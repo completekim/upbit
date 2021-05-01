@@ -40,20 +40,22 @@ print("autotrade start")
 while True:         
     try:
         now = datetime.datetime.now()
-        start_time = get_start_time("KRW-VET")
+        start_time = get_start_time("KRW-BTC")
         end_time = start_time + datetime.timedelta(days=1)  # endtime = start_time + 24시간인 다음날 9시
 
         if start_time < now < end_time - datetime.timedelta(seconds=10):    # if 문이 동작하는 시간 : 시작일9시 ~ 다음날8시59분50초 
-            target_price = get_target_price("KRW-VET", 0.5)
-            current_price = get_current_price("KRW-VET")
+            target_price = get_target_price("KRW-BTC", 0.5)
+            current_price = get_current_price("KRW-BTC")
             if target_price < current_price:
                 krw = get_balance("KRW")
                 if krw > 5000:
-                    upbit.buy_market_order("KRW-VET", krw*0.9995)           # 수수료 0.05% 고려
+                    upbit.buy_market_order("KRW-BTC", krw*0.9995)           # 수수료 0.05% 제외
         else:
-            vet = get_balance("VET")
-            if vet > 0.00008:#######################
-                upbit.sell_market_order("KRW-VET", vet*0.9995)
+            btc = get_balance("BTC")
+        
+            # 21.05.01 : 1BTC = 69,109,000 원, 0.00008 BTC = 5,529원, 만약 5천원 미만이면, else가 시행되지 못하는데 5천원 미만이기 어려움  
+            if btc > 0.00008:       
+                upbit.sell_market_order("KRW-BTC", btc*0.9995)
         time.sleep(1)
     except Exception as e:
         print(e)
