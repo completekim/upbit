@@ -1,9 +1,10 @@
+import os
 import time
 import pyupbit
 import datetime
 
-access = "DrWi6CJF2xRTlOix6Upx9kRRt1c4PVgvNkdJHQqY"
-secret = "0DexaS0FNkh56fjEPgx3tTP939o7gWmqe6CfMXsB"
+access = os.environ["UPBIT_ACCESS_KEY"]      # .env 또는 환경변수에서 읽어옴
+secret = os.environ["UPBIT_SECRET_KEY"]
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""

@@ -1,12 +1,13 @@
+import os
 import time
 import pyupbit
 import datetime
 import requests
 
-access = "DrWi6CJF2xRTlOix6Upx9kRRt1c4PVgvNkdJHQqY"
-secret = "0DexaS0FNkh56fjEPgx3tTP939o7gWmqe6CfMXsB"
+access = os.environ["UPBIT_ACCESS_KEY"]      # .env 또는 환경변수에서 읽어옴
+secret = os.environ["UPBIT_SECRET_KEY"]
 
-myToken = "xoxb-your-token"
+myToken = os.environ["SLACK_BOT_TOKEN"]
 
 def post_message(token, channel, text):
     """슬랙 메시지 전송"""

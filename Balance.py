@@ -1,8 +1,9 @@
+import os
 import pyupbit
 
 #주문은 초당 8회, 분당 200회 / 주문 외 요청은 초당 30회, 분당 900회 사용 가능합니다.
-access = "DrWi6CJF2xRTlOix6Upx9kRRt1c4PVgvNkdJHQqY"          # 본인 값으로 변경
-secret = "0DexaS0FNkh56fjEPgx3tTP939o7gWmqe6CfMXsB"          # 본인 값으로 변경
+access = os.environ["UPBIT_ACCESS_KEY"]      # .env 또는 환경변수에서 읽어옴
+secret = os.environ["UPBIT_SECRET_KEY"]
 upbit = pyupbit.Upbit(access, secret)
 
 
