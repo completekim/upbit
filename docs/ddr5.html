@@ -1,0 +1,1940 @@
+<title>DDR5 세대와 메커니즘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface-2:#F4F7F7; --surface-3:#E4EAEA;
+  --ink:#0F1A1C; --ink-2:#33474A; --muted:#63767A; --line:#D2DBDC; --line-2:#B4C1C3;
+  --accent:#00707C; --accent-ink:#005760; --accent-wash:#DCEDEE;
+  --signal:#B85C10; --signal-wash:#F6E7D6;
+  --danger:#A32E1E; --danger-wash:#F7E3E0;
+  --g1:#2C6E75; --g2:#2F8A8C; --g3:#43A38F; --g4:#79B877; --g5:#B0BE5C; --g6:#DE8A2C;
+  --shadow:0 1px 2px rgba(15,26,28,.06), 0 8px 24px -16px rgba(15,26,28,.28);
+  --maxw:1120px; --prose:68ch;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1315; --surface:#131E21; --surface-2:#18272A; --surface-3:#1E3034;
+    --ink:#E4EDEC; --ink-2:#B5C6C6; --muted:#87999B; --line:#25383B; --line-2:#385055;
+    --accent:#54C4CD; --accent-ink:#8FDCE2; --accent-wash:#10312F;
+    --signal:#E79A44; --signal-wash:#2E2313;
+    --danger:#E8836F; --danger-wash:#331914;
+    --g1:#3F959D; --g2:#3FA9AB; --g3:#57BCA6; --g4:#8ECB8B; --g5:#C3D06B; --g6:#EDA046;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1315; --surface:#131E21; --surface-2:#18272A; --surface-3:#1E3034;
+  --ink:#E4EDEC; --ink-2:#B5C6C6; --muted:#87999B; --line:#25383B; --line-2:#385055;
+  --accent:#54C4CD; --accent-ink:#8FDCE2; --accent-wash:#10312F;
+  --signal:#E79A44; --signal-wash:#2E2313;
+  --danger:#E8836F; --danger-wash:#331914;
+  --g1:#3F959D; --g2:#3FA9AB; --g3:#57BCA6; --g4:#8ECB8B; --g5:#C3D06B; --g6:#EDA046;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  font-size:16.5px; line-height:1.78; -webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px 96px}
+h1,h2,h3,h4,.ui{font-family:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif}
+.mono,code,figcaption b,th{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+.masthead{border-bottom:2px solid var(--ink); padding:56px 0 22px; margin-bottom:44px}
+.kicker{font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 18px}
+h1{font-size:clamp(2.3rem,5.4vw,3.7rem); line-height:1.07; font-weight:700; letter-spacing:-.025em;
+  margin:0 0 18px; text-wrap:balance}
+h1 em{font-style:normal; color:var(--accent)}
+.dek{max-width:60ch; font-size:1.06rem; color:var(--ink-2); margin:0 0 26px}
+.meta{display:flex; flex-wrap:wrap; gap:0 34px; font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px; color:var(--muted); border-top:1px solid var(--line); padding-top:14px}
+.meta span b{color:var(--ink-2); font-weight:500}
+
+/* 목차 */
+.toc{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); margin:0 0 60px}
+.toc a{background:var(--surface); padding:16px 16px 18px; text-decoration:none; display:block;
+  border-top:3px solid var(--tc); transition:background .12s}
+.toc a:hover{background:var(--surface-2)}
+.toc .t-n{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.14em; color:var(--muted)}
+.toc .t-t{font-family:"IBM Plex Sans KR",sans-serif; font-size:1.02rem; font-weight:600;
+  color:var(--ink); margin:5px 0 4px; letter-spacing:-.01em}
+.toc .t-d{font-family:"IBM Plex Sans KR",sans-serif; font-size:.78rem; color:var(--muted); line-height:1.45}
+
+section{margin:0 0 76px; scroll-margin-top:20px}
+.sec-head{display:grid; grid-template-columns:60px 1fr; gap:0 20px; align-items:baseline;
+  border-top:1px solid var(--line-2); padding-top:16px; margin-bottom:26px}
+.sec-num{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--accent); padding-top:.55em}
+h2{font-size:clamp(1.5rem,2.8vw,2rem); font-weight:600; letter-spacing:-.015em; margin:0; text-wrap:balance}
+.sec-head p{grid-column:2; margin:.5em 0 0; color:var(--muted); font-size:.94rem; max-width:62ch}
+h3{font-size:1.14rem; font-weight:600; margin:46px 0 12px; letter-spacing:-.01em}
+h4{font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin:34px 0 10px}
+p{margin:0 0 1.05em; max-width:var(--prose)}
+ul,ol.n{max-width:var(--prose); padding-left:1.2em; margin:0 0 1.2em}
+li{margin-bottom:.5em}
+strong{font-weight:600; color:var(--ink)}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:3px;
+  text-decoration-thickness:1px; text-decoration-color:color-mix(in srgb, var(--accent) 45%, transparent)}
+a:hover{text-decoration-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+code{background:var(--surface-2); border:1px solid var(--line); border-radius:3px;
+  padding:.06em .34em; font-size:.86em}
+
+/* 수식 블록 */
+.eq{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:14px 18px; margin:24px 0; max-width:var(--prose);
+  font-family:"IBM Plex Mono",monospace; font-size:.86rem; line-height:1.9;
+  overflow-x:auto; white-space:nowrap}
+.eq b{color:var(--accent-ink); font-weight:600}
+
+.verdict{border-left:3px solid var(--signal); background:var(--signal-wash);
+  padding:16px 20px; margin:26px 0; max-width:var(--prose)}
+.verdict.d{border-left-color:var(--danger); background:var(--danger-wash)}
+.verdict p{margin:0; font-size:.97rem}
+.verdict p + p{margin-top:.7em}
+.verdict .lbl{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--signal); display:block; margin-bottom:6px}
+.verdict.d .lbl{color:var(--danger)}
+.caveat{border-left:3px solid var(--line-2); padding:4px 0 4px 18px; margin:22px 0;
+  color:var(--muted); font-size:.93rem; max-width:var(--prose)}
+.caveat p{margin:0}
+
+/* 오해/사실 */
+.mf{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line);
+  border:1px solid var(--line); margin:28px 0}
+.mf > div{background:var(--surface); padding:16px 18px 18px}
+.mf .h{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:8px}
+.mf .m .h{color:var(--danger)}
+.mf .f .h{color:var(--accent)}
+.mf p{margin:0; font-size:.9rem; font-family:"IBM Plex Sans KR",sans-serif; line-height:1.62}
+@media (max-width:640px){ .mf{grid-template-columns:1fr} }
+
+figure{margin:34px 0; background:var(--surface); border:1px solid var(--line);
+  border-radius:2px; padding:22px 22px 16px; box-shadow:var(--shadow)}
+figure svg{display:block; width:100%; max-width:100%; height:auto; color:var(--ink)}
+figcaption{margin-top:16px; padding-top:12px; border-top:1px solid var(--line);
+  font-size:.87rem; color:var(--muted); line-height:1.6}
+figcaption b{color:var(--ink-2); font-weight:500; font-size:.86em; letter-spacing:.04em;
+  text-transform:uppercase; display:block; margin-bottom:4px}
+.fig-scroll{overflow-x:auto}
+.fig-scroll > svg{min-width:660px}
+
+.tbl{overflow-x:auto; margin:30px 0; border:1px solid var(--line); background:var(--surface);
+  box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; min-width:640px; font-size:.9rem}
+caption{text-align:left; font-family:"IBM Plex Sans KR",sans-serif; font-size:.83rem; font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+  padding:14px 18px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+th{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; text-align:left;
+  color:var(--ink-2); padding:11px 14px; border-bottom:1px solid var(--line-2);
+  white-space:nowrap; background:var(--surface-2)}
+td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top;
+  font-family:"IBM Plex Sans KR",sans-serif; font-size:.87rem; line-height:1.55}
+td.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  white-space:nowrap; font-size:.83rem}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface-2)}
+.tag{display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.06em;
+  padding:1px 6px; border:1px solid var(--line-2); border-radius:2px; color:var(--muted); white-space:nowrap}
+.tag.on{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-wash)}
+.tag.no{border-color:var(--danger); color:var(--danger); background:var(--danger-wash)}
+
+.refs{counter-reset:r; list-style:none; padding:0; max-width:none; columns:2; column-gap:40px}
+.refs li{break-inside:avoid; counter-increment:r; position:relative; padding-left:34px;
+  margin-bottom:14px; font-size:.85rem; line-height:1.55; color:var(--ink-2);
+  font-family:"IBM Plex Sans KR",sans-serif}
+.refs li::before{content:"[" counter(r) "]"; position:absolute; left:0; top:.05em;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--accent)}
+.refs a{word-break:break-word}
+@media (max-width:720px){ .refs{columns:1} .sec-head{grid-template-columns:1fr}
+  .sec-head p{grid-column:1} .sec-num{padding-top:0} }
+.foot{border-top:2px solid var(--ink); margin-top:64px; padding-top:20px;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted)}
+sup.rf{font-family:"IBM Plex Mono",monospace; font-size:9.5px; color:var(--accent);
+  vertical-align:super; line-height:0; padding-left:2px}
+
+/* --- 병합본 추가 컴포넌트 --- */
+.gens{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); margin:30px 0}
+.gen{background:var(--surface); padding:16px 16px 18px; border-top:3px solid var(--gc)}
+.gen .g-n{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.14em;
+  color:var(--muted); text-transform:uppercase}
+.gen .g-r{font-family:"IBM Plex Sans KR",sans-serif; font-size:1.42rem; font-weight:700;
+  letter-spacing:-.02em; margin:4px 0 2px; font-variant-numeric:tabular-nums}
+.gen .g-bw{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--accent-ink); margin-bottom:10px}
+.gen .g-d{font-family:"IBM Plex Sans KR",sans-serif; font-size:.8rem; line-height:1.5; color:var(--ink-2)}
+.gchip{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+  vertical-align:baseline; transform:translateY(-1px)}
+th.stick,td.stick{position:sticky; left:0; background:var(--surface); z-index:1}
+th.stick{background:var(--surface-2)}
+tbody tr:hover td.stick{background:var(--surface-2)}
+
+.part{border-top:2px solid var(--ink); margin:0 0 46px; padding-top:18px;
+  display:grid; grid-template-columns:auto 1fr; gap:4px 22px; align-items:baseline}
+.part .p-n{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent)}
+.part .p-t{font-family:"IBM Plex Sans KR",sans-serif; font-size:clamp(1.35rem,2.6vw,1.8rem);
+  font-weight:700; letter-spacing:-.022em}
+.part .p-d{grid-column:2; font-size:.92rem; color:var(--muted); max-width:64ch; margin-top:2px}
+
+.index{display:grid; grid-template-columns:1fr 1fr; gap:0 48px; margin:0 0 68px}
+.index h4{margin:0 0 4px}
+.index ol{list-style:none; padding:0; margin:0 0 30px; max-width:none}
+.index li{border-bottom:1px solid var(--line); margin:0}
+.index a{display:grid; grid-template-columns:42px 1fr; gap:0 10px; padding:9px 0;
+  text-decoration:none; color:var(--ink); align-items:baseline}
+.index a:hover .i-t{color:var(--accent-ink)}
+.index .i-n{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--accent)}
+.index .i-t{font-family:"IBM Plex Sans KR",sans-serif; font-size:.94rem; font-weight:600}
+.index .i-d{grid-column:2; font-family:"IBM Plex Sans KR",sans-serif; font-size:.78rem;
+  color:var(--muted); line-height:1.45; margin-top:2px}
+@media (max-width:720px){ .index{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+
+
+<header class="masthead">
+  <p class="kicker">Memory Technology · Complete Teardown</p>
+  <h1>DDR5를 <em>두 층</em>에서<br>동시에 뜯는다</h1>
+  <p class="dek">1부는 바깥에서 본다 — “DDR5 6세대”라는 말이 가리키는 세 개의 축을 분리해 각각 6단계로 비교한다.
+  2부는 안에서 본다 — 그 비교표에서 나란히 놓인 프리페치·버스트 길이·채널 구조·전압 조정·on-die ECC가
+  실은 하나의 인과 사슬임을 보인다. 부록은 DDR1부터의 계보를 같은 잣대로 재검토한다.</p>
+  <div class="meta">
+    <span><b>기준일</b> 2026-09-03</span>
+    <span><b>기준 규격</b> JESD79-5D (2025.11)</span>
+    <span><b>도표</b> 19점</span>
+    <span><b>출처</b> 24건</span>
+  </div>
+</header>
+
+<nav class="index">
+  <div>
+    <h4>1부 · 세대 — 바깥에서</h4>
+    <ol>
+      <li><a href="#s1"><span class="i-n">§ 01</span><span class="i-t">세대 정의의 분기</span>
+        <span class="i-d">“6세대”가 가리키는 세 개의 축</span></a></li>
+      <li><a href="#s2"><span class="i-n">§ 02</span><span class="i-t">축 A · JEDEC 규격 개정</span>
+        <span class="i-d">JESD79-5 → -5D, 다섯 번의 문서 교체</span></a></li>
+      <li><a href="#s3"><span class="i-n">§ 03</span><span class="i-t">축 B · 속도 등급 6세대</span>
+        <span class="i-d">4,800 → 8,800 MT/s, CKD 전환점과 MRDIMM</span></a></li>
+      <li><a href="#s4"><span class="i-n">§ 04</span><span class="i-t">축 C · 공정 노드 6세대</span>
+        <span class="i-d">1x → 1c, 확인된 공개 이벤트만</span></a></li>
+      <li><a href="#s5"><span class="i-n">§ 05</span><span class="i-t">개선되지 않은 것</span>
+        <span class="i-d">대역폭 +83%, 절대 지연은 평탄</span></a></li>
+    </ol>
+    <h4>부록</h4>
+    <ol>
+      <li><a href="#apx"><span class="i-n">A</span><span class="i-t">DDR1 → DDR5 계보</span>
+        <span class="i-d">데이터 레이트 22배, 코어 클럭 2.75배</span></a></li>
+      <li><a href="#refs"><span class="i-n">R</span><span class="i-t">출처 24건</span>
+        <span class="i-d">본문 위첨자 번호와 대응</span></a></li>
+    </ol>
+  </div>
+  <div>
+    <h4>2부 · 메커니즘 — 안에서</h4>
+    <ol>
+      <li><a href="#m1"><span class="i-n">§ 06</span><span class="i-t">프리페치</span>
+        <span class="i-d">내부/외부 버스 폭의 비율. 2n → 16n</span></a></li>
+      <li><a href="#m2"><span class="i-n">§ 07</span><span class="i-t">버스트 길이</span>
+        <span class="i-d">BL16 · BC8 · BL32와 캐시라인 제약</span></a></li>
+      <li><a href="#m3"><span class="i-n">§ 08</span><span class="i-t">채널 구조</span>
+        <span class="i-d">32-bit ×2 서브채널이 도출된 경위와 대가</span></a></li>
+      <li><a href="#m4"><span class="i-n">§ 09</span><span class="i-t">전압 조정</span>
+        <span class="i-d">12 V + 모듈 PMIC. 커넥터 전류 1/10</span></a></li>
+      <li><a href="#m5"><span class="i-n">§ 10</span><span class="i-t">on-die ECC</span>
+        <span class="i-d">(136,128) SEC. ECC 메모리가 아닌 이유</span></a></li>
+      <li><a href="#chain"><span class="i-n">§ 11</span><span class="i-t">다섯 겹의 인과 사슬</span>
+        <span class="i-d">병렬 항목이 아니라 인과 순서다</span></a></li>
+    </ol>
+  </div>
+</nav>
+
+<div class="part">
+  <div class="p-n">1부</div>
+  <div class="p-t">세대 — 바깥에서 본 DDR5</div>
+  <p class="p-d">“DDR5 1~6세대”는 JEDEC이 정의한 용어가 아니다. 시장에서 이 말은 규격 개정 이력, 속도 등급,
+  DRAM 공정 노드라는 세 가지 다른 것을 가리킨다. 세 축을 분리해 각각 6단계로 비교한다.</p>
+</div>
+<section id="s1">
+  <div class="sec-head">
+    <div class="sec-num">§ 01</div>
+    <h2>전제: “세대”라는 단어가 세 곳에서 동시에 쓰인다</h2>
+    <p>같은 “6세대”라도 지칭 대상이 다르다. 비교를 시작하기 전에 축을 고정해야 한다.</p>
+  </div>
+
+  <p>DDR4까지는 세대가 곧 규격 이름이었다. DDR5에서는 그렇지 않다. JEDEC은 DDR5 규격을 다섯 번 개정했고
+  <sup class="rf">1–5</sup>, 그 안에서 속도 등급이 4,800에서 8,800 MT/s까지 올라갔으며<sup class="rf">4</sup>,
+  같은 기간 DRAM 제조사들은 10nm급 공정을 1x부터 1c까지 여섯 단계 진행했다<sup class="rf">10–13</sup>.
+  세 축은 서로 연동되지만 일대일로 대응하지 않는다. “DDR5 3세대”라는 표현이 JESD79-5B를 뜻하는지,
+  DDR5-6400을 뜻하는지, 1z 노드를 뜻하는지는 문맥 없이는 결정되지 않는다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 292" role="img" aria-label="DDR5 하나에서 규격 개정, 속도 등급, 공정 노드라는 세 개의 축이 갈라지며 각 축이 여섯 단계를 가진다">
+      <defs>
+        <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <rect x="20" y="118" width="112" height="56" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect>
+      <text x="76" y="141" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="16" font-weight="700" fill="currentColor">DDR5</text>
+      <text x="76" y="159" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">2020 – 현재</text>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55" marker-end="url(#ar1)">
+        <path d="M132,146 C205,146 210,55 288,55"></path>
+        <path d="M132,146 L288,149"></path>
+        <path d="M132,146 C205,146 210,243 288,243"></path>
+      </g>
+
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".62" letter-spacing="1.4">
+        <text x="300" y="24">축 A · 규격 개정 이력 (JEDEC 문서)</text>
+        <text x="300" y="118">축 B · 속도 등급 (MT/s)</text>
+        <text x="300" y="212">축 C · DRAM 공정 노드 (10nm급)</text>
+      </g>
+
+      <g>
+        <rect x="300" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="398" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="496" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="594" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="692" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="790" y="34" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" opacity=".45"></rect>
+        <g text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">
+          <text x="346" y="53">JESD79-5</text><text x="444" y="53">-5A</text><text x="542" y="53">-5B</text>
+          <text x="640" y="53">-5C</text><text x="738" y="53">-5D</text>
+          <text x="836" y="53" opacity=".45">차기</text>
+        </g>
+        <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">
+          <text x="346" y="68">2020.07</text><text x="444" y="68">2021.10</text><text x="542" y="68">2022.09</text>
+          <text x="640" y="68">2024.04</text><text x="738" y="68">2025.11</text><text x="836" y="68">—</text>
+        </g>
+      </g>
+
+      <g>
+        <rect x="300" y="128" width="92" height="42" rx="2" style="fill:var(--g1)"></rect>
+        <rect x="398" y="128" width="92" height="42" rx="2" style="fill:var(--g2)"></rect>
+        <rect x="496" y="128" width="92" height="42" rx="2" style="fill:var(--g3)"></rect>
+        <rect x="594" y="128" width="92" height="42" rx="2" style="fill:var(--g4)"></rect>
+        <rect x="692" y="128" width="92" height="42" rx="2" style="fill:var(--g5)"></rect>
+        <rect x="790" y="128" width="92" height="42" rx="2" style="fill:var(--g6)"></rect>
+        <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13.5" font-weight="600" fill="#0F1A1C">
+          <text x="346" y="148">4800</text><text x="444" y="148">5600</text><text x="542" y="148">6400</text>
+          <text x="640" y="148">7200</text><text x="738" y="148">8000</text><text x="836" y="148">8800</text>
+        </g>
+        <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C" opacity=".7">
+          <text x="346" y="163">Gen 1</text><text x="444" y="163">Gen 2</text><text x="542" y="163">Gen 3</text>
+          <text x="640" y="163">Gen 4</text><text x="738" y="163">Gen 5</text><text x="836" y="163">Gen 6</text>
+        </g>
+      </g>
+
+      <g>
+        <rect x="300" y="222" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="398" y="222" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="496" y="222" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="594" y="222" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="692" y="222" width="92" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <rect x="790" y="222" width="92" height="42" rx="2" fill="none" stroke-width="2" style="stroke:var(--accent)"></rect>
+        <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="currentColor">
+          <text x="346" y="242">1x</text><text x="444" y="242">1y</text><text x="542" y="242">1z</text>
+          <text x="640" y="242">1a</text><text x="738" y="242">1b</text>
+          <text x="836" y="242" style="fill:var(--accent)">1c</text>
+        </g>
+        <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">
+          <text x="346" y="257">1세대</text><text x="444" y="257">2세대</text><text x="542" y="257">3세대</text>
+          <text x="640" y="257">4세대 1α</text><text x="738" y="257">5세대 1β</text><text x="836" y="257">6세대 1γ</text>
+        </g>
+      </g>
+      <text x="300" y="284" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">세 축은 시간적으로 겹치지만 단계가 일대일로 대응하지 않는다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 1 · 세대 정의의 분기</b>
+      하나의 “DDR5”가 세 축으로 갈라진다. 축 A는 문서 개정 번호, 축 B는 데이터 전송률, 축 C는 실리콘 공정이다.
+      이 문서는 <strong>축 B를 Gen 1~6의 기준</strong>으로 삼고, 축 A와 축 C를 교차 참조한다.</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="lbl">판단</span>
+    <p>세 축 중 축 B(속도 등급)만이 6단계가 시장에서 실제로 제품으로 구현됐고, 축 A는 5개, 축 C는 DDR5 이전 세대까지 포함해 6개다.
+    “DDR5 6세대”를 말할 때 대부분의 문헌은 축 B를 뜻한다.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="sec-head">
+    <div class="sec-num">§ 02</div>
+    <h2>축 A — JEDEC 규격 개정: 다섯 번의 문서 교체</h2>
+    <p>DDR5는 발행 이후 5년 반 동안 네 번 개정됐다. 개정은 새 하드웨어가 아니라 기존 하드웨어의 정의 범위를 넓힌다.</p>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>표 1 · JESD79-5 계열 개정 이력</caption>
+    <thead><tr>
+      <th class="stick">문서</th><th>발행</th><th>정의 상한</th><th>핵심 변화</th><th>출처</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stick"><strong>JESD79-5</strong></td><td class="num">2020.07</td><td class="num">4800 MT/s</td>
+        <td>DDR5 최초 발행. 1.1 V, 2×32-bit 서브채널, BL16, on-die ECC, 모듈 탑재 PMIC, 32 뱅크 / 8 뱅크그룹.</td><td class="num">[1]</td></tr>
+      <tr><td class="stick"><strong>JESD79-5A</strong></td><td class="num">2021.10</td><td class="num">6400 MT/s</td>
+        <td>5600 · 6400 MT/s 타이밍 정의 추가. 신뢰성·성능 항목 보강.</td><td class="num">[2][3]</td></tr>
+      <tr><td class="stick"><strong>JESD79-5B</strong></td><td class="num">2022.09</td><td class="num">6800 MT/s</td>
+        <td>타이밍 정의 범위 확장. 이후 5C 발표문이 “6800 → 8800 확장”이라 기술한 기준점.</td><td class="num">[4][5]</td></tr>
+      <tr><td class="stick"><strong>JESD79-5C</strong></td><td class="num">2024.04</td><td class="num">8800 MT/s</td>
+        <td>DRAM 코어 타이밍 및 Tx/Rx AC 타이밍을 8800 MT/s까지 확장. row hammer 대응 보안 기능 추가.</td><td class="num">[4][6]</td></tr>
+      <tr><td class="stick"><strong>JESD79-5D</strong></td><td class="num">2025.11</td><td class="num">8800 MT/s</td>
+        <td>신뢰성·보안 기능 추가 및 AI/ML 워크로드 대응 성능 항목 보강.</td><td class="num">[7]</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>주목할 점은 <strong>규격 개정이 속도 등급을 “발명”하지 않는다</strong>는 것이다. JESD79-5A는 2021년에
+  이미 6400 MT/s 타이밍을 정의했지만, 6400 MT/s 서버 플랫폼은 2024년 Granite Rapids에서야 등장했다<sup class="rf">9</sup>.
+  규격은 항상 실리콘보다 2~3년 앞서 나가고, 그 간격이 “세대”라는 말의 혼란을 만든다.</p>
+
+  <div class="caveat"><p>표 1의 “정의 상한”은 해당 문서가 타이밍 파라미터를 정의한 최대 데이터 레이트다.
+  DIMM 형태(UDIMM/RDIMM/MRDIMM)별 실제 지원 속도는 별도 모듈 규격(JESD323 등)이 정한다.</p></div>
+</section>
+
+<section id="s3">
+  <div class="sec-head">
+    <div class="sec-num">§ 03</div>
+    <h2>축 B — 속도 등급 6세대: 4800에서 8800까지</h2>
+    <p>이 문서가 Gen 1~6으로 삼는 축. 800 MT/s 간격으로 여섯 단계가 실제 제품으로 구현됐다.</p>
+  </div>
+
+  <div class="gens">
+    <div class="gen" style="--gc:var(--g1)"><div class="g-n">Gen 1 · 2021</div><div class="g-r">4,800</div>
+      <div class="g-bw">38.4 GB/s / 채널</div>
+      <div class="g-d">클라이언트 Alder Lake로 데뷔. 서버는 2023년 Sapphire Rapids. DDR4-3200보다 절대 지연이 나빴던 세대.</div></div>
+    <div class="gen" style="--gc:var(--g2)"><div class="g-n">Gen 2 · 2023</div><div class="g-r">5,600</div>
+      <div class="g-bw">44.8 GB/s / 채널</div>
+      <div class="g-d">Emerald Rapids 8채널 기본 속도. 1a/1b 노드 확산으로 수율이 안정된 첫 세대.</div></div>
+    <div class="gen" style="--gc:var(--g3)"><div class="g-n">Gen 3 · 2024</div><div class="g-r">6,400</div>
+      <div class="g-bw">51.2 GB/s / 채널</div>
+      <div class="g-d">변곡점. 클라이언트에서 이 속도부터 모듈에 CKD 탑재가 필수화되며 CUDIMM이 등장.</div></div>
+    <div class="gen" style="--gc:var(--g4)"><div class="g-n">Gen 4 · 2024–25</div><div class="g-r">7,200</div>
+      <div class="g-bw">57.6 GB/s / 채널</div>
+      <div class="g-d">CUDIMM 초판 규격의 목표 상한. 서버 UDIMM/RDIMM 계열에서는 사실상 건너뛴 구간.</div></div>
+    <div class="gen" style="--gc:var(--g5)"><div class="g-n">Gen 5 · 2025</div><div class="g-r">8,000</div>
+      <div class="g-bw">64.0 GB/s / 채널</div>
+      <div class="g-d">클라이언트 오버클럭/XMP 주력대. CKD 로드맵은 9,200 MT/s까지 목표로 제시됨.</div></div>
+    <div class="gen" style="--gc:var(--g6)"><div class="g-n">Gen 6 · 2024–</div><div class="g-r">8,800</div>
+      <div class="g-bw">70.4 GB/s / 채널</div>
+      <div class="g-d">JESD79-5C 레퍼런스 상한이자 MRDIMM Gen1 속도. 서버 전용 경로로만 도달했다.</div></div>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 400" role="img" aria-label="DDR5 세대별 채널당 대역폭 막대 그래프. 38.4에서 70.4 GB/s까지 상승하고, 로드맵상 MRDIMM Gen2가 102.4 GB/s에 위치한다">
+      <g stroke="currentColor" stroke-width="1" opacity=".16">
+        <line x1="90" y1="320" x2="880" y2="320"></line>
+        <line x1="90" y1="254" x2="880" y2="254"></line>
+        <line x1="90" y1="188" x2="880" y2="188"></line>
+        <line x1="90" y1="122" x2="880" y2="122"></line>
+        <line x1="90" y1="56" x2="880" y2="56"></line>
+      </g>
+      <g text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">
+        <text x="78" y="324">0</text><text x="78" y="258">25</text><text x="78" y="192">50</text>
+        <text x="78" y="126">75</text><text x="78" y="60">100</text>
+      </g>
+      <text x="30" y="60" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">GB/s</text>
+
+      <rect x="114" y="219" width="64" height="101" style="fill:var(--g1)"></rect>
+      <rect x="225" y="202" width="64" height="118" style="fill:var(--g2)"></rect>
+      <rect x="337" y="185" width="64" height="135" style="fill:var(--g3)"></rect>
+      <rect x="448" y="168" width="64" height="152" style="fill:var(--g4)"></rect>
+      <rect x="559" y="151" width="64" height="169" style="fill:var(--g5)"></rect>
+      <rect x="671" y="134" width="64" height="186" style="fill:var(--g6)"></rect>
+      <rect x="782" y="50" width="64" height="270" fill="none" stroke-width="1.6" stroke-dasharray="5 4" style="stroke:var(--signal)"></rect>
+
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="currentColor">
+        <text x="146" y="211">38.4</text><text x="257" y="194">44.8</text><text x="369" y="177">51.2</text>
+        <text x="480" y="160">57.6</text><text x="591" y="143">64.0</text><text x="703" y="126">70.4</text>
+        <text x="814" y="42" style="fill:var(--signal)">102.4</text>
+      </g>
+      <line x1="90" y1="320" x2="880" y2="320" stroke="currentColor" stroke-width="1.6"></line>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" fill="currentColor">
+        <text x="146" y="342">4800</text><text x="257" y="342">5600</text><text x="369" y="342">6400</text>
+        <text x="480" y="342">7200</text><text x="591" y="342">8000</text><text x="703" y="342">8800</text>
+        <text x="814" y="342" style="fill:var(--signal)">12800</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">
+        <text x="146" y="358">Gen 1</text><text x="257" y="358">Gen 2</text><text x="369" y="358">Gen 3</text>
+        <text x="480" y="358">Gen 4</text><text x="591" y="358">Gen 5</text><text x="703" y="358">Gen 6</text>
+      </g>
+      <text x="814" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--signal)">MRDIMM Gen2</text>
+      <text x="90" y="386" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">대역폭 = MT/s × 8 byte. 64-bit 채널 1개(또는 32-bit 서브채널 2개) 기준.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 2 · 세대별 채널당 이론 대역폭</b>
+      Gen1→Gen6은 6년간 83% 증가(38.4 → 70.4 GB/s). 점선은 표준화 진행 중인 MRDIMM Gen2(12,800 MT/s)로,
+      Gen1 대비 45% 상향이며 서버 전용 경로다.<sup class="rf">8</sup></figcaption>
+  </figure>
+
+  <h3>Gen 3의 단절 — 6400 MT/s부터 모듈에 능동 소자가 들어간다</h3>
+  <p>속도 등급 축에서 유일하게 <em>구조적</em> 단절이 일어나는 지점이 Gen 3이다. 6400 MT/s부터
+  클라이언트 모듈은 클럭 신호를 재구동하는 <strong>CKD(Client Clock Driver)</strong>를 반드시 탑재해야 한다<sup class="rf">14</sup>.
+  이 부품이 붙은 모듈이 CUDIMM(데스크톱)·CSODIMM(노트북)이고, JEDEC은 2024년 두 규격
+  JESD323·JESD324를 발행했다<sup class="rf">14</sup>. 즉 Gen 1~2와 Gen 3~ 사이에는 “같은 DDR5”라는 말로 가릴 수 없는
+  모듈 BOM 차이가 존재한다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 262" role="img" aria-label="5600 이하에서는 메모리 컨트롤러의 클럭이 DRAM에 직결되지만, 6400 이상에서는 모듈 위 CKD가 클럭을 재생성해 각 DRAM에 분배한다">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+        <marker id="ar2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"></path>
+        </marker>
+      </defs>
+
+      <text x="20" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">Gen 1–2 · ≤ 5600 MT/s · UDIMM</text>
+      <rect x="20" y="36" width="410" height="196" rx="3" fill="none" stroke="currentColor" stroke-width="1" opacity=".3" stroke-dasharray="3 3"></rect>
+      <rect x="40" y="112" width="96" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="88" y="134" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">메모리</text>
+      <text x="88" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">컨트롤러</text>
+      <line x1="136" y1="138" x2="272" y2="138" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar2)"></line>
+      <text x="204" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">CK 직결</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".75">
+        <rect x="278" y="70" width="132" height="30" rx="2"></rect>
+        <rect x="278" y="122" width="132" height="30" rx="2"></rect>
+        <rect x="278" y="174" width="132" height="30" rx="2"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+        <text x="344" y="89">DRAM</text><text x="344" y="141">DRAM</text><text x="344" y="193">DRAM</text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1" opacity=".5">
+        <path d="M272,138 L272,85 L278,85"></path>
+        <path d="M272,138 L278,138"></path>
+        <path d="M272,138 L272,189 L278,189"></path>
+      </g>
+      <text x="40" y="222" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">클럭 부하가 DRAM 개수만큼 누적 → 지터 한계</text>
+
+      <line x1="450" y1="36" x2="450" y2="232" stroke="currentColor" stroke-width="1" opacity=".25"></line>
+
+      <text x="470" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" style="fill:var(--accent)">Gen 3–6 · ≥ 6400 MT/s · CUDIMM</text>
+      <rect x="470" y="36" width="410" height="196" rx="3" fill="none" stroke-width="1" opacity=".45" stroke-dasharray="3 3" style="stroke:var(--accent)"></rect>
+      <rect x="490" y="112" width="96" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="538" y="134" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">메모리</text>
+      <text x="538" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">컨트롤러</text>
+      <line x1="586" y1="138" x2="648" y2="138" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar2)"></line>
+      <rect x="652" y="114" width="72" height="48" rx="3" stroke-width="2" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="688" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" style="fill:var(--accent-ink)">CKD</text>
+      <text x="688" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" style="fill:var(--accent-ink)">re-drive</text>
+      <text x="688" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">모듈 위 능동 소자 (신규)</text>
+      <g fill="none" stroke-width="1.4" marker-end="url(#ar2a)" style="stroke:var(--accent)">
+        <path d="M724,138 L742,138 L742,85 L768,85"></path>
+        <path d="M724,138 L768,138"></path>
+        <path d="M724,138 L742,138 L742,189 L768,189"></path>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".75">
+        <rect x="772" y="70" width="98" height="30" rx="2"></rect>
+        <rect x="772" y="122" width="98" height="30" rx="2"></rect>
+        <rect x="772" y="174" width="98" height="30" rx="2"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+        <text x="821" y="89">DRAM</text><text x="821" y="141">DRAM</text><text x="821" y="193">DRAM</text>
+      </g>
+      <text x="490" y="222" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent-ink)">클럭이 모듈 위에서 재생성 → 지터·노이즈 차단</text>
+      <text x="20" y="252" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">차이는 클럭 경로 하나뿐이다. 데이터 경로(DQ)는 양쪽 모두 컨트롤러–DRAM 직결로 유지된다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 3 · CKD가 추가하는 유일한 홉</b>
+      6400 MT/s 이상에서 클럭 경로에만 재구동 단이 삽입된다. 초판 규격은 7,200 MT/s, 후속 버전은 9,200 MT/s를
+      목표로 한다.<sup class="rf">14</sup> 부작용은 모듈 단가와 클럭 지연 증가다.</figcaption>
+  </figure>
+
+  <h3>Gen 6의 정체 — 8800은 일반 DIMM의 속도가 아니다</h3>
+  <p>여기서 냉정해야 한다. DDR5-8800은 JESD79-5C가 타이밍을 정의한 상한이지만<sup class="rf">4</sup>,
+  이 속도로 동작하는 서버 모듈은 일반 RDIMM이 아니라 <strong>MRDIMM</strong>이다. MRDIMM은 두 개의 랭크를
+  멀티플렉싱해 DRAM 자체는 절반 속도로 돌리면서 호스트 링크만 두 배로 올린다. 즉 <em>DRAM 다이의
+  속도 한계를 우회한 모듈 레벨 트릭</em>이지, 셀이 8800 MT/s로 동작하는 것이 아니다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 288" role="img" aria-label="MRDIMM 구조도. 4400 MT/s로 동작하는 두 개의 랭크를 멀티플렉스 데이터 버퍼가 교대로 읽어 호스트에 8800 MT/s로 전송한다">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+        <marker id="ar3s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--signal)"></path>
+        </marker>
+      </defs>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">MRDIMM Gen1 — 모듈 내부</text>
+
+      <rect x="20" y="46" width="200" height="76" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="120" y="74" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" fill="currentColor">Rank 0 (DRAM ×N)</text>
+      <text x="120" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" style="fill:var(--g3)">4,400 MT/s</text>
+      <text x="120" y="112" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">셀 어레이 실제 속도</text>
+
+      <rect x="20" y="152" width="200" height="76" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="120" y="180" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" fill="currentColor">Rank 1 (DRAM ×N)</text>
+      <text x="120" y="202" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" style="fill:var(--g3)">4,400 MT/s</text>
+      <text x="120" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">셀 어레이 실제 속도</text>
+
+      <line x1="220" y1="84" x2="356" y2="112" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3)"></line>
+      <line x1="220" y1="190" x2="356" y2="162" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3)"></line>
+      <text x="288" y="86" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".65">A 데이터</text>
+      <text x="288" y="204" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".65">B 데이터</text>
+
+      <rect x="360" y="96" width="152" height="82" rx="3" stroke-width="2" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="436" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" style="fill:var(--signal)">MDB</text>
+      <text x="436" y="142" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="currentColor">멀티플렉스</text>
+      <text x="436" y="158" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="currentColor">데이터 버퍼</text>
+      <text x="436" y="88" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">JESD82-552 (DDR5MDB02)</text>
+
+      <line x1="512" y1="137" x2="638" y2="137" stroke-width="2.4" marker-end="url(#ar3s)" style="stroke:var(--signal)"></line>
+      <text x="575" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" style="fill:var(--signal)">A B A B …</text>
+      <text x="575" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">한 클럭에 두 랭크를 교대 전송</text>
+
+      <rect x="642" y="96" width="238" height="82" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+      <text x="761" y="122" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" fill="currentColor">호스트 메모리 컨트롤러</text>
+      <text x="761" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="600" style="fill:var(--g6)">8,800 MT/s</text>
+      <text x="761" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">= 70.4 GB/s / 채널</text>
+
+      <line x1="20" y1="252" x2="880" y2="252" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="274" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">셀 속도는 그대로 두고 링크 속도만 2배로 올린다 → 대역폭은 2배, 절대 지연은 개선되지 않는다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 4 · MRDIMM의 실제 메커니즘</b>
+      두 랭크를 MDB가 교대로 뽑아 호스트 링크를 두 배 속도로 채운다. JEDEC은 Gen2(12,800 MT/s) 표준화를 진행 중이며
+      Gen3는 17,600 MT/s를 목표로 한다.<sup class="rf">8</sup></figcaption>
+  </figure>
+
+  <div class="tbl">
+  <table>
+    <caption>표 2 · 속도 등급 6세대 대조</caption>
+    <thead><tr>
+      <th class="stick">항목</th><th>Gen 1</th><th>Gen 2</th><th>Gen 3</th><th>Gen 4</th><th>Gen 5</th><th>Gen 6</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stick"><strong>데이터 레이트</strong></td>
+        <td class="num"><span class="gchip" style="background:var(--g1)"></span>4,800</td>
+        <td class="num"><span class="gchip" style="background:var(--g2)"></span>5,600</td>
+        <td class="num"><span class="gchip" style="background:var(--g3)"></span>6,400</td>
+        <td class="num"><span class="gchip" style="background:var(--g4)"></span>7,200</td>
+        <td class="num"><span class="gchip" style="background:var(--g5)"></span>8,000</td>
+        <td class="num"><span class="gchip" style="background:var(--g6)"></span>8,800</td></tr>
+      <tr><td class="stick">채널당 대역폭</td><td class="num">38.4 GB/s</td><td class="num">44.8</td><td class="num">51.2</td>
+        <td class="num">57.6</td><td class="num">64.0</td><td class="num">70.4</td></tr>
+      <tr><td class="stick">I/O 클럭</td><td class="num">2,400 MHz</td><td class="num">2,800</td><td class="num">3,200</td>
+        <td class="num">3,600</td><td class="num">4,000</td><td class="num">4,400</td></tr>
+      <tr><td class="stick">코어(어레이) 클럭</td><td class="num">300 MHz</td><td class="num">350</td><td class="num">400</td>
+        <td class="num">450</td><td class="num">500</td><td class="num">550</td></tr>
+      <tr><td class="stick">규격 근거</td><td class="num">JESD79-5</td><td class="num">-5A</td><td class="num">-5A</td>
+        <td class="num">-5B</td><td class="num">-5C</td><td class="num">-5C</td></tr>
+      <tr><td class="stick">모듈 CKD</td>
+        <td><span class="tag no">불필요</span></td><td><span class="tag no">불필요</span></td>
+        <td><span class="tag on">필수</span></td><td><span class="tag on">필수</span></td>
+        <td><span class="tag on">필수</span></td><td><span class="tag on">필수</span></td></tr>
+      <tr><td class="stick">대표 모듈</td><td>UDIMM / RDIMM</td><td>UDIMM / RDIMM</td><td>CUDIMM / RDIMM</td>
+        <td>CUDIMM</td><td>CUDIMM (XMP·EXPO)</td><td><strong>MRDIMM Gen1</strong></td></tr>
+      <tr><td class="stick">대표 서버 플랫폼</td><td>Sapphire Rapids<br><span class="tag">2023</span></td>
+        <td>Emerald Rapids<br><span class="tag">2023.12</span></td><td>Granite Rapids<br><span class="tag">2024</span></td>
+        <td>—</td><td>—</td><td>Granite Rapids<br><span class="tag">MRDIMM</span></td></tr>
+      <tr><td class="stick">주 공정 노드</td><td>1z / 1a</td><td>1a / 1b</td><td>1b</td><td>1b</td><td>1b / 1c</td><td>1c</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="caveat"><p>코어 클럭과 I/O 클럭 행은 <code>데이터레이트 ÷ 프리페치(16n)</code>, <code>데이터레이트 ÷ 2</code>로
+  계산한 값이다. 실제 제품의 tCK와 내부 분주는 제조사 데이터시트를 확인해야 한다.
+  “주 공정 노드” 행은 시장 출하 시점의 지배적 노드를 근사한 것으로, 제조사별로 한 세대 이상 차이가 난다.</p></div>
+</section>
+
+<section id="s4">
+  <div class="sec-head">
+    <div class="sec-num">§ 04</div>
+    <h2>축 C — 공정 노드 6세대: 1x에서 1c까지</h2>
+    <p>“10nm급 n세대”는 제조사가 쓰는 공식 표현이고, 정확히 여섯 단계다. DDR5의 속도·용량·전력을 실제로 결정하는 축.</p>
+  </div>
+
+  <p>삼성전자·SK하이닉스·마이크론 셋 다 10nm급 공정을 <code>1x → 1y → 1z → 1a(1α) → 1b(1β) → 1c(1γ)</code>로
+  표기한다<sup class="rf">10–13</sup>. 각 단계는 다이 축소, 비트 밀도 증가, 비트당 전력 감소, 그리고
+  달성 가능한 동작 속도 상승을 뜻한다. 여기서 중요한 사실 하나 — <strong>노드 번호가 나노미터 수치가 아니다</strong>.
+  1a와 1c 사이의 실제 하프피치 차이는 공개되지 않으며, 제조사 간 같은 알파벳이 같은 밀도를 뜻하지도 않는다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 218" role="img" aria-label="2020년부터 2026년까지 DRAM 공정 노드 관련 공개 이벤트 타임라인. 마이크론 1알파 2021년 1월, 1베타 2022년 11월, SK하이닉스 1c 2024년 8월, 마이크론 1감마 2025년 2월, 삼성 1c 2025년 7월">
+      <line x1="70" y1="170" x2="860" y2="170" stroke="currentColor" stroke-width="1.6"></line>
+      <g stroke="currentColor" stroke-width="1" opacity=".45">
+        <line x1="70" y1="170" x2="70" y2="177"></line><line x1="191" y1="170" x2="191" y2="177"></line>
+        <line x1="313" y1="170" x2="313" y2="177"></line><line x1="434" y1="170" x2="434" y2="177"></line>
+        <line x1="556" y1="170" x2="556" y2="177"></line><line x1="677" y1="170" x2="677" y2="177"></line>
+        <line x1="799" y1="170" x2="799" y2="177"></line>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">
+        <text x="70" y="194">2020</text><text x="191" y="194">2021</text><text x="313" y="194">2022</text>
+        <text x="434" y="194">2023</text><text x="556" y="194">2024</text><text x="677" y="194">2025</text><text x="799" y="194">2026</text>
+      </g>
+
+      <g stroke="currentColor" stroke-width="1" opacity=".5">
+        <line x1="202" y1="164" x2="202" y2="125"></line>
+        <line x1="424" y1="164" x2="424" y2="80"></line>
+        <line x1="637" y1="164" x2="637" y2="125"></line>
+      </g>
+      <g stroke-width="1.2" style="stroke:var(--accent)">
+        <line x1="693" y1="164" x2="693" y2="70"></line>
+        <line x1="738" y1="164" x2="738" y2="70"></line>
+        <line x1="693" y1="70" x2="738" y2="70"></line>
+      </g>
+      <g style="fill:var(--g3)">
+        <circle cx="202" cy="170" r="5"></circle><circle cx="424" cy="170" r="5"></circle>
+      </g>
+      <g style="fill:var(--g6)">
+        <circle cx="637" cy="170" r="5"></circle><circle cx="693" cy="170" r="5"></circle><circle cx="738" cy="170" r="5"></circle>
+      </g>
+
+      <text x="202" y="117" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">Micron 1α 양산 출하</text>
+      <text x="202" y="103" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">2021.01 · EUV 미적용</text>
+
+      <text x="424" y="72" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">Micron 1β 샘플 출하</text>
+      <text x="424" y="58" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">2022.11 · 마지막 DUV 전용 세대</text>
+
+      <text x="645" y="117" text-anchor="end" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">SK hynix 1c DDR5 개발 발표</text>
+      <text x="645" y="103" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">2024.08 · 8 Gbps · 1b 대비 +11%</text>
+
+      <text x="715" y="46" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--accent-ink)">Micron 1γ 샘플(2025.02, EUV) / Samsung 1c 양산 승인(2025.07)</text>
+      <text x="715" y="32" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">6세대 노드 3사 진입 구간</text>
+
+      <text x="70" y="214" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">공개 확인된 이벤트만 표기. 양산 램프업 시점은 별도.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 5 · 6세대 노드 진입 타임라인</b>
+      1γ/1c 진입이 2024년 하반기~2025년에 3사에서 동시에 일어났다. 이 구간이 DDR5 후기 세대(8,000 MT/s 이상)와
+      대용량 다이의 공급 기반이다.<sup class="rf">10–13</sup></figcaption>
+  </figure>
+
+  <div class="tbl">
+  <table>
+    <caption>표 3 · 10nm급 공정 6세대</caption>
+    <thead><tr>
+      <th class="stick">세대</th><th>표기</th><th>대략 시기</th><th>리소그래피</th><th>확인된 공개 사실</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stick"><strong>1세대</strong></td><td class="num">1x</td><td class="num">~2016–17</td><td>DUV 멀티패터닝</td>
+        <td>10nm급 진입. DDR4 후기 및 LPDDR4X 주력.</td></tr>
+      <tr><td class="stick"><strong>2세대</strong></td><td class="num">1y</td><td class="num">~2018</td><td>DUV</td>
+        <td>DDR4 주력 노드.</td></tr>
+      <tr><td class="stick"><strong>3세대</strong></td><td class="num">1z</td><td class="num">~2019–20</td><td>DUV</td>
+        <td>DDR5 초기(4,800 MT/s) 물량의 출발점.</td></tr>
+      <tr><td class="stick"><strong>4세대</strong></td><td class="num">1a / 1α</td><td class="num">2021</td><td>DUV(마이크론) / EUV 도입 시작</td>
+        <td>마이크론 1α 볼륨 출하 2021.01, EUV 대신 계산 리소그래피와 멀티패터닝 사용.<sup class="rf">12</sup></td></tr>
+      <tr><td class="stick"><strong>5세대</strong></td><td class="num">1b / 1β</td><td class="num">2022–23</td><td>DUV(마이크론 기준 최종)</td>
+        <td>마이크론 1β 퀄 샘플 2022.11.<sup class="rf">12</sup> DDR5 5,600~6,400 MT/s 대량 공급의 주 노드.</td></tr>
+      <tr><td class="stick"><strong>6세대</strong></td><td class="num">1c / 1γ</td><td class="num">2024–25</td><td>EUV</td>
+        <td>SK하이닉스 1c DDR5 개발 발표 2024.08(8 Gbps, 1b 대비 속도 +11%, 전력효율 +9% 이상)<sup class="rf">10</sup>;
+        마이크론 1γ 업계 최초 샘플 출하 2025.02.25, EUV 적용, 웨이퍼당 비트 30% 이상 증가.<sup class="rf">11</sup></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="caveat"><p>삼성전자의 1c 관련 시점(2025년 7월 재설계 완료·양산 승인)은 1차 자료가 아닌 2차 보도에 기반한다.
+  이 항목은 다른 항목보다 신뢰도가 낮다고 보아야 한다.<sup class="rf">13</sup></p></div>
+</section>
+
+<section id="s5">
+  <div class="sec-head">
+    <div class="sec-num">§ 05</div>
+    <h2>여섯 세대가 개선하지 못한 것 — 절대 지연</h2>
+    <p>대역폭은 83% 늘었다. 그 사이 표준 빈의 CAS 지연은 나노초 단위로 거의 그대로다.</p>
+  </div>
+
+  <p>DDR5 마케팅은 언제나 MT/s로 말한다. 그러나 메모리 접근 지연은 클럭 수(CL)가 아니라 시간(ns)으로 결정되고,
+  그 값은 <code>tCL(ns) = CL × 2000 ÷ MT/s</code>다. JEDEC 표준 빈에서 CL은 데이터 레이트에 거의 비례해 커진다.
+  결과적으로 절대 지연은 세대가 넘어가도 평탄하다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 382" role="img" aria-label="데이터 레이트 대비 CAS 절대 지연 그래프. JEDEC 표준 빈은 4800에서 6400까지 약 16.7에서 16.3 나노초로 평탄하고, 고성능 XMP 빈만 10 나노초 아래로 내려간다">
+      <g stroke="currentColor" stroke-width="1" opacity=".15">
+        <line x1="90" y1="300" x2="870" y2="300"></line>
+        <line x1="90" y1="235" x2="870" y2="235"></line>
+        <line x1="90" y1="170" x2="870" y2="170"></line>
+        <line x1="90" y1="105" x2="870" y2="105"></line>
+        <line x1="90" y1="40" x2="870" y2="40"></line>
+      </g>
+      <g text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">
+        <text x="78" y="304">0</text><text x="78" y="239">5</text><text x="78" y="174">10</text>
+        <text x="78" y="109">15</text><text x="78" y="44">20</text>
+      </g>
+      <text x="26" y="44" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">tCL (ns)</text>
+
+      <polyline points="324,83 428,86 532,89" fill="none" stroke-width="2.4" style="stroke:var(--signal)"></polyline>
+      <g style="fill:var(--signal)"><circle cx="324" cy="83" r="5"></circle><circle cx="428" cy="86" r="5"></circle><circle cx="532" cy="89" r="5"></circle></g>
+      <polyline points="532,170 740,177 792,176" fill="none" stroke-width="2.4" stroke-dasharray="6 4" style="stroke:var(--g3)"></polyline>
+      <g style="fill:var(--g3)"><circle cx="532" cy="170" r="5"></circle><circle cx="740" cy="177" r="5"></circle><circle cx="792" cy="176" r="5"></circle></g>
+      <circle cx="116" cy="121" r="5.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+        <text x="324" y="72" text-anchor="middle" style="fill:var(--signal)">16.67</text>
+        <text x="428" y="75" text-anchor="middle" style="fill:var(--signal)">16.43</text>
+        <text x="546" y="78" text-anchor="start" style="fill:var(--signal)">16.25</text>
+        <text x="524" y="192" text-anchor="middle" style="fill:var(--g3)">10.00</text>
+        <text x="740" y="199" text-anchor="middle" style="fill:var(--g3)">9.50</text>
+        <text x="800" y="164" text-anchor="start" style="fill:var(--g3)">9.52</text>
+        <text x="116" y="110" text-anchor="middle" opacity=".75">13.75</text>
+      </g>
+      <text x="116" y="97" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="10.5" fill="currentColor" opacity=".75">DDR4-3200 CL22</text>
+
+      <line x1="90" y1="300" x2="870" y2="300" stroke="currentColor" stroke-width="1.6"></line>
+      <g stroke="currentColor" stroke-width="1" opacity=".4">
+        <line x1="116" y1="300" x2="116" y2="306"></line><line x1="324" y1="300" x2="324" y2="306"></line>
+        <line x1="428" y1="300" x2="428" y2="306"></line><line x1="532" y1="300" x2="532" y2="306"></line>
+        <line x1="636" y1="300" x2="636" y2="306"></line><line x1="740" y1="300" x2="740" y2="306"></line>
+        <line x1="844" y1="300" x2="844" y2="306"></line>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">
+        <text x="116" y="322">3200</text><text x="324" y="322">4800</text><text x="428" y="322">5600</text>
+        <text x="532" y="322">6400</text><text x="636" y="322">7200</text><text x="740" y="322">8000</text><text x="844" y="322">8800</text>
+      </g>
+      <text x="480" y="344" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">데이터 레이트 (MT/s)</text>
+
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="11">
+        <rect x="90" y="358" width="22" height="3" style="fill:var(--signal)"></rect>
+        <text x="120" y="365" fill="currentColor">JEDEC 표준 빈 (CL 40 / 46 / 52)</text>
+        <rect x="360" y="358" width="22" height="3" style="fill:var(--g3)"></rect>
+        <text x="390" y="365" fill="currentColor">고성능 XMP·EXPO 빈 (CL 32 / 38 / 40)</text>
+        <circle cx="700" cy="360" r="5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <text x="714" y="365" fill="currentColor">DDR4 기준선</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption><b>도표 6 · 대역폭은 오르고 지연은 서 있다</b>
+      표준 빈 기준으로 DDR5 Gen1(16.67 ns)은 DDR4-3200(13.75 ns)보다 <strong>21% 느렸고</strong>,
+      Gen3(16.25 ns)에서도 DDR4를 회복하지 못했다. 10 ns 아래로 내려간 값은 모두 규격 밖(XMP/EXPO) 빈이다.</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="lbl">냉정한 결론</span>
+    <p>DDR5의 여섯 세대는 <strong>대역폭 세대이지 지연 세대가 아니다</strong>. 병렬 코어 수가 많고 스트리밍이 지배적인
+    워크로드(서버 추론, 렌더링, 컴파일)에서는 세대 차이가 그대로 성능으로 나타나지만, 포인터 추적이 지배적인
+    워크로드(다수의 게임 엔진, 트랜잭션 DB)에서는 Gen1→Gen6 이득이 대역폭 수치만큼 나오지 않는다.
+    MRDIMM은 이 성질을 극단적으로 보여준다 — 링크 속도만 두 배이고 셀 지연은 그대로다.</p>
+  </div>
+</section>
+
+
+<div class="part">
+  <div class="p-n">2부</div>
+  <div class="p-t">메커니즘 — 안에서 본 DDR5</div>
+  <p class="p-d">1부의 대조표에서 나란히 놓인 다섯 항목은 독립된 스펙이 아니다. 하나의 인과 사슬로 묶여 있고,
+  그 출발점은 “DRAM 셀이 빨라지지 않는다”는 25년째 변하지 않는 사실이다. 다섯 겹을 순서대로 벗긴다.</p>
+</div>
+<section id="m1">
+  <div class="sec-head">
+    <div class="sec-num">§ 06</div>
+    <h2>프리페치 — 느린 셀에서 한 번에 더 많이 꺼내는 기술</h2>
+    <p>DDR 계보 성능 향상의 8할이 여기서 나온다. 그리고 지연이 개선되지 않는 이유도 여기에 있다.</p>
+  </div>
+
+  <h3>정의를 정확히</h3>
+  <p><strong>프리페치(prefetch) n비트</strong>란, 한 번의 컬럼 액세스에서 <em>DQ 핀 하나당</em> DRAM 내부가
+  병렬로 끌어올리는 비트 수다. CPU 캐시의 “프리페치”(미래 접근 예측)와는 이름만 같고 완전히 다른 개념이다.
+  DRAM의 프리페치는 예측이 아니라 <strong>내부 버스 폭과 외부 버스 폭의 비율</strong>이다.</p>
+
+  <div class="eq">
+    내부 데이터 폭 = 외부 데이터 폭 × 프리페치 깊이<br>
+    데이터 레이트 = <b>코어(컬럼) 클럭 × 프리페치 깊이</b><br>
+    예) DDR5-6400 : 400 MHz × 16 = 6,400 MT/s
+  </div>
+
+  <p>셀 어레이는 물리적으로 느리다. 센스앰프가 비트라인 전위차를 판정하는 데 걸리는 시간(tRCD, tCAS)은
+  25년간 12~15 ns 부근에서 거의 움직이지 않았다. 그래서 업계는 셀을 빠르게 만드는 대신,
+  <strong>한 번의 느린 동작에서 더 넓은 비트를 동시에 꺼내 빠른 I/O로 직렬화</strong>하는 길을 택했다.
+  프리페치 깊이는 그 “동시에 꺼내는 폭”이다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 336" role="img" aria-label="DDR부터 DDR5까지 프리페치 깊이 비교. DQ 핀당 인출 비트가 2, 4, 8, 8, 16으로 늘고 x8 디바이스 내부 폭이 16비트에서 128비트로 커진다">
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6" letter-spacing="1.2">
+        <text x="20" y="26">세대 · 프리페치</text>
+        <text x="256" y="26">DQ 핀 1개당 한 번에 인출되는 비트</text>
+        <text x="620" y="26">데이터 레이트</text>
+        <text x="762" y="26">내부 폭 (x8)</text>
+      </g>
+      <line x1="20" y1="36" x2="880" y2="36" stroke="currentColor" stroke-width="1" opacity=".3"></line>
+
+      <g stroke="currentColor" stroke-width="1" opacity=".13">
+        <line x1="20" y1="98" x2="880" y2="98"></line><line x1="20" y1="146" x2="880" y2="146"></line>
+        <line x1="20" y1="194" x2="880" y2="194"></line><line x1="20" y1="242" x2="880" y2="242"></line>
+      </g>
+
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">
+        <text x="20" y="79">DDR-400</text><text x="20" y="127">DDR2-800</text><text x="20" y="175">DDR3-1600</text>
+        <text x="20" y="223">DDR4-3200</text><text x="20" y="271">DDR5-6400</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" opacity=".65">
+        <text x="150" y="79">2n</text><text x="150" y="127">4n</text><text x="150" y="175">8n</text>
+        <text x="150" y="223">8n</text><text x="150" y="271">16n</text>
+      </g>
+
+      <g style="fill:var(--g1)"><rect x="256" y="65" width="17" height="18" rx="1"></rect><rect x="275" y="65" width="17" height="18" rx="1"></rect></g>
+      <g style="fill:var(--g2)"><rect x="256" y="113" width="17" height="18" rx="1"></rect><rect x="275" y="113" width="17" height="18" rx="1"></rect><rect x="294" y="113" width="17" height="18" rx="1"></rect><rect x="313" y="113" width="17" height="18" rx="1"></rect></g>
+      <g style="fill:var(--g3)"><rect x="256" y="161" width="17" height="18" rx="1"></rect><rect x="275" y="161" width="17" height="18" rx="1"></rect><rect x="294" y="161" width="17" height="18" rx="1"></rect><rect x="313" y="161" width="17" height="18" rx="1"></rect><rect x="332" y="161" width="17" height="18" rx="1"></rect><rect x="351" y="161" width="17" height="18" rx="1"></rect><rect x="370" y="161" width="17" height="18" rx="1"></rect><rect x="389" y="161" width="17" height="18" rx="1"></rect></g>
+      <g style="fill:var(--g4)"><rect x="256" y="209" width="17" height="18" rx="1"></rect><rect x="275" y="209" width="17" height="18" rx="1"></rect><rect x="294" y="209" width="17" height="18" rx="1"></rect><rect x="313" y="209" width="17" height="18" rx="1"></rect><rect x="332" y="209" width="17" height="18" rx="1"></rect><rect x="351" y="209" width="17" height="18" rx="1"></rect><rect x="370" y="209" width="17" height="18" rx="1"></rect><rect x="389" y="209" width="17" height="18" rx="1"></rect></g>
+      <g style="fill:var(--g6)"><rect x="256" y="257" width="17" height="18" rx="1"></rect><rect x="275" y="257" width="17" height="18" rx="1"></rect><rect x="294" y="257" width="17" height="18" rx="1"></rect><rect x="313" y="257" width="17" height="18" rx="1"></rect><rect x="332" y="257" width="17" height="18" rx="1"></rect><rect x="351" y="257" width="17" height="18" rx="1"></rect><rect x="370" y="257" width="17" height="18" rx="1"></rect><rect x="389" y="257" width="17" height="18" rx="1"></rect><rect x="408" y="257" width="17" height="18" rx="1"></rect><rect x="427" y="257" width="17" height="18" rx="1"></rect><rect x="446" y="257" width="17" height="18" rx="1"></rect><rect x="465" y="257" width="17" height="18" rx="1"></rect><rect x="484" y="257" width="17" height="18" rx="1"></rect><rect x="503" y="257" width="17" height="18" rx="1"></rect><rect x="522" y="257" width="17" height="18" rx="1"></rect><rect x="541" y="257" width="17" height="18" rx="1"></rect></g>
+
+      <text x="420" y="223" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">← 8n 유지 (캐시라인 한계) · 뱅크그룹으로 우회</text>
+
+      <g font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="currentColor">
+        <text x="620" y="79">400</text><text x="620" y="127">800</text><text x="620" y="175">1,600</text>
+        <text x="620" y="223">3,200</text><text x="620" y="271">6,400</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" opacity=".75">
+        <text x="762" y="79">16 bit</text><text x="762" y="127">32 bit</text><text x="762" y="175">64 bit</text>
+        <text x="762" y="223">64 bit</text>
+        <text x="762" y="271" font-weight="600" style="fill:var(--accent-ink)">128 bit</text>
+      </g>
+
+      <line x1="20" y1="292" x2="880" y2="292" stroke="currentColor" stroke-width="1" opacity=".25"></line>
+      <text x="20" y="312" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">코어 클럭은 200 → 400 MHz로 2배 오르는 동안, 프리페치는 2n → 16n으로 8배 커졌다. 곱이 곧 16배 데이터 레이트다.</text>
+      <text x="20" y="328" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">x8 디바이스의 128 bit 내부 폭은 뒤에서 on-die ECC 코드워드 크기와 정확히 일치한다(§ 10).</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 7 · 프리페치 깊이의 변천</b>
+      DDR5 x8 디바이스는 한 번의 컬럼 액세스에서 8 DQ × 16 = <strong>128비트</strong>를 내부에서 끌어올린다.
+      이 128이라는 숫자가 §10에서 다시 등장한다.</figcaption>
+  </figure>
+
+<figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 306" role="img" aria-label="DDR4와 DDR5의 프리페치 비교. 같은 400MHz 코어 클럭에서 DDR4는 8비트를 뽑아 3200 MT/s를, DDR5는 16비트를 뽑아 6400 MT/s를 만든다">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <text x="20" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">DDR4-3200 · 프리페치 8n</text>
+      <rect x="20" y="40" width="120" height="200" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="80" y="128" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">셀 어레이</text>
+      <text x="80" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" fill="currentColor">400 MHz</text>
+      <g stroke="currentColor" stroke-width="1.2" opacity=".7" marker-end="url(#ar4)">
+        <line x1="140" y1="56" x2="248" y2="56"></line><line x1="140" y1="82" x2="248" y2="82"></line>
+        <line x1="140" y1="108" x2="248" y2="108"></line><line x1="140" y1="134" x2="248" y2="134"></line>
+        <line x1="140" y1="160" x2="248" y2="160"></line><line x1="140" y1="186" x2="248" y2="186"></line>
+        <line x1="140" y1="212" x2="248" y2="212"></line><line x1="140" y1="238" x2="248" y2="238"></line>
+      </g>
+      <text x="194" y="264" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" opacity=".7">8 비트 동시 인출</text>
+      <rect x="252" y="106" width="66" height="68" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="285" y="136" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="10.5" fill="currentColor">직렬화</text>
+      <text x="285" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">8:1</text>
+      <line x1="318" y1="140" x2="366" y2="140" stroke="currentColor" stroke-width="1.8" marker-end="url(#ar4)"></line>
+      <text x="400" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" style="fill:var(--g2)">3,200</text>
+      <text x="400" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">MT/s ×64 bit</text>
+      <text x="400" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">BL8 → 64 byte</text>
+
+      <line x1="450" y1="30" x2="450" y2="276" stroke="currentColor" stroke-width="1" opacity=".25"></line>
+
+      <text x="470" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" style="fill:var(--accent)">DDR5-6400 · 프리페치 16n</text>
+      <rect x="470" y="40" width="120" height="200" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="530" y="128" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">셀 어레이</text>
+      <text x="530" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" style="fill:var(--signal)">400 MHz</text>
+      <text x="530" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">동일</text>
+      <g stroke-width="1.1" opacity=".85" marker-end="url(#ar4)" style="stroke:var(--accent);color:var(--accent)">
+        <line x1="590" y1="46" x2="694" y2="46"></line><line x1="590" y1="59" x2="694" y2="59"></line>
+        <line x1="590" y1="72" x2="694" y2="72"></line><line x1="590" y1="85" x2="694" y2="85"></line>
+        <line x1="590" y1="98" x2="694" y2="98"></line><line x1="590" y1="111" x2="694" y2="111"></line>
+        <line x1="590" y1="124" x2="694" y2="124"></line><line x1="590" y1="137" x2="694" y2="137"></line>
+        <line x1="590" y1="150" x2="694" y2="150"></line><line x1="590" y1="163" x2="694" y2="163"></line>
+        <line x1="590" y1="176" x2="694" y2="176"></line><line x1="590" y1="189" x2="694" y2="189"></line>
+        <line x1="590" y1="202" x2="694" y2="202"></line><line x1="590" y1="215" x2="694" y2="215"></line>
+        <line x1="590" y1="228" x2="694" y2="228"></line><line x1="590" y1="241" x2="694" y2="241"></line>
+      </g>
+      <text x="642" y="264" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" style="fill:var(--accent-ink)">16 비트 동시 인출 (2배)</text>
+      <rect x="698" y="106" width="66" height="68" rx="3" stroke-width="1.6" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="731" y="136" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="10.5" fill="currentColor">직렬화</text>
+      <text x="731" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" style="fill:var(--accent-ink)">16:1</text>
+      <line x1="764" y1="140" x2="806" y2="140" stroke="currentColor" stroke-width="1.8" marker-end="url(#ar4)"></line>
+      <text x="845" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" style="fill:var(--g4)">6,400</text>
+      <text x="845" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">MT/s ×32 bit ×2</text>
+      <text x="845" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">BL16 → 64 byte</text>
+
+      <text x="20" y="296" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">양쪽 모두 한 번의 버스트가 정확히 64 byte = CPU 캐시라인 하나를 채운다. DDR5는 그것을 두 갈래로 독립 수행한다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 8 · 코어는 그대로, 프리페치만 두 배</b>
+      DDR5가 DDR4의 두 배 속도를 내는 직접적 이유. 대가는 한 번의 접근이 가져오는 데이터가 커진다는 것이고,
+      그래서 버스 폭을 32-bit로 쪼개 <em>버스트당 64 byte</em>를 유지했다.</figcaption>
+  </figure>
+
+  <h3>DDR4가 8n에 멈춰선 이유</h3>
+  <p>표를 보면 DDR3와 DDR4의 프리페치가 똑같이 8n이다. 이것은 기술적 정체가 아니라 <strong>의도적 정지</strong>다.
+  64-bit 채널에서 8n을 넘기면 한 번의 버스트가 128 byte를 뱉는데, x86 캐시라인은 64 byte다.
+  절반이 낭비되거나 컨트롤러가 억지로 잘라야 한다.</p>
+
+  <p>그래서 DDR4는 프리페치 대신 <strong>뱅크 그룹(bank group)</strong>을 도입했다. 뱅크를 4개 그룹으로 묶고,
+  서로 다른 그룹 간 연속 컬럼 명령의 최소 간격(<code>tCCD_S</code>)을 같은 그룹 내 간격(<code>tCCD_L</code>)보다
+  짧게 규정한 것이다. 프리페치 깊이는 그대로 두고 <em>명령 발행 빈도</em>를 높여 버스를 채우는 방식 —
+  결과적으로 “유사 프리페치 증가”다. DDR5는 이 뱅크 그룹을 8개로 늘리면서 프리페치도 16n으로 올렸다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 300" role="img" aria-label="같은 뱅크그룹 연속 접근은 tCCD_L 간격 때문에 데이터 버스에 공백이 생기고, 뱅크그룹을 교대하면 tCCD_S 간격으로 버스트가 연속된다">
+      <defs>
+        <pattern id="hatch1" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" stroke-width="2.5" opacity=".28"></line>
+        </pattern>
+      </defs>
+      <g stroke="currentColor" stroke-width="1" opacity=".12">
+        <line x1="140" y1="40" x2="140" y2="260"></line><line x1="260" y1="40" x2="260" y2="260"></line>
+        <line x1="380" y1="40" x2="380" y2="260"></line><line x1="500" y1="40" x2="500" y2="260"></line>
+        <line x1="620" y1="40" x2="620" y2="260"></line><line x1="740" y1="40" x2="740" y2="260"></line>
+        <line x1="860" y1="40" x2="860" y2="260"></line>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">
+        <text x="140" y="34">t0</text><text x="260" y="34">t4</text><text x="380" y="34">t8</text>
+        <text x="500" y="34">t12</text><text x="620" y="34">t16</text><text x="740" y="34">t20</text><text x="860" y="34">t24</text>
+      </g>
+      <text x="20" y="34" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">tCK</text>
+
+      <text x="20" y="66" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" style="fill:var(--danger)">A · 같은 뱅크그룹 연속 접근</text>
+      <text x="20" y="94" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">CMD</text>
+      <rect x="140" y="80" width="58" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"></rect>
+      <text x="169" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">RD BG0</text>
+      <rect x="500" y="80" width="58" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"></rect>
+      <text x="529" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">RD BG0</text>
+      <line x1="198" y1="90" x2="498" y2="90" stroke-width="1.2" stroke-dasharray="4 3" style="stroke:var(--danger)"></line>
+      <text x="348" y="76" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--danger)">tCCD_L (예: 12 tCK)</text>
+
+      <text x="20" y="124" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">DQ</text>
+      <rect x="260" y="110" width="240" height="24" rx="2" style="fill:var(--g3)"></rect>
+      <text x="380" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#0F1A1C">BL16 버스트 (8 tCK)</text>
+      <rect x="500" y="110" width="120" height="24" rx="2" fill="url(#hatch1)" stroke-width="1.2" stroke-dasharray="3 2" style="stroke:var(--danger)"></rect>
+      <text x="560" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--danger)">버스 공백</text>
+      <rect x="620" y="110" width="240" height="24" rx="2" style="fill:var(--g3)"></rect>
+      <text x="740" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#0F1A1C">BL16 버스트</text>
+
+      <line x1="20" y1="158" x2="880" y2="158" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+
+      <text x="20" y="186" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" style="fill:var(--accent)">B · 뱅크그룹 교대 접근</text>
+      <text x="20" y="214" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">CMD</text>
+      <rect x="140" y="200" width="58" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"></rect>
+      <text x="169" y="214" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">RD BG0</text>
+      <rect x="380" y="200" width="58" height="20" rx="2" fill="none" stroke-width="1.6" style="stroke:var(--accent)"></rect>
+      <text x="409" y="214" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent-ink)">RD BG1</text>
+      <line x1="198" y1="210" x2="378" y2="210" stroke-width="1.2" stroke-dasharray="4 3" style="stroke:var(--accent)"></line>
+      <text x="288" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">tCCD_S = 8 tCK</text>
+
+      <text x="20" y="244" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">DQ</text>
+      <rect x="260" y="230" width="240" height="24" rx="2" style="fill:var(--g3)"></rect>
+      <text x="380" y="246" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#0F1A1C">BL16 (BG0)</text>
+      <rect x="500" y="230" width="240" height="24" rx="2" style="fill:var(--g5)"></rect>
+      <text x="620" y="246" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#0F1A1C">BL16 (BG1)</text>
+      <text x="760" y="246" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">공백 없음</text>
+
+      <text x="20" y="284" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">tCCD_L은 ns 단위 하한을 갖기 때문에 속도가 오를수록 tCK 환산값이 커진다. 그림의 12 tCK는 예시다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 9 · 뱅크 그룹이 버스를 채우는 방식</b>
+      BL16 버스트는 8 tCK를 점유한다. 같은 뱅크그룹을 연속으로 때리면 <code>tCCD_L</code>이 그보다 길어 공백이 생기고,
+      그룹을 번갈아 쓰면 <code>tCCD_S</code>(=8 tCK)로 버스트가 맞물린다. DDR5가 뱅크그룹을 8개로 늘린 이유가 이것이다.</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="lbl">대가</span>
+    <p>프리페치를 늘리면 <strong>최소 접근 입도</strong>가 함께 커진다. 4 byte만 필요해도 64 byte를 끌고 오는 구조는
+    변하지 않고, 내부 글로벌 IO 배선이 넓어져 다이 면적과 스위칭 전력이 늘어난다.
+    그리고 결정적으로 — 이 트릭은 <strong>tCAS를 1 ns도 줄이지 못한다</strong>. 대역폭만 사는 거래다.</p>
+  </div>
+</section>
+
+<section id="m2">
+  <div class="sec-head">
+    <div class="sec-num">§ 07</div>
+    <h2>버스트 길이 — 프리페치와 혼동되지만 다른 층에 있다</h2>
+    <p>프리페치는 DRAM 내부의 폭, 버스트 길이는 외부 버스 위의 시간이다. 둘의 값이 같아 보이는 것은 결과지 정의가 아니다.</p>
+  </div>
+
+  <p><strong>버스트 길이(BL)</strong>는 하나의 READ/WRITE 명령이 DQ 핀당 연속으로 전송하는 <em>전송 횟수</em>다.
+  DDR는 클럭의 상승·하강 양쪽에서 전송하므로, BL16은 8 클럭 사이클을 소모한다.
+  프리페치가 내부에서 꺼낸 비트를 외부로 흘려보내는 형식이 BL이므로, <strong>프리페치 깊이가 BL의 하한을 정한다</strong>.
+  16n 프리페치 소자가 BL4를 지원할 수는 없다.</p>
+
+  <div class="tbl">
+  <table>
+    <caption>표 1 · DDR5 버스트 모드</caption>
+    <thead><tr><th>모드</th><th>전송 횟수</th><th>점유 시간</th><th>서브채널 페이로드</th><th>용도와 한계</th></tr></thead>
+    <tbody>
+      <tr><td class="num"><strong>BL16</strong></td><td class="num">16</td><td class="num">8 tCK</td><td class="num">32 bit × 16 = <strong>64 byte</strong></td>
+        <td>기본 모드. x86 캐시라인과 정확히 일치한다.</td></tr>
+      <tr><td class="num"><strong>BC8</strong></td><td class="num">8 유효 + 8 무효</td><td class="num">8 tCK</td><td class="num">32 bit × 8 = 32 byte</td>
+        <td>버스트 첩(chop). 32 byte 입도가 필요할 때 쓰지만, 명령 간격 제약 때문에 <strong>버스 점유 시간은 대개 줄지 않는다</strong> — 데이터만 버려진다.</td></tr>
+      <tr><td class="num"><strong>BL32</strong></td><td class="num">32</td><td class="num">16 tCK</td><td class="num">32 bit × 32 = 128 byte</td>
+        <td>옵션 모드. x4 디바이스에서 명령 오버헤드를 줄이려는 용도. 캐시라인 2개 분량이라 범용 클라이언트에서는 쓰이지 않는다.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 320" role="img" aria-label="클럭 파형 위에 DDR4 BL8, DDR5 BL16, DDR5 BC8의 데이터 전송 셀을 나란히 그린 타이밍도. BL16은 16개 셀로 8클럭을 점유하고 BC8은 뒤 8개가 무효다">
+      <text x="20" y="30" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">CK</text>
+      <polyline points="180,64 180,44 210,44 210,64 240,64 240,44 270,44 270,64 300,64 300,44 330,44 330,64 360,64 360,44 390,44 390,64 420,64 420,44 450,44 450,64 480,64 480,44 510,44 510,64 540,64 540,44 570,44 570,64 600,64 600,44 630,44 630,64 660,64 660,44 690,44 690,64"
+        fill="none" stroke="currentColor" stroke-width="1.6"></polyline>
+      <g stroke="currentColor" stroke-width="1" opacity=".12">
+        <line x1="180" y1="44" x2="180" y2="290"></line><line x1="420" y1="44" x2="420" y2="290"></line>
+        <line x1="660" y1="44" x2="660" y2="290"></line>
+      </g>
+      <text x="180" y="38" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".5">0 tCK</text>
+      <text x="420" y="38" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".5">4 tCK</text>
+      <text x="660" y="38" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".5">8 tCK</text>
+
+      <text x="20" y="104" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">DDR4 · BL8</text>
+      <text x="20" y="119" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">64-bit 채널</text>
+      <g style="fill:var(--g4)">
+        <rect x="180" y="92" width="28" height="26" rx="1"></rect><rect x="210" y="92" width="28" height="26" rx="1"></rect>
+        <rect x="240" y="92" width="28" height="26" rx="1"></rect><rect x="270" y="92" width="28" height="26" rx="1"></rect>
+        <rect x="300" y="92" width="28" height="26" rx="1"></rect><rect x="330" y="92" width="28" height="26" rx="1"></rect>
+        <rect x="360" y="92" width="28" height="26" rx="1"></rect><rect x="390" y="92" width="28" height="26" rx="1"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">
+        <text x="194" y="109">D0</text><text x="224" y="109">D1</text><text x="254" y="109">D2</text><text x="284" y="109">D3</text>
+        <text x="314" y="109">D4</text><text x="344" y="109">D5</text><text x="374" y="109">D6</text><text x="404" y="109">D7</text>
+      </g>
+      <text x="700" y="105" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">64 bit × 8 = <tspan font-weight="600">64 B</tspan></text>
+      <text x="700" y="120" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent-ink)">캐시라인 일치</text>
+
+      <text x="20" y="174" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">DDR5 · BL16</text>
+      <text x="20" y="189" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">32-bit 서브채널</text>
+      <g style="fill:var(--g6)">
+        <rect x="180" y="162" width="28" height="26" rx="1"></rect><rect x="210" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="240" y="162" width="28" height="26" rx="1"></rect><rect x="270" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="300" y="162" width="28" height="26" rx="1"></rect><rect x="330" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="360" y="162" width="28" height="26" rx="1"></rect><rect x="390" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="420" y="162" width="28" height="26" rx="1"></rect><rect x="450" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="480" y="162" width="28" height="26" rx="1"></rect><rect x="510" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="540" y="162" width="28" height="26" rx="1"></rect><rect x="570" y="162" width="28" height="26" rx="1"></rect>
+        <rect x="600" y="162" width="28" height="26" rx="1"></rect><rect x="630" y="162" width="28" height="26" rx="1"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">
+        <text x="194" y="179">D0</text><text x="284" y="179">D3</text><text x="404" y="179">D7</text>
+        <text x="524" y="179">D11</text><text x="644" y="179">D15</text>
+      </g>
+      <text x="700" y="175" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">32 bit × 16 = <tspan font-weight="600">64 B</tspan></text>
+      <text x="700" y="190" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent-ink)">캐시라인 일치</text>
+
+      <text x="20" y="244" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">DDR5 · BC8</text>
+      <text x="20" y="259" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">버스트 첩</text>
+      <g style="fill:var(--g6)">
+        <rect x="180" y="232" width="28" height="26" rx="1"></rect><rect x="210" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="240" y="232" width="28" height="26" rx="1"></rect><rect x="270" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="300" y="232" width="28" height="26" rx="1"></rect><rect x="330" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="360" y="232" width="28" height="26" rx="1"></rect><rect x="390" y="232" width="28" height="26" rx="1"></rect>
+      </g>
+      <g fill="none" stroke-width="1.2" stroke-dasharray="3 2" style="stroke:var(--danger)">
+        <rect x="420" y="232" width="28" height="26" rx="1"></rect><rect x="450" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="480" y="232" width="28" height="26" rx="1"></rect><rect x="510" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="540" y="232" width="28" height="26" rx="1"></rect><rect x="570" y="232" width="28" height="26" rx="1"></rect>
+        <rect x="600" y="232" width="28" height="26" rx="1"></rect><rect x="630" y="232" width="28" height="26" rx="1"></rect>
+      </g>
+      <text x="524" y="249" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">무효 · 버려짐</text>
+      <text x="700" y="245" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">32 bit × 8 = <tspan font-weight="600">32 B</tspan></text>
+      <text x="700" y="260" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">시간은 그대로</text>
+
+      <line x1="20" y1="284" x2="880" y2="284" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="306" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">셀 하나 = 1 전송(클럭 반주기). BL16의 16셀은 정확히 8 tCK를 채운다 — 도표 9의 tCCD_S와 같은 길이다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 10 · 세 가지 버스트가 버스를 쓰는 방식</b>
+      BC8은 데이터를 절반만 쓰지만 버스 시간은 대개 그대로 소모한다. “작게 읽으면 빨라진다”는 직관이
+      DDR5에서 성립하지 않는 이유다.</figcaption>
+  </figure>
+
+  <h3>왜 하필 64 byte인가 — 설계 공간은 셋뿐이었다</h3>
+  <p>DDR5 설계자에게 주어진 선택지는 사실상 세 가지였고, 두 개는 탈락했다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 268" role="img" aria-label="세 가지 설계안의 버스트 페이로드 비교. 64비트 BL8은 64바이트로 적합, 64비트 BL16은 128바이트로 캐시라인 초과, 32비트 BL16은 64바이트로 적합하며 동시에 두 갈래를 얻는다">
+      <line x1="300" y1="34" x2="300" y2="230" stroke-width="1.6" stroke-dasharray="5 4" style="stroke:var(--accent)"></line>
+      <text x="300" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">x86 캐시라인 = 64 byte</text>
+
+      <text x="20" y="64" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" fill="currentColor">안 1 · 그대로 두기</text>
+      <text x="20" y="80" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">64 bit × BL8</text>
+      <rect x="180" y="52" width="120" height="30" rx="2" style="fill:var(--g4)"></rect>
+      <text x="240" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A1C">64 B</text>
+      <text x="320" y="72" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">정합 ✓ — 그러나 속도가 DDR4에 묶인다.</text>
+
+      <text x="20" y="134" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" fill="currentColor">안 2 · 폭 유지 + 16n</text>
+      <text x="20" y="150" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">64 bit × BL16</text>
+      <rect x="180" y="122" width="120" height="30" rx="2" style="fill:var(--g5)"></rect>
+      <rect x="300" y="122" width="120" height="30" rx="2" fill="none" stroke-width="1.4" stroke-dasharray="4 3" style="stroke:var(--danger)"></rect>
+      <text x="240" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A1C">64 B</text>
+      <text x="360" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" style="fill:var(--danger)">+64 B 초과</text>
+      <text x="440" y="136" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" style="fill:var(--danger)">128 byte 버스트 ✗</text>
+      <text x="440" y="152" font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="currentColor" opacity=".7">랜덤 접근에서 절반이 버려진다.</text>
+
+      <text x="20" y="204" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" style="fill:var(--accent-ink)">안 3 · 폭 절반 + 16n</text>
+      <text x="20" y="220" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">32 bit × BL16 × 2</text>
+      <rect x="180" y="184" width="120" height="14" rx="2" style="fill:var(--g6)"></rect>
+      <rect x="180" y="202" width="120" height="14" rx="2" style="fill:var(--g6)"></rect>
+      <text x="240" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">64 B · 서브채널 A</text>
+      <text x="240" y="213" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">64 B · 서브채널 B</text>
+      <text x="320" y="196" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" style="fill:var(--accent-ink)">정합 ✓ + 독립 접근 2개 ✓</text>
+      <text x="320" y="214" font-family="IBM Plex Sans KR, sans-serif" font-size="11" fill="currentColor" opacity=".7">채택안. 대가는 CA 버스·ECC 폭의 중복이다(§ 08).</text>
+
+      <line x1="20" y1="244" x2="880" y2="244" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="262" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">채널 분할은 병렬성을 노린 설계가 아니라, 캐시라인 제약을 지키려다 얻은 결과였다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 11 · 세 가지 안 중 하나만 남았다</b>
+      DDR5의 서브채널 구조는 <strong>병렬성을 목표로 설계된 것이 아니라</strong>, 16n 프리페치와 64 byte 캐시라인을
+      동시에 만족시키려다 도출된 해였다. 병렬성은 부산물이다.</figcaption>
+  </figure>
+</section>
+
+<section id="m3">
+  <div class="sec-head">
+    <div class="sec-num">§ 08</div>
+    <h2>채널 구조 — 하나의 DIMM이 두 개의 채널처럼 동작한다</h2>
+    <p>물리 커넥터는 288핀 그대로다. 바뀐 것은 그 288핀을 어떻게 나누는가다.</p>
+  </div>
+
+  <p>DDR5 DIMM은 <strong>완전히 독립된 두 개의 서브채널 A/B</strong>로 구성된다. 각 서브채널은 자체 데이터 버스,
+  <strong>자체 CA(Command/Address) 버스, 자체 칩 선택(CS), 자체 클럭</strong>을 갖는다. 컨트롤러 입장에서는
+  DIMM 한 장이 두 개의 채널이다. 8채널 서버 플랫폼은 실제로는 <strong>16개의 서브채널</strong>을 스케줄링한다.</p>
+
+  <div class="tbl">
+  <table>
+    <caption>표 2 · 데이터 폭 구성</caption>
+    <thead><tr><th>구성</th><th>DDR4 (채널 1개)</th><th>DDR5 (서브채널 1개)</th><th>DDR5 (DIMM 합계)</th></tr></thead>
+    <tbody>
+      <tr><td>데이터</td><td class="num">64 bit</td><td class="num">32 bit</td><td class="num">64 bit</td></tr>
+      <tr><td>ECC (사이드밴드)</td><td class="num">8 bit</td><td class="num">8 bit</td><td class="num">16 bit</td></tr>
+      <tr><td>전체 폭</td><td class="num">72 bit</td><td class="num">40 bit</td><td class="num">80 bit</td></tr>
+      <tr><td><strong>ECC 오버헤드</strong></td><td class="num">12.5 %</td><td class="num"><strong>25 %</strong></td><td class="num">25 %</td></tr>
+      <tr><td>CA 버스</td><td>공용 1조</td><td class="num">14 신호 (SDR)</td><td>2조 (독립)</td></tr>
+      <tr><td>명령 전송</td><td>1 사이클</td><td colspan="2">1 또는 2 사이클 — CA 폭을 줄인 대가</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="caveat"><p>ECC 구성은 모듈 종류에 따라 서브채널당 36-bit(32+4)를 쓰는 경우도 있다.
+  표의 40-bit는 서버 RDIMM의 일반적 구성이다.<sup class="rf">20</sup></p></div>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 284" role="img" aria-label="DDR4의 64비트 단일 채널과 DDR5의 32비트 서브채널 2개 구조 비교. 양쪽 모두 버스트당 64바이트이지만 DDR5는 두 개의 독립 요청을 동시에 처리한다">
+      <text x="20" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">DDR1 – DDR4 · 64-bit 단일 채널</text>
+      <rect x="20" y="40" width="410" height="182" rx="3" fill="none" stroke="currentColor" stroke-width="1" opacity=".3" stroke-dasharray="3 3"></rect>
+      <rect x="44" y="66" width="110" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="99" y="122" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">메모리</text>
+      <text x="99" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">컨트롤러</text>
+      <rect x="182" y="112" width="146" height="38" rx="2" stroke="currentColor" stroke-width="1.4" style="fill:var(--surface-3)"></rect>
+      <text x="255" y="136" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="currentColor">64 bit · BL8</text>
+      <line x1="154" y1="131" x2="182" y2="131" stroke="currentColor" stroke-width="1.6"></line>
+      <line x1="328" y1="131" x2="356" y2="131" stroke="currentColor" stroke-width="1.6"></line>
+      <rect x="356" y="66" width="52" height="130" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="382" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">D</text>
+      <text x="382" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">I</text>
+      <text x="382" y="158" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">M</text>
+      <text x="382" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">M</text>
+      <text x="225" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" opacity=".7">64 bit × 8 = 64 byte</text>
+      <text x="44" y="212" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor" opacity=".8">동시 진행 가능한 독립 요청: <tspan font-family="IBM Plex Mono, monospace" font-weight="600">1</tspan></text>
+
+      <line x1="450" y1="30" x2="450" y2="256" stroke="currentColor" stroke-width="1" opacity=".25"></line>
+
+      <text x="470" y="22" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" style="fill:var(--accent)">DDR5 · 32-bit 서브채널 2개</text>
+      <rect x="470" y="40" width="410" height="182" rx="3" fill="none" stroke-width="1" opacity=".45" stroke-dasharray="3 3" style="stroke:var(--accent)"></rect>
+      <rect x="494" y="66" width="110" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <text x="549" y="122" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">메모리</text>
+      <text x="549" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">컨트롤러</text>
+      <rect x="632" y="76" width="146" height="38" rx="2" stroke-width="1.6" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="705" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" style="fill:var(--accent-ink)">32 bit · BL16</text>
+      <rect x="632" y="148" width="146" height="38" rx="2" stroke-width="1.6" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="705" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" style="fill:var(--accent-ink)">32 bit · BL16</text>
+      <g stroke-width="1.6" fill="none" style="stroke:var(--accent)">
+        <path d="M604,131 L618,131 L618,95 L632,95"></path>
+        <path d="M604,131 L618,131 L618,167 L632,167"></path>
+        <path d="M778,95 L792,95 L792,131 L806,131"></path>
+        <path d="M778,167 L792,167 L792,131"></path>
+      </g>
+      <rect x="806" y="66" width="52" height="130" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="832" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">D</text>
+      <text x="832" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">I</text>
+      <text x="832" y="158" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">M</text>
+      <text x="832" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">M</text>
+      <text x="705" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".7">각 32 bit × 16 = 64 byte</text>
+      <text x="494" y="212" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" style="fill:var(--accent-ink)">동시 진행 가능한 독립 요청: <tspan font-family="IBM Plex Mono, monospace" font-weight="700">2</tspan></text>
+
+      <text x="20" y="248" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">버스트당 페이로드는 양쪽 다 64 byte로 동일하다. 바뀐 것은 그 64 byte를 만드는 갈래의 수다.</text>
+      <text x="20" y="270" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">DDR5의 on-die ECC는 다이 내부 오류 정정일 뿐, 서버용 시스템 ECC(모듈 레벨)를 대체하지 않는다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 12 · DDR5가 채널을 쪼갠 이유</b>
+      프리페치를 16n으로 올리면서도 버스트 페이로드를 캐시라인(64 byte)에 고정하려면 데이터 폭을 절반으로
+      줄여야 했다. 부산물로 얻은 것이 <strong>서브채널 병렬성</strong>이다.</figcaption>
+  </figure>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 340" role="img" aria-label="DDR4 DIMM은 9개 칩이 하나의 CA 버스를 공유하고, DDR5 DIMM은 5개씩 두 그룹으로 나뉘어 각자의 CA 버스를 가지며 중앙에 PMIC와 SPD 허브, RCD가 배치된다">
+      <text x="20" y="28" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">DDR4 DIMM — 288핀 · 채널 1개</text>
+      <rect x="30" y="42" width="840" height="96" rx="3" stroke="currentColor" stroke-width="1.4" style="fill:var(--surface-2)"></rect>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".8">
+        <rect x="112" y="56" width="60" height="40" rx="2"></rect><rect x="188" y="56" width="60" height="40" rx="2"></rect>
+        <rect x="264" y="56" width="60" height="40" rx="2"></rect><rect x="340" y="56" width="60" height="40" rx="2"></rect>
+        <rect x="416" y="56" width="60" height="40" rx="2"></rect><rect x="492" y="56" width="60" height="40" rx="2"></rect>
+        <rect x="568" y="56" width="60" height="40" rx="2"></rect><rect x="644" y="56" width="60" height="40" rx="2"></rect>
+      </g>
+      <rect x="720" y="56" width="60" height="40" rx="2" fill="none" stroke-width="1.6" style="stroke:var(--signal)"></rect>
+      <text x="750" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--signal)">ECC</text>
+      <text x="142" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".7">x8</text>
+      <rect x="112" y="106" width="668" height="10" rx="2" style="fill:var(--g4)"></rect>
+      <text x="446" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">CA / CS / CK 공용 — 한 번에 하나의 명령</text>
+      <g stroke="currentColor" stroke-width="1.6" opacity=".45">
+        <line x1="120" y1="138" x2="120" y2="146"></line><line x1="160" y1="138" x2="160" y2="146"></line>
+        <line x1="200" y1="138" x2="200" y2="146"></line><line x1="240" y1="138" x2="240" y2="146"></line>
+        <line x1="700" y1="138" x2="700" y2="146"></line><line x1="740" y1="138" x2="740" y2="146"></line>
+        <line x1="780" y1="138" x2="780" y2="146"></line>
+      </g>
+      <text x="30" y="160" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">DQ[63:0] + CB[7:0] = 72 bit</text>
+
+      <text x="20" y="204" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" style="fill:var(--accent)">DDR5 DIMM — 288핀 · 서브채널 2개</text>
+      <rect x="30" y="218" width="840" height="96" rx="3" stroke-width="1.4" style="fill:var(--surface-2);stroke:var(--accent)"></rect>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".8">
+        <rect x="50" y="232" width="60" height="40" rx="2"></rect><rect x="118" y="232" width="60" height="40" rx="2"></rect>
+        <rect x="186" y="232" width="60" height="40" rx="2"></rect><rect x="254" y="232" width="60" height="40" rx="2"></rect>
+      </g>
+      <rect x="322" y="232" width="60" height="40" rx="2" fill="none" stroke-width="1.6" style="stroke:var(--signal)"></rect>
+      <text x="352" y="256" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--signal)">ECC</text>
+
+      <rect x="390" y="228" width="44" height="48" rx="2" stroke-width="1.6" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="412" y="250" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" style="fill:var(--signal)">PMIC</text>
+      <text x="412" y="262" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7.5" style="fill:var(--signal)">§09</text>
+      <rect x="438" y="228" width="32" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"></rect>
+      <text x="454" y="250" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="currentColor">SPD</text>
+      <text x="454" y="260" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="currentColor">Hub</text>
+      <rect x="474" y="228" width="42" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"></rect>
+      <text x="495" y="250" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="currentColor">RCD</text>
+      <text x="495" y="260" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7.5" fill="currentColor">/CKD</text>
+
+      <rect x="530" y="232" width="60" height="40" rx="2" fill="none" stroke-width="1.6" style="stroke:var(--signal)"></rect>
+      <text x="560" y="256" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--signal)">ECC</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".8">
+        <rect x="598" y="232" width="60" height="40" rx="2"></rect><rect x="666" y="232" width="60" height="40" rx="2"></rect>
+        <rect x="734" y="232" width="60" height="40" rx="2"></rect><rect x="802" y="232" width="60" height="40" rx="2"></rect>
+      </g>
+      <rect x="50" y="282" width="332" height="10" rx="2" style="fill:var(--g3)"></rect>
+      <rect x="530" y="282" width="332" height="10" rx="2" style="fill:var(--g6)"></rect>
+      <text x="216" y="306" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">서브채널 A · CA_A / CS_A / CK_A</text>
+      <text x="696" y="306" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">서브채널 B · CA_B / CS_B / CK_B</text>
+      <g stroke-width="1.6" opacity=".55" style="stroke:var(--accent)">
+        <line x1="60" y1="314" x2="60" y2="322"></line><line x1="100" y1="314" x2="100" y2="322"></line>
+        <line x1="140" y1="314" x2="140" y2="322"></line><line x1="780" y1="314" x2="780" y2="322"></line>
+        <line x1="820" y1="314" x2="820" y2="322"></line><line x1="860" y1="314" x2="860" y2="322"></line>
+      </g>
+      <text x="30" y="336" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">40 bit (A) + 40 bit (B) = 80 bit — DDR4의 72 bit보다 ECC 몫이 8 bit 더 든다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 13 · 같은 288핀, 다른 배분</b>
+      DDR5 모듈이 좌우 5칩씩 갈라지고 가운데에 부품이 몰려 있는 물리적 배치는 우연이 아니라
+      서브채널 경계 그 자체다. 중앙 부품군은 §09에서 다룬다.</figcaption>
+  </figure>
+
+  <h3>실효 이득은 어디서 나오는가 — 큐가 막히지 않는다</h3>
+  <p>단일 채널에서는 명령이 하나씩만 발행된다. 앞선 요청이 뱅크 충돌이나 리프레시로 지연되면 뒤의 요청이
+  전부 대기한다(head-of-line blocking). 서브채널이 둘이면 서로 다른 큐가 독립적으로 진행한다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 286" role="img" aria-label="네 개의 요청을 단일 채널과 두 서브채널에서 처리하는 타임라인 비교. 단일 채널은 순차 처리로 총 시간이 길고 서브채널 두 개는 병렬로 처리해 절반 가까이 단축된다">
+      <g stroke="currentColor" stroke-width="1" opacity=".12">
+        <line x1="150" y1="40" x2="150" y2="250"></line><line x1="330" y1="40" x2="330" y2="250"></line>
+        <line x1="510" y1="40" x2="510" y2="250"></line><line x1="690" y1="40" x2="690" y2="250"></line>
+        <line x1="870" y1="40" x2="870" y2="250"></line>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">
+        <text x="150" y="34">0</text><text x="330" y="34">t</text><text x="510" y="34">2t</text>
+        <text x="690" y="34">3t</text><text x="870" y="34">4t</text>
+      </g>
+
+      <text x="20" y="62" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="currentColor" opacity=".62">DDR4 · 채널 1개</text>
+      <text x="20" y="92" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">CH</text>
+      <rect x="150" y="78" width="180" height="26" rx="2" style="fill:var(--g4)"></rect>
+      <text x="240" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R1</text>
+      <rect x="330" y="78" width="180" height="26" rx="2" opacity=".82" style="fill:var(--g4)"></rect>
+      <text x="420" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R2 (대기 후)</text>
+      <rect x="510" y="78" width="180" height="26" rx="2" opacity=".64" style="fill:var(--g4)"></rect>
+      <text x="600" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R3</text>
+      <rect x="690" y="78" width="180" height="26" rx="2" opacity=".46" style="fill:var(--g4)"></rect>
+      <text x="780" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R4</text>
+      <line x1="150" y1="118" x2="870" y2="118" stroke-width="1.4" style="stroke:var(--danger)"></line>
+      <text x="510" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" style="fill:var(--danger)">4개 요청 완료 = 4t</text>
+
+      <line x1="20" y1="152" x2="880" y2="152" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+
+      <text x="20" y="178" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" style="fill:var(--accent)">DDR5 · 서브채널 2개</text>
+      <text x="20" y="208" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">SC-A</text>
+      <rect x="150" y="194" width="180" height="26" rx="2" style="fill:var(--g3)"></rect>
+      <text x="240" y="212" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R1</text>
+      <rect x="330" y="194" width="180" height="26" rx="2" opacity=".72" style="fill:var(--g3)"></rect>
+      <text x="420" y="212" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R3</text>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">SC-B</text>
+      <rect x="150" y="226" width="180" height="26" rx="2" style="fill:var(--g6)"></rect>
+      <text x="240" y="244" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R2</text>
+      <rect x="330" y="226" width="180" height="26" rx="2" opacity=".72" style="fill:var(--g6)"></rect>
+      <text x="420" y="244" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A1C">R4</text>
+      <line x1="150" y1="264" x2="510" y2="264" stroke-width="1.8" style="stroke:var(--accent)"></line>
+      <text x="330" y="280" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" style="fill:var(--accent-ink)">4개 요청 완료 = 2t</text>
+      <text x="560" y="280" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">단, 두 요청이 같은 서브채널에 몰리면 이득은 사라진다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 14 · 큐가 둘이면 앞이 막혀도 뒤가 간다</b>
+      DDR5의 실측 성능 향상이 클럭 상승분을 초과하는 구간은 대부분 이 병렬성에서 나온다.
+      반대로 접근 패턴이 한쪽 서브채널에 쏠리면 이득은 0이다.</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="lbl">대가</span>
+    <p><strong>ECC 오버헤드가 12.5%에서 25%로 두 배가 됐다.</strong> 32-bit 데이터를 보호하는 데도 8-bit 패리티가
+    필요하기 때문이다. 서버 모듈 기준으로 같은 용량을 위해 더 많은 다이를 실어야 한다는 뜻이고,
+    이것이 DDR5 서버 메모리 단가 구조의 한 축이다.</p>
+    <p>또한 CA 버스가 두 벌 필요해졌다. 288핀을 유지하려면 서브채널당 CA 신호를 14개로 줄여야 했고,
+    그 대가로 일부 명령은 <strong>2 사이클에 걸쳐</strong> 전송된다 — 명령 발행 지연이 늘어난다.</p>
+  </div>
+</section>
+
+<section id="m4">
+  <div class="sec-head">
+    <div class="sec-num">§ 09</div>
+    <h2>전압 조정 — 전원 공급을 메인보드에서 모듈로 옮겼다</h2>
+    <p>DDR5 슬롯에 들어가는 것은 12 V뿐이다. 1.1 V를 만드는 일은 모듈이 스스로 한다.</p>
+  </div>
+
+  <p>DDR4까지 메인보드의 VRM이 1.2 V(VDD)와 2.5 V(VPP)를 만들어 슬롯으로 배급했다. DDR5는 이 구조를 버렸다.
+  메인보드는 <strong>12 V만</strong> 공급하고, DIMM 위의 <strong>PMIC(Power Management IC)</strong>가
+  VDD 1.1 V, VDDQ 1.1 V, VPP 1.8 V, VDDSPD 1.8 V를 모듈 위에서 직접 생성한다.<sup class="rf">18,19</sup></p>
+
+  <h3>왜 12 V인가 — 전류의 문제다</h3>
+  <p>이유는 신호 무결성보다 훨씬 단순한 산술에 있다. 전력이 같다면 전압을 10배 올리면 전류는 1/10이 된다.
+  커넥터 핀 하나가 흘릴 수 있는 전류에는 물리적 한계가 있고, DDR5 세대에서 저전압 직결 방식은 그 한계에 부딪혔다.</p>
+
+  <div class="eq">
+    모듈 소비 전력 ≈ 10 W 라고 하면 —<br>
+    DDR4 방식: I = 10 W ÷ 1.2 V = <b>8.3 A</b> 가 커넥터를 통과<br>
+    DDR5 방식: I = 10 W ÷ 12 V &nbsp;= <b>0.83 A</b> 가 커넥터를 통과 &nbsp;&nbsp;<span style="opacity:.6">(1/10)</span>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 296" role="img" aria-label="DDR4는 메인보드 VRM이 1.2V를 만들어 긴 배선으로 슬롯에 공급하고, DDR5는 12V만 슬롯에 보내 모듈 위 PMIC가 1.1V를 만든다">
+      <defs>
+        <marker id="pw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">DDR4 — 메인보드가 최종 전압까지 만든다</text>
+      <rect x="20" y="38" width="410" height="106" rx="3" fill="none" stroke="currentColor" stroke-width="1" opacity=".3" stroke-dasharray="3 3"></rect>
+      <rect x="36" y="62" width="84" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+      <text x="78" y="84" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">보드 VRM</text>
+      <text x="78" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">1.2 V 생성</text>
+      <line x1="120" y1="88" x2="250" y2="88" stroke-width="5" marker-end="url(#pw)" style="stroke:var(--danger)"></line>
+      <text x="185" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" style="fill:var(--danger)">8.3 A</text>
+      <text x="185" y="108" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".55">긴 배선 · IR drop</text>
+      <rect x="254" y="62" width="30" height="52" rx="2" stroke="currentColor" stroke-width="1.2" style="fill:var(--surface-3)"></rect>
+      <text x="269" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".6">슬롯</text>
+      <rect x="292" y="62" width="122" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+      <text x="353" y="84" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">DIMM</text>
+      <text x="353" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".7">DRAM만 실장</text>
+
+      <line x1="450" y1="30" x2="450" y2="270" stroke="currentColor" stroke-width="1" opacity=".25"></line>
+
+      <text x="470" y="24" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" style="fill:var(--accent)">DDR5 — 모듈이 최종 전압을 만든다</text>
+      <rect x="470" y="38" width="410" height="106" rx="3" fill="none" stroke-width="1" opacity=".45" stroke-dasharray="3 3" style="stroke:var(--accent)"></rect>
+      <rect x="486" y="62" width="84" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+      <text x="528" y="84" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">보드 12 V</text>
+      <text x="528" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".7">벌크 레일</text>
+      <line x1="570" y1="88" x2="656" y2="88" stroke-width="2" marker-end="url(#pw)" style="stroke:var(--accent)"></line>
+      <text x="613" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" style="fill:var(--accent-ink)">0.83 A</text>
+      <rect x="660" y="62" width="30" height="52" rx="2" stroke="currentColor" stroke-width="1.2" style="fill:var(--surface-3)"></rect>
+      <text x="675" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".6">슬롯</text>
+      <rect x="698" y="62" width="166" height="52" rx="3" fill="none" stroke-width="1.5" style="stroke:var(--accent)"></rect>
+      <rect x="708" y="72" width="46" height="32" rx="2" stroke-width="1.6" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="731" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" font-weight="600" style="fill:var(--signal)">PMIC</text>
+      <line x1="754" y1="88" x2="782" y2="88" stroke-width="3" marker-end="url(#pw)" style="stroke:var(--signal)"></line>
+      <text x="824" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">DRAM</text>
+      <text x="824" y="98" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".6">1.1 V · 짧은 경로</text>
+
+      <line x1="20" y1="164" x2="880" y2="164" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="188" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">PMIC 출력 레일</text>
+      <rect x="20" y="200" width="66" height="34" rx="3" stroke-width="1.6" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="53" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600" style="fill:var(--signal)">12 V IN</text>
+      <g fill="none" stroke-width="1.3" style="stroke:var(--signal)">
+        <path d="M86,217 L110,217 L110,204 L142,204"></path>
+        <path d="M86,217 L110,217 L110,232 L142,232"></path>
+        <path d="M86,217 L110,217 L110,260 L142,260"></path>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+        <text x="150" y="208">VDD 1.1 V</text><text x="278" y="208" opacity=".6">DRAM 코어</text>
+        <text x="150" y="236">VDDQ 1.1 V</text><text x="278" y="236" opacity=".6">I/O 드라이버</text>
+        <text x="150" y="264">VPP 1.8 V</text><text x="278" y="264" opacity=".6">워드라인 승압</text>
+        <text x="440" y="208">VDDSPD 1.8 V</text><text x="580" y="208" opacity=".6">SPD Hub · 온도센서</text>
+        <text x="440" y="236">Vref ≈ 0.5 × VDDQ</text><text x="580" y="236" opacity=".6">저잡음 기준 전압</text>
+        <text x="440" y="264" style="fill:var(--accent-ink)">I2C / I3C 텔레메트리</text><text x="580" y="264" opacity=".6">전압·전류·온도·폴트 보고</text>
+      </g>
+      <text x="20" y="290" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">DDR4의 VPP는 2.5 V였다. DDR5는 이를 1.8 V로 낮추면서 모든 레일을 모듈 위로 옮겼다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 15 · 전원 경로와 레일 트리</b>
+      12 V 전환의 1차 동기는 커넥터 전류 감소다. 짧아진 전원 경로에서 얻는 노이즈·IR drop 개선은
+      그 결과로 따라온 이득이다.<sup class="rf">18,19</sup></figcaption>
+  </figure>
+
+  <h3>모듈로 함께 이사한 것들</h3>
+  <p>PMIC 혼자 옮겨간 것이 아니다. DDR5 DIMM 중앙에는 최소 세 종류의 능동 부품이 모여 있다.</p>
+
+  <div class="tbl">
+  <table>
+    <caption>표 3 · DDR4 → DDR5 모듈 실장 부품 변화</caption>
+    <thead><tr><th>부품</th><th>DDR4</th><th>DDR5</th><th>역할과 파급</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PMIC</strong></td><td><span class="tag no">없음</span></td><td><span class="tag on">필수</span></td>
+        <td>12 V → VDD/VDDQ/VPP/VDDSPD 변환, 과전류·과전압·과온 보호. 제조사가 전압 상한을 잠그면 오버클럭 범위가 제한된다.</td></tr>
+      <tr><td><strong>SPD Hub</strong></td><td>SPD EEPROM</td><td><span class="tag on">Hub로 대체</span></td>
+        <td>단순 EEPROM에서 I3C 허브로 승격. 호스트–모듈 사이드밴드 통신의 관문.</td></tr>
+      <tr><td><strong>온도 센서(TS)</strong></td><td>선택</td><td><span class="tag on">2개 표준</span></td>
+        <td>모듈 양쪽 온도를 독립 측정. 리프레시율·스로틀링 제어의 입력.</td></tr>
+      <tr><td><strong>RCD / CKD</strong></td><td>RDIMM만 RCD</td><td>RDIMM: RCD<br>UDIMM 6400+: <span class="tag on">CKD</span></td>
+        <td>클럭·명령 재구동. 6,400 MT/s 이상 클라이언트 모듈에서도 능동 소자가 필수가 됐다.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="verdict">
+    <span class="lbl">대가</span>
+    <p>메인보드 원가가 모듈 원가로 이동했다. DIMM 한 장에 PMIC·SPD Hub·온도센서·(경우에 따라)CKD가 실리면서
+    <strong>모듈 BOM이 구조적으로 비싸졌고</strong>, 초기 DDR5 세대에서는 PMIC 품질 편차가 모듈 안정성 문제로
+    직결됐다. 오버클럭 관점에서는 PMIC의 전압 잠금 여부가 모듈 선택 기준이 됐다 — DDR4에는 없던 변수다.</p>
+  </div>
+</section>
+
+<section id="m5">
+  <div class="sec-head">
+    <div class="sec-num">§ 10</div>
+    <h2>on-die ECC — 신뢰성 기능이 아니라 수율 기능이다</h2>
+    <p>DDR5의 on-die ECC는 “드디어 소비자용 ECC 메모리”라는 뜻이 아니다. 정반대에 가깝다.</p>
+  </div>
+
+  <h3>구조: (136, 128) SEC</h3>
+  <p>DDR5는 JEDEC 강제 사항으로 모든 다이가 on-die ECC를 갖는다. 방식은
+  <strong>128비트 데이터 + 8비트 패리티 = 136비트 코드워드</strong>의 SEC(Single Error Correction) 해밍 코드다.<sup class="rf">15,16</sup>
+  쓰기 시 다이 내부에서 패리티를 계산해 함께 저장하고, 읽기 시 신드롬을 계산해 단일 비트 오류를 정정한 뒤
+  DQ 핀으로 내보낸다.</p>
+
+  <p>여기서 §06의 숫자가 되돌아온다. x8 디바이스의 프리페치 16n은 한 번의 컬럼 액세스에서
+  8 DQ × 16 = <strong>128비트</strong>를 끌어올린다. on-die ECC 코드워드가 128비트인 것은 우연이 아니라,
+  <em>한 번의 내부 접근 단위와 정확히 맞춘 것</em>이다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 240" role="img" aria-label="128비트 데이터와 8비트 패리티가 136비트 코드워드를 이루는 구조. 쓰기 때 인코딩하고 읽기 때 신드롬으로 1비트를 정정하지만 2비트 오류는 검출하지 못한다">
+      <defs>
+        <marker id="ec" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <text x="20" y="26" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">코드워드 구조</text>
+      <g style="fill:var(--g3)">
+        <rect x="20" y="40" width="46" height="30" rx="1"></rect><rect x="70" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="120" y="40" width="46" height="30" rx="1"></rect><rect x="170" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="220" y="40" width="46" height="30" rx="1"></rect><rect x="270" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="320" y="40" width="46" height="30" rx="1"></rect><rect x="370" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="420" y="40" width="46" height="30" rx="1"></rect><rect x="470" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="520" y="40" width="46" height="30" rx="1"></rect><rect x="570" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="620" y="40" width="46" height="30" rx="1"></rect><rect x="670" y="40" width="46" height="30" rx="1"></rect>
+        <rect x="720" y="40" width="46" height="30" rx="1"></rect><rect x="770" y="40" width="46" height="30" rx="1"></rect>
+      </g>
+      <rect x="824" y="40" width="46" height="30" rx="1" style="fill:var(--signal)"></rect>
+      <text x="847" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600" fill="#0F1A1C">8b</text>
+            <line x1="20" y1="80" x2="816" y2="80" stroke="currentColor" stroke-width="1.2"></line>
+      <line x1="824" y1="80" x2="870" y2="80" stroke-width="1.2" style="stroke:var(--signal)"></line>
+      <text x="418" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".78">데이터 128 bit (8 bit × 16) = x8 디바이스 프리페치 16n 1회분</text>
+      <text x="847" y="96" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--signal)">패리티</text>
+      <text x="20" y="118" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">코드워드 = 136 bit · 오버헤드 6.25 %</text>
+
+      <line x1="20" y1="136" x2="880" y2="136" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+
+      <rect x="20" y="152" width="132" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="86" y="170" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">쓰기</text>
+      <text x="86" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".65">패리티 인코딩</text>
+      <line x1="152" y1="173" x2="196" y2="173" stroke="currentColor" stroke-width="1.5" marker-end="url(#ec)"></line>
+      <rect x="200" y="152" width="132" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="266" y="170" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">셀 저장</text>
+      <text x="266" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".65">리텐션 · 소프트에러</text>
+      <line x1="332" y1="173" x2="376" y2="173" stroke="currentColor" stroke-width="1.5" marker-end="url(#ec)"></line>
+      <rect x="380" y="152" width="132" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+      <text x="446" y="170" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">읽기</text>
+      <text x="446" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".65">신드롬 계산</text>
+      <line x1="512" y1="173" x2="556" y2="173" stroke="currentColor" stroke-width="1.5" marker-end="url(#ec)"></line>
+      <rect x="560" y="146" width="150" height="26" rx="3" stroke-width="1.5" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="635" y="163" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--accent-ink)">1 bit 오류 → 정정 ✓</text>
+      <rect x="560" y="178" width="150" height="26" rx="3" stroke-width="1.5" style="fill:var(--danger-wash);stroke:var(--danger)"></rect>
+      <text x="635" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" style="fill:var(--danger)">2 bit 오류 → 검출 불가</text>
+      <text x="726" y="163" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">호스트에 보고 없음</text>
+      <text x="726" y="195" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">신드롬 별칭 → 오정정 위험</text>
+
+      <text x="20" y="228" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">8 bit 패리티로 128 bit를 보호하면 SEC는 되지만 DED(2비트 검출)는 성립하지 않는다 — 해밍 거리가 모자란다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 16 · (136,128) SEC의 능력과 한계</b>
+      단일 비트는 조용히 정정된다. 2비트 오류에서는 신드롬이 다른 비트로 “별칭(alias)”되어
+      멀쩡한 비트를 뒤집을 수도 있다.<sup class="rf">16</sup></figcaption>
+  </figure>
+
+  <h3>결정적 한계 — 커버 구간이 다이 내부뿐이다</h3>
+  <p>이것이 on-die ECC를 오해하게 만드는 핵심이다. 정정은 <strong>DQ 핀으로 나가기 전에</strong> 끝난다.
+  그 이후 구간 — 모듈 PCB 배선, 커넥터 골드핑거, 메인보드 트레이스, 메모리 컨트롤러 수신단 — 에서 발생한
+  오류는 on-die ECC가 존재조차 모른다. 서버용 사이드밴드 ECC는 컨트롤러가 검사하므로 이 전 구간을 덮는다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 300" role="img" aria-label="데이터 경로 위에 on-die ECC의 커버 구간은 셀부터 다이 내부까지로 짧고, 시스템 사이드밴드 ECC는 셀부터 메모리 컨트롤러까지 전 구간을 덮는다">
+      <defs>
+        <marker id="cv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <text x="20" y="26" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="currentColor" opacity=".62">읽기 데이터 경로</text>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="20" y="44" width="118" height="48" rx="3"></rect>
+        <rect x="158" y="44" width="118" height="48" rx="3"></rect>
+        <rect x="296" y="44" width="118" height="48" rx="3"></rect>
+        <rect x="434" y="44" width="118" height="48" rx="3"></rect>
+        <rect x="572" y="44" width="118" height="48" rx="3"></rect>
+        <rect x="710" y="44" width="160" height="48" rx="3"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" font-weight="600" fill="currentColor">
+        <text x="79" y="66">셀 어레이</text><text x="217" y="66">센스앰프</text><text x="355" y="66">on-die ECC</text>
+        <text x="493" y="66">출력 FIFO</text><text x="631" y="66">DQ 핀</text><text x="790" y="66">메모리 컨트롤러</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity=".6">
+        <text x="79" y="82">리텐션 페일</text><text x="217" y="82">판정 마진</text><text x="355" y="82">신드롬 정정</text>
+        <text x="493" y="82">직렬화</text><text x="631" y="82">PCB · 커넥터</text><text x="790" y="82">최종 수신</text>
+      </g>
+      <g stroke="currentColor" stroke-width="1.4" marker-end="url(#cv)">
+        <line x1="138" y1="68" x2="154" y2="68"></line><line x1="276" y1="68" x2="292" y2="68"></line>
+        <line x1="414" y1="68" x2="430" y2="68"></line><line x1="552" y1="68" x2="568" y2="68"></line>
+        <line x1="690" y1="68" x2="706" y2="68"></line>
+      </g>
+
+      <rect x="20" y="118" width="394" height="30" rx="3" stroke-width="1.8" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
+      <text x="217" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--accent-ink)">on-die ECC 커버 구간</text>
+      <rect x="414" y="118" width="456" height="30" rx="3" fill="none" stroke-width="1.8" stroke-dasharray="5 4" style="stroke:var(--danger)"></rect>
+      <text x="642" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--danger)">on-die ECC 사각지대 — 아무도 검사하지 않는다</text>
+
+      <rect x="20" y="164" width="850" height="30" rx="3" stroke-width="1.8" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="445" y="184" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--signal)">시스템(사이드밴드) ECC 커버 구간 — 서버 모듈에만 존재</text>
+
+      <line x1="20" y1="216" x2="880" y2="216" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="240" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
+        소비자용 DDR5 UDIMM은 <tspan font-weight="600" style="fill:var(--accent-ink)">파란 구간만</tspan> 갖는다.
+        <tspan style="fill:var(--danger)">붉은 구간의 오류는 그대로 CPU에 전달된다.</tspan></text>
+      <text x="20" y="262" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
+        서버용 ECC RDIMM은 여기에 <tspan font-weight="600" style="fill:var(--signal)">주황 구간</tspan>이 추가로 얹힌다 — 서브채널당 8 bit의 추가 폭을 지불하고서.</text>
+      <text x="20" y="288" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">on-die ECC는 미세 공정에서 무너진 셀 수율을 다이 안에서 흡수하는 장치이지, 시스템 신뢰성 기능이 아니다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 17 · 두 ECC가 덮는 구간은 겹치지 않는다</b>
+      이 그림이 “DDR5 = ECC 메모리” 주장에 대한 답이다. 두 기능은 목적도, 관측 지점도, 보고 경로도 다르다.</figcaption>
+  </figure>
+
+  <div class="mf">
+    <div class="m"><div class="h">흔한 오해</div>
+      <p>“DDR5는 전부 ECC라서 서버 메모리를 따로 살 필요가 없다.”</p></div>
+    <div class="f"><div class="h">실제</div>
+      <p>on-die ECC는 다이 내부 오류만 정정하고 호스트에 보고하지 않는다. 버스·커넥터·컨트롤러 경로는 무방비다.
+      서버 ECC는 여전히 별도의 8-bit 폭과 컨트롤러 지원을 요구한다.</p></div>
+    <div class="m"><div class="h">흔한 오해</div>
+      <p>“on-die ECC가 있으니 메모리 오류를 감지할 수 있다.”</p></div>
+    <div class="f"><div class="h">실제</div>
+      <p>기본 동작에서 정정 사실은 호스트에 통보되지 않는다. 오류율 상승이 <strong>숨겨진 채</strong> 진행되다가
+      SEC 능력을 넘어서는 순간 정정 불가 오류로 표면화된다. DDR5의 ECS(Error Check and Scrub)가 이를 부분적으로 보완한다.</p></div>
+    <div class="m"><div class="h">흔한 오해</div>
+      <p>“on-die ECC가 row hammer도 막아준다.”</p></div>
+    <div class="f"><div class="h">실제</div>
+      <p>row hammer는 인접 행에서 다중 비트를 뒤집는다. SEC 한 개로는 무력하다.
+      JEDEC이 JESD79-5C에서 별도의 row hammer 대응 기능을 추가한 이유가 이것이다.</p></div>
+  </div>
+
+  <h3>왜 강제됐는가</h3>
+  <p>1x nm급 이하로 내려가면서 셀 커패시터 용량이 줄었다. 저장 전하가 작아지면 리텐션 시간이 짧아지고,
+  알파 입자·중성자에 의한 소프트 에러 감수성이 올라간다. 다이 하나에 완벽한 셀만 담으려면 수율이 무너진다.
+  <strong>on-die ECC는 이 문제를 다이 안에서 흡수해 “합격품”의 정의를 넓히는 장치</strong>다.
+  사용자에게 주는 신뢰성 향상은 부수 효과이고, 제조사에게 주는 수율 향상이 1차 동기다.</p>
+
+  <div class="verdict d">
+    <span class="lbl">냉정한 결론</span>
+    <p>on-die ECC는 DDR5가 <em>더 안전해졌다</em>는 증거가 아니라, <strong>안전장치 없이는 만들 수 없을 만큼
+    셀이 취약해졌다</strong>는 증거다. 같은 논리가 §06의 프리페치, §08의 채널 분할에도 적용된다 —
+    DDR5의 새 기능 대부분은 능력의 확장이 아니라 <strong>한계에 대한 보상</strong>이다.</p>
+  </div>
+</section>
+
+<section id="chain">
+  <div class="sec-head">
+    <div class="sec-num">§ 11</div>
+    <h2>다섯 항목은 하나의 사슬이다</h2>
+    <p>대조표에서 나란히 놓인 다섯 행은 병렬 항목이 아니라 인과 순서다.</p>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 320" role="img" aria-label="DRAM 셀이 빨라지지 않는다는 전제에서 프리페치 16n, 버스트 페이로드 문제, 채널 32비트 분할, 전력 재설계, on-die ECC 강제로 이어지는 인과 사슬 도표">
+      <defs>
+        <marker id="ch" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+        </marker>
+      </defs>
+      <rect x="20" y="30" width="860" height="46" rx="3" stroke="currentColor" stroke-width="1.6" style="fill:var(--surface-2)"></rect>
+      <text x="450" y="52" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="13.5" font-weight="700" fill="currentColor">전제 · DRAM 셀 어레이는 25년째 빨라지지 않는다 (tCAS ≈ 12–15 ns 고정)</text>
+      <text x="450" y="68" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">동시에, 미세화로 셀은 점점 취약해진다</text>
+
+      <line x1="200" y1="76" x2="200" y2="104" stroke="currentColor" stroke-width="1.4" marker-end="url(#ch)"></line>
+      <line x1="740" y1="76" x2="740" y2="230" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ch)"></line>
+
+      <rect x="20" y="108" width="184" height="62" rx="3" style="fill:var(--g1)"></rect>
+      <text x="112" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">§ 06</text>
+      <text x="112" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="700" fill="#0F1A1C">프리페치 16n</text>
+      <text x="112" y="164" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">한 번에 128 bit 인출</text>
+      <line x1="204" y1="139" x2="228" y2="139" stroke="currentColor" stroke-width="1.6" marker-end="url(#ch)"></line>
+
+      <rect x="232" y="108" width="184" height="62" rx="3" style="fill:var(--g2)"></rect>
+      <text x="324" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">§ 07</text>
+      <text x="324" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="700" fill="#0F1A1C">BL16 = 8 tCK</text>
+      <text x="324" y="164" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">64 bit면 128 byte 초과</text>
+      <line x1="416" y1="139" x2="440" y2="139" stroke="currentColor" stroke-width="1.6" marker-end="url(#ch)"></line>
+
+      <rect x="444" y="108" width="184" height="62" rx="3" style="fill:var(--g3)"></rect>
+      <text x="536" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">§ 08</text>
+      <text x="536" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="700" fill="#0F1A1C">32-bit × 2 분할</text>
+      <text x="536" y="164" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">64 byte 유지 + 큐 2개</text>
+      <line x1="628" y1="139" x2="652" y2="139" stroke="currentColor" stroke-width="1.6" marker-end="url(#ch)"></line>
+
+      <rect x="656" y="108" width="224" height="62" rx="3" style="fill:var(--g5)"></rect>
+      <text x="768" y="132" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">§ 09</text>
+      <text x="768" y="150" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="700" fill="#0F1A1C">12 V + 모듈 PMIC</text>
+      <text x="768" y="164" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">핀·전류·노이즈 재설계</text>
+
+      <text x="112" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">지연은 그대로</text>
+      <text x="324" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">입도 커짐</text>
+      <text x="536" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">ECC 폭 25 %</text>
+      <text x="768" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">모듈 BOM 상승</text>
+
+      <rect x="232" y="234" width="396" height="58" rx="3" style="fill:var(--g6)"></rect>
+      <text x="430" y="256" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#0F1A1C">§ 10</text>
+      <text x="430" y="274" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" font-weight="700" fill="#0F1A1C">on-die ECC (136,128) SEC — 강제 사항</text>
+      <text x="430" y="288" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#0F1A1C">코드워드 128 bit = 프리페치 1회분</text>
+      <path d="M112,200 L112,263 L228,263" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ch)"></path>
+      <text x="130" y="228" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">인출 단위를 그대로 코드워드로</text>
+      <text x="648" y="256" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">← 미세화로 인한 셀 취약성이</text>
+      <text x="648" y="270" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">&nbsp;&nbsp;&nbsp;직접 요구한 항목</text>
+
+      <text x="20" y="314" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">주황색 문구는 각 단계가 지불한 대가다. 다섯 항목 어디에도 “셀이 빨라졌다”는 항목은 없다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 18 · 다섯 겹의 인과 사슬</b>
+      §06이 §07을 낳고, §07의 문제가 §08을 강제하며, §08의 전기적 부담이 §09를 요구한다.
+      §10만은 다른 축 — 미세화에 따른 셀 취약화 — 에서 직접 내려오지만, 그 코드워드 크기는 §06이 정한다.</figcaption>
+  </figure>
+
+  <div class="tbl">
+  <table>
+    <caption>표 4 · 다섯 항목 요약</caption>
+    <thead><tr><th>항목</th><th>DDR4</th><th>DDR5</th><th>얻은 것</th><th>지불한 것</th></tr></thead>
+    <tbody>
+      <tr><td><strong>프리페치</strong></td><td class="num">8n</td><td class="num">16n</td>
+        <td>동일 코어 클럭에서 2배 데이터 레이트</td><td>접근 입도 증가, 지연 무개선, 내부 배선 면적</td></tr>
+      <tr><td><strong>버스트 길이</strong></td><td class="num">BL8 / BC4</td><td class="num">BL16 / BC8 / BL32</td>
+        <td>버스트당 64 byte 캐시라인 정합 유지</td><td>BC8이 시간을 절약하지 못함, tCCD_L 공백 관리 필요</td></tr>
+      <tr><td><strong>채널 구조</strong></td><td>64-bit ×1</td><td>32-bit ×2</td>
+        <td>독립 큐 2개, head-of-line blocking 완화</td><td>ECC 오버헤드 12.5 → 25 %, CA 2조, 2사이클 명령</td></tr>
+      <tr><td><strong>전압 조정</strong></td><td>보드 VRM 1.2 V</td><td>모듈 PMIC (12 V 입력)</td>
+        <td>커넥터 전류 1/10, 짧은 전원 경로, 텔레메트리</td><td>모듈 BOM 상승, PMIC 전압 잠금, 초기 품질 편차</td></tr>
+      <tr><td><strong>on-die ECC</strong></td><td><span class="tag no">없음</span></td><td>(136,128) SEC 강제</td>
+        <td>미세 공정 수율 확보, 단일 비트 오류 흡수</td><td>DED 불가, 호스트 미보고, 사각지대 존재, ECC 메모리 아님</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+
+<div class="part">
+  <div class="p-n">부록 · 참고</div>
+  <div class="p-t">DDR1부터의 계보, 그리고 출처</div>
+  <p class="p-d">같은 잣대를 DDR1까지 소급하면 DDR5의 다섯 항목이 새로운 발명이 아니라
+  25년째 반복된 트릭의 최신판임이 드러난다.</p>
+</div>
+<section id="apx">
+  <div class="sec-head">
+    <div class="sec-num">부록</div>
+    <h2>DDR1 → DDR5 계보: 같은 트릭을 다섯 번 반복했다</h2>
+    <p>25년간 데이터 레이트는 22배가 됐다. 같은 기간 DRAM 셀 어레이 클럭은 2.75배에 그쳤다.</p>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>표 4 · DDR 세대 전면 대조</caption>
+    <thead><tr>
+      <th class="stick">항목</th><th>DDR</th><th>DDR2</th><th>DDR3</th><th>DDR4</th><th>DDR5</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stick"><strong>규격 문서</strong></td><td class="num">JESD79</td><td class="num">JESD79-2</td>
+        <td class="num">JESD79-3</td><td class="num">JESD79-4</td><td class="num">JESD79-5</td></tr>
+      <tr><td class="stick">발행</td><td class="num">2000.06</td><td class="num">2003.09</td><td class="num">2007</td>
+        <td class="num">2012.09</td><td class="num">2020.07</td></tr>
+      <tr><td class="stick">공급 전압 (VDD)</td><td class="num">2.5 V</td><td class="num">1.8 V</td><td class="num">1.5 V</td>
+        <td class="num">1.2 V</td><td class="num">1.1 V</td></tr>
+      <tr><td class="stick"><strong>프리페치</strong></td><td class="num">2n</td><td class="num">4n</td><td class="num">8n</td>
+        <td class="num">8n (+뱅크그룹)</td><td class="num"><strong>16n</strong></td></tr>
+      <tr><td class="stick">버스트 길이</td><td class="num">BL2/4</td><td class="num">BL4/8</td><td class="num">BL8</td>
+        <td class="num">BL8</td><td class="num">BL16</td></tr>
+      <tr><td class="stick">데이터 레이트</td><td class="num">200–400</td><td class="num">400–1,066</td><td class="num">800–2,133</td>
+        <td class="num">1,600–3,200</td><td class="num">3,200–8,800</td></tr>
+      <tr><td class="stick">채널 구조</td><td>64-bit ×1</td><td>64-bit ×1</td><td>64-bit ×1</td><td>64-bit ×1</td>
+        <td><strong>32-bit ×2 서브채널</strong></td></tr>
+      <tr><td class="stick">뱅크 구성</td><td class="num">4</td><td class="num">4 / 8</td><td class="num">8</td>
+        <td class="num">16 (4 BG × 4)</td><td class="num">32 (8 BG × 4)</td></tr>
+      <tr><td class="stick">DIMM 핀 수</td><td class="num">184</td><td class="num">240</td><td class="num">240</td>
+        <td class="num">288</td><td class="num">288 (노치 위치 상이)</td></tr>
+      <tr><td class="stick">전압 조정</td><td colspan="4">메인보드 VRM</td><td><strong>모듈 탑재 PMIC (12 V 입력)</strong></td></tr>
+      <tr><td class="stick">on-die ECC</td>
+        <td><span class="tag no">없음</span></td><td><span class="tag no">없음</span></td>
+        <td><span class="tag no">없음</span></td><td><span class="tag no">없음</span></td>
+        <td><span class="tag on">필수</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>A-1. 반복된 트릭 — 코어는 그대로 두고 프리페치를 늘린다</h3>
+  <p>DDR 계보의 성능 향상은 대부분 하나의 아이디어에서 나온다. DRAM 셀 어레이는 물리적으로 빨라지지 않으므로,
+  한 번의 컬럼 접근에서 <em>더 많은 비트를 한꺼번에 꺼내</em> 빠른 I/O로 직렬화한다. 이것이 프리페치이고,
+  <code>데이터 레이트 = 코어 클럭 × 프리페치</code>가 성립한다. 그 메커니즘은 <a href="#m1">§ 06</a>에서 도표 7·8로 자세히 다뤘다.</p>
+
+  
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 360" role="img" aria-label="DDR부터 DDR5까지 데이터 레이트와 셀 어레이 코어 클럭의 로그 스케일 비교. 데이터 레이트는 400에서 8800으로 22배 오르지만 코어 클럭은 200에서 550MHz로 2.75배에 그친다">
+      <g stroke="currentColor" stroke-width="1" opacity=".15">
+        <line x1="90" y1="290" x2="870" y2="290"></line>
+        <line x1="90" y1="165" x2="870" y2="165"></line>
+        <line x1="90" y1="40" x2="870" y2="40"></line>
+      </g>
+      <g text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">
+        <text x="78" y="294">100</text><text x="78" y="169">1,000</text><text x="78" y="44">10,000</text>
+      </g>
+      <text x="26" y="26" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">MT/s · MHz (log)</text>
+
+      <polygon points="100,215 250,177 400,140 550,102 700,64 850,47 850,198 700,215 550,215 400,252 250,252 100,252"
+        opacity=".13" style="fill:var(--signal)"></polygon>
+
+      <polyline points="100,215 250,177 400,140 550,102 700,64 850,47" fill="none" stroke-width="2.6" style="stroke:var(--accent)"></polyline>
+      <polyline points="100,252 250,252 400,252 550,215 700,215 850,198" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4" opacity=".7"></polyline>
+
+      <g style="fill:var(--accent)">
+        <circle cx="100" cy="215" r="5"></circle><circle cx="250" cy="177" r="5"></circle><circle cx="400" cy="140" r="5"></circle>
+        <circle cx="550" cy="102" r="5"></circle><circle cx="700" cy="64" r="5"></circle><circle cx="850" cy="47" r="5"></circle>
+      </g>
+      <g stroke="currentColor" stroke-width="2" style="fill:var(--ground)">
+        <circle cx="100" cy="252" r="4.5"></circle><circle cx="250" cy="252" r="4.5"></circle><circle cx="400" cy="252" r="4.5"></circle>
+        <circle cx="550" cy="215" r="4.5"></circle><circle cx="700" cy="215" r="4.5"></circle><circle cx="850" cy="198" r="4.5"></circle>
+      </g>
+
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" style="fill:var(--accent-ink)">
+        <text x="100" y="203">400</text><text x="250" y="165">800</text><text x="400" y="128">1,600</text>
+        <text x="550" y="90">3,200</text><text x="700" y="52">6,400</text><text x="850" y="35">8,800</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">
+        <text x="100" y="270">200</text><text x="250" y="270">200</text><text x="400" y="270">200</text>
+        <text x="550" y="233">400</text><text x="700" y="233">400</text><text x="850" y="216">550</text>
+      </g>
+      <text x="475" y="180" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600" style="fill:var(--signal)">벌어지는 간격 = 프리페치 배수 (2n → 16n)</text>
+
+      <line x1="90" y1="290" x2="870" y2="290" stroke="currentColor" stroke-width="1.6"></line>
+      <g text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">
+        <text x="100" y="312">DDR</text><text x="250" y="312">DDR2</text><text x="400" y="312">DDR3</text>
+        <text x="550" y="312">DDR4</text><text x="700" y="312">DDR5</text><text x="850" y="312">DDR5 후기</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">
+        <text x="100" y="326">2n</text><text x="250" y="326">4n</text><text x="400" y="326">8n</text>
+        <text x="550" y="326">8n</text><text x="700" y="326">16n</text><text x="850" y="326">16n</text>
+      </g>
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="11">
+        <rect x="90" y="346" width="22" height="3" style="fill:var(--accent)"></rect>
+        <text x="120" y="353" fill="currentColor">데이터 레이트 (MT/s) — 22배</text>
+        <rect x="380" y="346" width="22" height="3" fill="currentColor" opacity=".7"></rect>
+        <text x="410" y="353" fill="currentColor">셀 어레이 코어 클럭 (MHz) — 2.75배</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption><b>도표 19 · 25년간 벌어진 간격</b>
+      두 선 사이의 수직 거리가 곧 프리페치 배수다. DRAM 셀의 물리적 속도가 정체된 상태에서 인터페이스만
+      가속해 왔다는 사실이 DDR 계보 전체를 관통한다.</figcaption>
+  </figure>
+
+  <h3>A-2. DDR5가 유일하게 바꾼 구조 — 채널 분할</h3>
+  <p>DDR1~DDR4는 모두 64-bit 채널 하나였다. DDR5는 프리페치를 16n으로 올리면서 버스트당 데이터가
+  128 byte가 되는 것을 피하기 위해 채널을 32-bit 두 개로 쪼갰다. 결과적으로 <strong>버스트당 64 byte라는
+  캐시라인 정합은 유지되고, 동시에 진행 가능한 독립 접근이 두 개로 늘었다</strong>. DDR5의 실효 성능 향상은
+  클럭보다 이 구조 변경에서 나오는 부분이 크다. 페이로드 산술과 모듈 신호 분할은 <a href="#m3">§ 08</a>의 도표 12·13에서 다뤘다.</p>
+
+  
+
+  <div class="verdict">
+    <span class="lbl">부록 결론</span>
+    <p>DDR1→DDR5는 “메모리가 빨라진 역사”가 아니라 <strong>“느린 셀을 빠른 인터페이스 뒤에 숨겨 온 역사”</strong>다.
+    프리페치 배수는 2n에서 16n으로 8배가 됐고, 다음 세대(DDR6)에서 이 트릭을 또 한 번 쓰려면 버스트당 128 byte가
+    캐시라인과 어긋나는 문제를 다시 풀어야 한다. DDR5가 채널을 쪼갠 것이 그 문제에 대한 첫 답이었다.</p>
+  </div>
+</section>
+
+<section id="refs">
+  <div class="sec-head">
+    <div class="sec-num">출처</div>
+    <h2>참고 문헌</h2>
+    <p>본문의 <sup class="rf">n</sup> 표기와 대응한다. [1]–[14]는 1부, [15]–[24]는 2부에서 인용했다. 검증 불가하거나 2차 보도에 의존한 항목은 본문에 명시했다.</p>
+  </div>
+  <ol class="refs">
+    <li>JEDEC, “JEDEC Publishes New DDR5 Standard for Advancing Next-Generation High Performance Computing Systems”(JESD79-5, 2020.07) — <a href="https://www.jedec.org/news/pressreleases/jedec-publishes-new-ddr5-standard-advancing-next-generation-high-performance">jedec.org</a></li>
+    <li>JEDEC, “JEDEC Publishes Update to DDR5 SDRAM Standard Used in High-Performance Computing Applications”(JESD79-5A, 2021.10.26) — <a href="https://www.jedec.org/news/pressreleases/jedec-publishes-update-ddr5-sdram-standard-used-high-performance-computing">jedec.org</a></li>
+    <li>Tom’s Hardware, “JEDEC Updates DDR5 Standard: Improved Performance and Reliability” — <a href="https://www.tomshardware.com/news/jedec-publishes-jesd79-5a-specification">tomshardware.com</a></li>
+    <li>JEDEC / BusinessWire, “JEDEC Updates JESD79-5C DDR5 SDRAM Standard”(2024.04.17) — 타이밍 정의 6800 → 8800 Mbps 확장 — <a href="https://www.businesswire.com/news/home/20240417886230/en/JEDEC-Updates-JESD79-5C-DDR5-SDRAM-Standard-Elevating-Performance-and-Security-for-Next-Gen-Technologies">businesswire.com</a></li>
+    <li>GlobalSpec 표준 레코드, JESD79-5A(2021.10.01) / JESD79-5B(2022.09.01) — <a href="https://standards.globalspec.com/std/14562454/jesd79-5b">standards.globalspec.com</a></li>
+    <li>TechPowerUp, “JEDEC Updates DDR5 Specification for Increased Security Against Rowhammer Attacks, New DDR5-8800 Reference Speed” — <a href="https://www.techpowerup.com/321808/jedec-updates-ddr5-specification-for-increased-security-against-rowhammer-attacks-new-ddr5-8800-reference-speed">techpowerup.com</a></li>
+    <li>JEDEC JESD79-5D:2025 표준 레코드(2025.11) — <a href="https://www.intertekinform.com/standards/jedec-jesd79-5d-2025-1450100_saig_jedec_jedec_3780502/">intertekinform.com</a></li>
+    <li>JEDEC, “JEDEC Advances DDR5 MRDIMM Ecosystem with New Memory Interface Logic and Expanded MRDIMM Roadmap”(JESD82-552 MDB, Gen2 12,800 MT/s, Gen3 17,600 MT/s) — <a href="https://www.jedec.org/news/pressreleases/jedec%C2%AE-advances-ddr5-mrdimm-ecosystem-new-memory-interface-logic-and-expanded">jedec.org</a></li>
+    <li>Wikipedia, Granite Rapids — DDR5-6400 및 MRDIMM 8800 MT/s 지원 — <a href="https://en.wikipedia.org/wiki/Granite_Rapids">en.wikipedia.org</a></li>
+    <li>KED Global, “SK Hynix unveils industry’s 1st 10-nanometer DDR5”(1c, 8 Gbps, 1b 대비 +11%, 전력효율 +9%) — <a href="https://www.kedglobal.com/korean-chipmakers/newsView/ked202408290009">kedglobal.com</a></li>
+    <li>Micron, “Micron Announces Shipment of 1γ (1-gamma) DRAM”(2025.02.25, EUV, 웨이퍼당 비트 +30%) — <a href="https://investors.micron.com/news-releases/news-release-details/micron-announces-shipment-1g-1-gamma-dram-pioneering-memory">investors.micron.com</a></li>
+    <li>All About Circuits, “Micron Ships its Advanced DRAM 1-beta Node”(2022.11) — <a href="https://www.allaboutcircuits.com/news/micron-ships-its-advanced-dram-1-beta-node-targeting-mobile/">allaboutcircuits.com</a></li>
+    <li>2차 보도(신뢰도 낮음): 삼성 1c 공정 재설계 완료 및 양산 승인(2025.07) 관련 기술 블로그 정리 — <a href="https://cyberraiden.wordpress.com/2026/08/22/samsungs-1c-1%CE%B3-1-gamma-dram-node-the-companys-sixth-generation-10-nm-class-process-technology/">cyberraiden.wordpress.com</a></li>
+    <li>JEDEC, “JEDEC to Launch New Raw Card DIMM Designs with DDR5 Clock Drivers … at 6400 Mbps and Beyond”(JESD323 CUDIMM / JESD324 CSODIMM, 2024.10) — <a href="https://www.businesswire.com/news/home/20241015781979/en/JEDEC-to-Launch-New-Raw-Card-DIMM-Designs-with-DDR5-Clock-Drivers-Enhancing-Client-Computing-Memory-Performance-and-Stability-at-6400-Mbps-and-Beyond">businesswire.com</a></li>
+    <li>Micron, “DDR5 SDRAM: New Features” 백서 — on-die ECC 및 신규 기능 — <a href="https://assets.micron.com/adobe/assets/urn:aaid:aem:5ea148c8-e3fe-489e-8489-99b1b9cdcd3c/renditions/original/as/ddr5-new-features-white-paper.pdf">micron.com</a></li>
+    <li>ATP, “DDR5 ECC Explained: On-Die ECC vs Side-Band ECC” — 128 bit + 8 bit SEC 코드워드, 해밍 별칭 — <a href="https://www.atpinc.com/tw/blog/ddr5-what-is-on-die-ecc-how-is-it-different-to-traditional-ecc">atpinc.com</a></li>
+    <li>Rambus, “DDR4 vs DDR5 RAM: All the Design Challenges &amp; Advantages” — 서브채널, BL16, 뱅크그룹 — <a href="https://www.rambus.com/blogs/get-ready-for-ddr5-dimm-chipsets/">rambus.com</a></li>
+    <li>Rambus, DDR5 Server / Client PMIC 제품 개요 — <a href="https://www.rambus.com/memory-interface-chips/ddr5-dimm-chipset/ddr5-server-pmics/">rambus.com</a></li>
+    <li>ICNavigator, “DDR5 PMIC (on-DIMM): Rails, Telemetry, Faults &amp; Debug” — VDD/VDDQ 1.1 V, VPP 1.8 V, VDDSPD 1.8 V, Vref — <a href="https://icnavigator.com/applications/data-center-servers/ddr5-pmic-on-dimm/">icnavigator.com</a></li>
+    <li>arXiv, “Single 32-bit Sub-Channel DDR5 DIMMs: Architecture, Performance Bounds, and Standardisation” — 40-bit 서브채널(32 데이터 + 8 ECC) — <a href="https://arxiv.org/abs/2605.08725">arxiv.org</a></li>
+    <li>ATP, “How to Read a DDR5 Datasheet: Key Specs Explained” — BL16 / BC8 / BL32, 뱅크 구성 — <a href="https://www.atpinc.com/blog/ddr5-datasheet-key-specs">atpinc.com</a></li>
+    <li>Micron, “DDR5: Key Module Features” 기술 브리프 — DDR4 대 DDR5 모듈 실장 부품 비교 — <a href="https://www.mouser.com/pdfDocs/ddr5_key_module_features_tech_brief.pdf">mouser.com</a></li>
+    <li>Kingston, “DDR5 Memory Standard” 개요 — 1.1 V, 서브채널, PMIC — <a href="https://www.kingston.com/en/blog/pc-performance/ddr5-overview">kingston.com</a></li>
+    <li>288-Pin DDR5 RDIMM Core Product Description — 모듈 레벨 전원 레일 및 SPD/TS 구성 — <a href="https://www.mouser.com/datasheet/2/671/ddr5_rdimm_core-3310292.pdf">mouser.com</a></li>
+  </ol>
+  <p class="foot">파생 계산에 쓴 식 — 대역폭 = MT/s × 8 byte · tCL(ns) = CL × 2000 ÷ MT/s · 데이터 레이트 = 코어 클럭 × 프리페치 · 전류 I = P ÷ V · 버스트 페이로드 = 버스 폭 × BL ÷ 8 · 내부 폭 = DQ 폭 × 프리페치. 표와 도표의 모든 수치는 이 여섯 식으로 재검증할 수 있다.</p>
+</section>
+
+
+</div>
