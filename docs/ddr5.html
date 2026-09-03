@@ -208,8 +208,8 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   <div class="meta">
     <span><b>기준일</b> 2026-09-03</span>
     <span><b>기준 규격</b> JESD79-5D (2025.11)</span>
-    <span><b>도표</b> 19점</span>
-    <span><b>출처</b> 24건</span>
+    <span><b>도표</b> 20점</span>
+    <span><b>출처</b> 37건</span>
   </div>
 </header>
 
@@ -222,17 +222,17 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <li><a href="#s2"><span class="i-n">§ 02</span><span class="i-t">축 A · JEDEC 규격 개정</span>
         <span class="i-d">JESD79-5 → -5D, 다섯 번의 문서 교체</span></a></li>
       <li><a href="#s3"><span class="i-n">§ 03</span><span class="i-t">축 B · 속도 등급 6세대</span>
-        <span class="i-d">4,800 → 8,800 MT/s, CKD 전환점과 MRDIMM</span></a></li>
+        <span class="i-d">4,800 → 8,800 MT/s, 플랫폼 채택, CKD와 CAMM2</span></a></li>
       <li><a href="#s4"><span class="i-n">§ 04</span><span class="i-t">축 C · 공정 노드 6세대</span>
-        <span class="i-d">1x → 1c, 확인된 공개 이벤트만</span></a></li>
+        <span class="i-d">1x → 1c, EUV 전환, 다이 밀도와 용량</span></a></li>
       <li><a href="#s5"><span class="i-n">§ 05</span><span class="i-t">개선되지 않은 것</span>
         <span class="i-d">대역폭 +83%, 절대 지연은 평탄</span></a></li>
     </ol>
     <h4>부록</h4>
     <ol>
       <li><a href="#apx"><span class="i-n">A</span><span class="i-t">DDR1 → DDR5 계보</span>
-        <span class="i-d">데이터 레이트 22배, 코어 클럭 2.75배</span></a></li>
-      <li><a href="#refs"><span class="i-n">R</span><span class="i-t">출처 24건</span>
+        <span class="i-d">데이터 레이트 22배, 코어 클럭 2.75배 · DDR6 전망</span></a></li>
+      <li><a href="#refs"><span class="i-n">R</span><span class="i-t">출처 37건</span>
         <span class="i-d">본문 위첨자 번호와 대응</span></a></li>
     </ol>
   </div>
@@ -251,6 +251,8 @@ tbody tr:hover td.stick{background:var(--surface-2)}
         <span class="i-d">(136,128) SEC. ECC 메모리가 아닌 이유</span></a></li>
       <li><a href="#chain"><span class="i-n">§ 11</span><span class="i-t">다섯 겹의 인과 사슬</span>
         <span class="i-d">병렬 항목이 아니라 인과 순서다</span></a></li>
+      <li><a href="#extra"><span class="i-n">§ 12</span><span class="i-t">사슬 밖의 기능들</span>
+        <span class="i-d">DFE · CRC · REFsb · RFM/PRAC · ECS · 루프백</span></a></li>
     </ol>
   </div>
 </nav>
@@ -363,6 +365,10 @@ tbody tr:hover td.stick{background:var(--surface-2)}
     <p>세 축 중 축 B(속도 등급)만이 6단계가 시장에서 실제로 제품으로 구현됐고, 축 A는 5개, 축 C는 DDR5 이전 세대까지 포함해 6개다.
     “DDR5 6세대”를 말할 때 대부분의 문헌은 축 B를 뜻한다.</p>
   </div>
+
+  <div class="caveat"><p>범위 주의 — LPDDR5/5X(JESD209-5), LPDDR6(JESD209-6, 2025.07 발행), GDDR6/7, HBM3/3E는 각각 별도 규격이며
+  “DDR5 세대”와 무관하다. 특히 LPDDR6는 6세대 계열에서 가장 먼저 발행된 규격이지만 DDR6가 아니다.<sup class="rf">36</sup>
+  또한 시장에서 통용되는 다이 리비전 표기(A-die, M-die 등)는 제조사 내부 개정 번호이지 세대가 아니며, 이 문서는 다루지 않는다.</p></div>
 </section>
 
 <section id="s2">
@@ -631,16 +637,24 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <tr><td class="stick">코어(어레이) 클럭</td><td class="num">300 MHz</td><td class="num">350</td><td class="num">400</td>
         <td class="num">450</td><td class="num">500</td><td class="num">550</td></tr>
       <tr><td class="stick">규격 근거</td><td class="num">JESD79-5</td><td class="num">-5A</td><td class="num">-5A</td>
-        <td class="num">-5B</td><td class="num">-5C</td><td class="num">-5C</td></tr>
+        <td class="num">-5C</td><td class="num">-5C</td><td class="num">-5C</td></tr>
       <tr><td class="stick">모듈 CKD</td>
         <td><span class="tag no">불필요</span></td><td><span class="tag no">불필요</span></td>
         <td><span class="tag on">필수</span></td><td><span class="tag on">필수</span></td>
         <td><span class="tag on">필수</span></td><td><span class="tag on">필수</span></td></tr>
       <tr><td class="stick">대표 모듈</td><td>UDIMM / RDIMM</td><td>UDIMM / RDIMM</td><td>CUDIMM / RDIMM</td>
         <td>CUDIMM</td><td>CUDIMM (XMP·EXPO)</td><td><strong>MRDIMM Gen1</strong></td></tr>
-      <tr><td class="stick">대표 서버 플랫폼</td><td>Sapphire Rapids<br><span class="tag">2023</span></td>
-        <td>Emerald Rapids<br><span class="tag">2023.12</span></td><td>Granite Rapids<br><span class="tag">2024</span></td>
-        <td>—</td><td>—</td><td>Granite Rapids<br><span class="tag">MRDIMM</span></td></tr>
+      <tr><td class="stick">대표 서버 플랫폼<sup class="rf">9,30,31</sup></td>
+        <td>Sapphire Rapids <span class="tag">2023.01</span><br>EPYC Genoa 12ch <span class="tag">2022.11</span></td>
+        <td>Emerald Rapids <span class="tag">2023.12</span></td>
+        <td>Granite Rapids <span class="tag">2024.09</span><br>EPYC Turin 6,000 <span class="tag">2024.10</span><br><span class="tag">6,400은 1DPC 검증 시스템 한정</span></td>
+        <td>—</td><td>—</td><td>Granite Rapids <span class="tag">MRDIMM Gen1</span></td></tr>
+      <tr><td class="stick">대표 클라이언트 플랫폼<sup class="rf">32–35</sup></td>
+        <td>Alder Lake <span class="tag">2021.11</span><br>Ryzen 7000은 5,200 <span class="tag">2022.09</span></td>
+        <td>Raptor Lake <span class="tag">2022.10</span><br>Ryzen 9000 <span class="tag">2024.08</span></td>
+        <td>Arrow Lake <span class="tag">2024.10</span><br><span class="tag">CUDIMM 한정 · UDIMM은 5,600 유지</span></td>
+        <td>Arrow Lake Refresh<br><span class="tag">CUDIMM 7,200</span></td>
+        <td>XMP · EXPO 영역</td><td>—</td></tr>
       <tr><td class="stick">주 공정 노드</td><td>1z / 1a</td><td>1a / 1b</td><td>1b</td><td>1b</td><td>1b / 1c</td><td>1c</td></tr>
     </tbody>
   </table>
@@ -649,6 +663,18 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   <div class="caveat"><p>코어 클럭과 I/O 클럭 행은 <code>데이터레이트 ÷ 프리페치(16n)</code>, <code>데이터레이트 ÷ 2</code>로
   계산한 값이다. 실제 제품의 tCK와 내부 분주는 제조사 데이터시트를 확인해야 한다.
   “주 공정 노드” 행은 시장 출하 시점의 지배적 노드를 근사한 것으로, 제조사별로 한 세대 이상 차이가 난다.</p></div>
+
+  <div class="caveat"><p>JEDEC 빈은 3,200부터 8,800까지 <strong>400 MT/s 간격, 15단계</strong>로 정의된다. 본문의 6세대는 그중
+  플랫폼이 공식 채택한 800 MT/s 간격의 여섯 등급을 고른 것이며, 5,200(Ryzen 7000)·6,000(EPYC Turin) 같은 중간 빈은
+  인접 세대 사이에 놓인다. “세대”는 규격의 구분이 아니라 채택의 구분이다.</p></div>
+
+  <h3>네 번째 축 — 폼팩터: UDIMM에서 CUDIMM, 그리고 CAMM2</h3>
+  <p>속도·규격·공정과 별개로 폼팩터도 DDR5 안에서 세대를 이뤘다. UDIMM/SODIMM(Gen 1~2) → CKD를 얹은
+  CUDIMM/CSODIMM(Gen 3~, JESD323/324)<sup class="rf">14</sup> → 압착식 커넥터 <strong>CAMM2</strong>(JESD318, 2023.12).
+  CAMM2는 DDR5와 LPDDR5/5X를 하나의 커넥터 규격으로 묶되 핀아웃과 장착 방식을 의도적으로 다르게 해 오장착을 막는다.
+  DDR5 CAMM2는 고성능 노트북과 메인스트림 데스크톱, LPDDR5/5X CAMM2는 범용 노트북과 일부 서버 세그먼트를 겨냥하며,
+  SODIMM 대비 57% 얇고 한 면에 최대 128 GB를 싣는다는 것이 JEDEC의 설명이다.<sup class="rf">29</sup>
+  즉 같은 “DDR5-6400”이라도 UDIMM·CUDIMM·CAMM2는 서로 다른 세대의 물건이다.</p>
 </section>
 
 <section id="s4">
@@ -663,9 +689,14 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   달성 가능한 동작 속도 상승을 뜻한다. 여기서 중요한 사실 하나 — <strong>노드 번호가 나노미터 수치가 아니다</strong>.
   1a와 1c 사이의 실제 하프피치 차이는 공개되지 않으며, 제조사 간 같은 알파벳이 같은 밀도를 뜻하지도 않는다.</p>
 
+  <p>리소그래피 전환 시점도 제조사마다 다르다. 삼성은 2020년 3월 업계 최초 EUV DRAM을 출하한 뒤 2021년 10월
+  14nm(1a) DDR5에 <strong>EUV 5개 층</strong>을 적용해 양산에 들어갔고 — 웨이퍼 생산성 약 20% 향상, 전력 약 20% 절감,
+  최대 7.2 Gbps<sup class="rf">25</sup> — 마이크론은 1α·1β를 DUV 멀티패터닝으로 버티다 1γ에서야 EUV를 채택했다.<sup class="rf">11,12</sup>
+  “같은 알파벳 세대 = 같은 리소그래피”가 아니라는 뜻이다.</p>
+
   <figure>
     <div class="fig-scroll">
-    <svg viewBox="0 0 900 218" role="img" aria-label="2020년부터 2026년까지 DRAM 공정 노드 관련 공개 이벤트 타임라인. 마이크론 1알파 2021년 1월, 1베타 2022년 11월, SK하이닉스 1c 2024년 8월, 마이크론 1감마 2025년 2월, 삼성 1c 2025년 7월">
+    <svg viewBox="0 0 900 262" role="img" aria-label="2020년부터 2026년까지 DRAM 공정 노드 관련 공개 이벤트 타임라인. 마이크론 1알파 2021년 1월, 삼성 14nm EUV DDR5 양산 2021년 10월, 마이크론 1베타 2022년 11월, SK하이닉스 1c 2024년 8월, 마이크론 1감마 2025년 2월, 삼성 1c 2025년 7월">
       <line x1="70" y1="170" x2="860" y2="170" stroke="currentColor" stroke-width="1.6"></line>
       <g stroke="currentColor" stroke-width="1" opacity=".45">
         <line x1="70" y1="170" x2="70" y2="177"></line><line x1="191" y1="170" x2="191" y2="177"></line>
@@ -707,10 +738,15 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="715" y="46" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--accent-ink)">Micron 1γ 샘플(2025.02, EUV) / Samsung 1c 양산 승인(2025.07)</text>
       <text x="715" y="32" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">6세대 노드 3사 진입 구간</text>
 
-      <text x="70" y="214" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">공개 확인된 이벤트만 표기. 양산 램프업 시점은 별도.</text>
+      <line x1="288" y1="176" x2="288" y2="226" stroke="currentColor" stroke-width="1" opacity=".5"></line>
+      <circle cx="288" cy="170" r="5" style="fill:var(--g3)"></circle>
+      <text x="288" y="241" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="currentColor">Samsung 14nm(1a) EUV DDR5 양산</text>
+      <text x="288" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">2021.10 · EUV 5개 층 · 최대 7.2 Gbps</text>
+      <text x="860" y="256" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">공개 확인된 이벤트만 표기. 양산 램프업 시점은 별도.</text>
     </svg>
     </div>
     <figcaption><b>도표 5 · 6세대 노드 진입 타임라인</b>
+      삼성은 2021년 10월 1a(14nm) DDR5에 EUV를 먼저 적용했고<sup class="rf">25</sup>, 마이크론은 1γ에서야 EUV로 넘어갔다.
       1γ/1c 진입이 2024년 하반기~2025년에 3사에서 동시에 일어났다. 이 구간이 DDR5 후기 세대(8,000 MT/s 이상)와
       대용량 다이의 공급 기반이다.<sup class="rf">10–13</sup></figcaption>
   </figure>
@@ -728,10 +764,12 @@ tbody tr:hover td.stick{background:var(--surface-2)}
         <td>DDR4 주력 노드.</td></tr>
       <tr><td class="stick"><strong>3세대</strong></td><td class="num">1z</td><td class="num">~2019–20</td><td>DUV</td>
         <td>DDR5 초기(4,800 MT/s) 물량의 출발점.</td></tr>
-      <tr><td class="stick"><strong>4세대</strong></td><td class="num">1a / 1α</td><td class="num">2021</td><td>DUV(마이크론) / EUV 도입 시작</td>
-        <td>마이크론 1α 볼륨 출하 2021.01, EUV 대신 계산 리소그래피와 멀티패터닝 사용.<sup class="rf">12</sup></td></tr>
+      <tr><td class="stick"><strong>4세대</strong></td><td class="num">1a / 1α</td><td class="num">2021</td><td>DUV(마이크론) / EUV 5개 층(삼성)</td>
+        <td>마이크론 1α 볼륨 출하 2021.01, EUV 대신 계산 리소그래피와 멀티패터닝 사용.<sup class="rf">12</sup>
+        삼성 14nm EUV DDR5 양산 2021.10.12, 최대 7.2 Gbps.<sup class="rf">25</sup></td></tr>
       <tr><td class="stick"><strong>5세대</strong></td><td class="num">1b / 1β</td><td class="num">2022–23</td><td>DUV(마이크론 기준 최종)</td>
-        <td>마이크론 1β 퀄 샘플 2022.11.<sup class="rf">12</sup> DDR5 5,600~6,400 MT/s 대량 공급의 주 노드.</td></tr>
+        <td>마이크론 1β 퀄 샘플 2022.11.<sup class="rf">12</sup> 삼성 12nm급 16Gb 양산 2023.05, 12nm급 32Gb 개발 2023.09.<sup class="rf">26</sup>
+        DDR5 5,600~6,400 MT/s 대량 공급의 주 노드.</td></tr>
       <tr><td class="stick"><strong>6세대</strong></td><td class="num">1c / 1γ</td><td class="num">2024–25</td><td>EUV</td>
         <td>SK하이닉스 1c DDR5 개발 발표 2024.08(8 Gbps, 1b 대비 속도 +11%, 전력효율 +9% 이상)<sup class="rf">10</sup>;
         마이크론 1γ 업계 최초 샘플 출하 2025.02.25, EUV 적용, 웨이퍼당 비트 30% 이상 증가.<sup class="rf">11</sup></td></tr>
@@ -741,6 +779,87 @@ tbody tr:hover td.stick{background:var(--surface-2)}
 
   <div class="caveat"><p>삼성전자의 1c 관련 시점(2025년 7월 재설계 완료·양산 승인)은 1차 자료가 아닌 2차 보도에 기반한다.
   이 항목은 다른 항목보다 신뢰도가 낮다고 보아야 한다.<sup class="rf">13</sup></p></div>
+
+  <h3>축 D — 다이 밀도와 모듈 용량: 세대 표기에 숨은 또 하나의 축</h3>
+  <p>공정 노드가 한 단계 내려갈 때마다 다이 밀도도 올라왔다. 16 Gb에서 출발한 DDR5 다이는 24 Gb, 32 Gb로 커졌고,
+  JEDEC 규격은 64 Gb까지 정의한다. 모듈 용량은 <code>다이 밀도 × 다이 수 ÷ 8</code>이라는 산술로 결정되므로,
+  같은 랭크 구성에서 밀도가 1.5배면 용량도 1.5배다. 24 Gb 다이가 만든 <strong>24 / 48 / 96 GB의 “비이진(non-binary)” 용량</strong>이
+  그 결과이며<sup class="rf">27,28</sup>, 32 Gb 다이는 TSV 적층 없이 128 GB RDIMM을 만들고 1 TB 모듈로 가는 길을 열었다.<sup class="rf">26</sup></p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 900 328" role="img" aria-label="다이 밀도 16, 24, 32 기가비트와 모듈 구성별 다이 수의 곱으로 모듈 용량이 결정되는 행렬. 24기가비트 열은 비이진 용량, 32기가비트 열은 TSV 없이 128기가바이트에 도달한다">
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6" letter-spacing="1.2">
+        <text x="20" y="30">모듈 구성 · 다이 수</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="12" font-weight="600">
+        <text x="360" y="30" fill="currentColor">16 Gb 다이</text>
+        <text x="560" y="30" style="fill:var(--signal)">24 Gb 다이 · 비이진</text>
+        <text x="760" y="30" style="fill:var(--accent-ink)">32 Gb 다이</text>
+      </g>
+      <line x1="20" y1="42" x2="880" y2="42" stroke="currentColor" stroke-width="1" opacity=".3"></line>
+
+      <g font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
+        <text x="20" y="80">1R × x8 UDIMM</text><text x="20" y="134">2R × x8 UDIMM</text>
+        <text x="20" y="188">2R × x4 RDIMM</text><text x="20" y="242">2R × x4 · 2-high 3DS</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">
+        <text x="200" y="80">8 die</text><text x="200" y="134">16 die</text>
+        <text x="200" y="188">32 die</text><text x="200" y="242">64 die · TSV</text>
+      </g>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".7">
+        <rect x="270" y="58" width="180" height="36" rx="2"></rect><rect x="270" y="112" width="180" height="36" rx="2"></rect>
+        <rect x="270" y="166" width="180" height="36" rx="2"></rect><rect x="270" y="220" width="180" height="36" rx="2"></rect>
+      </g>
+      <g stroke-width="1.4" style="fill:var(--signal-wash);stroke:var(--signal)">
+        <rect x="470" y="58" width="180" height="36" rx="2"></rect><rect x="470" y="112" width="180" height="36" rx="2"></rect>
+        <rect x="470" y="166" width="180" height="36" rx="2"></rect><rect x="470" y="220" width="180" height="36" rx="2"></rect>
+      </g>
+      <g stroke-width="1.4" style="fill:var(--accent-wash);stroke:var(--accent)">
+        <rect x="670" y="58" width="180" height="36" rx="2"></rect><rect x="670" y="112" width="180" height="36" rx="2"></rect>
+        <rect x="670" y="166" width="180" height="36" rx="2"></rect><rect x="670" y="220" width="180" height="36" rx="2"></rect>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="currentColor">
+        <text x="360" y="81">16 GB</text><text x="360" y="135">32 GB</text><text x="360" y="189">64 GB</text>
+        <text x="360" y="243" font-weight="700">128 GB</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" style="fill:var(--signal)">
+        <text x="560" y="81">24 GB</text><text x="560" y="135">48 GB</text><text x="560" y="189">96 GB</text><text x="560" y="243">192 GB</text>
+      </g>
+      <g text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" style="fill:var(--accent-ink)">
+        <text x="760" y="81">32 GB</text><text x="760" y="135">64 GB</text>
+        <text x="760" y="189" font-weight="700">128 GB</text><text x="760" y="243">256 GB</text>
+      </g>
+      <g stroke-width="1.6" stroke-dasharray="4 3" style="stroke:var(--signal)">
+        <line x1="322" y1="250" x2="398" y2="250"></line><line x1="722" y1="196" x2="798" y2="196"></line>
+      </g>
+
+      <line x1="20" y1="272" x2="880" y2="272" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="290" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">용량(GB) = 밀도(Gb) × 다이 수 ÷ 8. x4 RDIMM 2랭크 = 32 die, 3DS 2-high는 패키지당 다이 2개. ECC 다이(사이드밴드)는 계산에서 제외.</text>
+      <text x="20" y="304" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--signal)">밑줄 친 두 128 GB — 16 Gb × 64 die(TSV 적층) vs 32 Gb × 32 die(단일 다이): 다이 수 절반, TSV 공정 제거.</text>
+      <text x="20" y="318" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">JEDEC DDR5는 64 Gb 다이까지 정의한다.</text>
+    </svg>
+    </div>
+    <figcaption><b>도표 6 · 용량은 다이 밀도 × 다이 수 — 산술이지 발명이 아니다</b>
+      24 Gb 열이 비이진 용량(24/48/96/192 GB)의 출처이고, 32 Gb 열이 3DS 적층 없이 128 GB RDIMM에 도달한 경로다.
+      같은 128 GB라도 왼쪽 아래(16 Gb × 64 die, TSV)와 오른쪽(32 Gb × 32 die, 단일 다이)은 원가·전력·지연이 다른 물건이다.<sup class="rf">26</sup></figcaption>
+  </figure>
+
+  <div class="tbl">
+  <table>
+    <caption>표 4 · 다이 밀도 세대의 확인된 공개 이벤트</caption>
+    <thead><tr><th>밀도</th><th>확인된 이벤트</th><th>가능해진 모듈</th><th>출처</th></tr></thead>
+    <tbody>
+      <tr><td class="num"><strong>16 Gb</strong></td><td>DDR5 출시 밀도. 1z~1a 노드에서 양산.</td><td>16 / 32 / 64 GB(3DS 128 GB)</td><td class="num">[1]</td></tr>
+      <tr><td class="num"><strong>24 Gb</strong></td><td>SK하이닉스 업계 최초 24 Gb DDR5 샘플 출하(1a, EUV), 48 / 96 GB 모듈 공개; 마이크론 24 / 48 GB 클라이언트 모듈 출시.</td>
+        <td>24 / 48 / 96 GB — 비이진</td><td class="num">[27][28]</td></tr>
+      <tr><td class="num"><strong>32 Gb</strong></td><td>삼성 12nm급 32 Gb 개발 2023.09.01 — TSV 없이 128 GB 모듈, 16 Gb 기반 128 GB 대비 전력 약 10% 절감, 1 TB 모듈 로드맵.</td>
+        <td>32 / 64 GB UDIMM · 128 GB RDIMM(단일 다이)</td><td class="num">[26]</td></tr>
+      <tr><td class="num">64 Gb</td><td>JEDEC 규격 정의 상한. 확인된 양산 발표 없음.</td><td>—</td><td class="num">[1]</td></tr>
+    </tbody>
+  </table>
+  </div>
 </section>
 
 <section id="s5">
@@ -810,7 +929,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       </g>
     </svg>
     </div>
-    <figcaption><b>도표 6 · 대역폭은 오르고 지연은 서 있다</b>
+    <figcaption><b>도표 7 · 대역폭은 오르고 지연은 서 있다</b>
       표준 빈 기준으로 DDR5 Gen1(16.67 ns)은 DDR4-3200(13.75 ns)보다 <strong>21% 느렸고</strong>,
       Gen3(16.25 ns)에서도 DDR4를 회복하지 못했다. 10 ns 아래로 내려간 값은 모두 규격 밖(XMP/EXPO) 빈이다.</figcaption>
   </figure>
@@ -902,7 +1021,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="328" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--accent)">x8 디바이스의 128 bit 내부 폭은 뒤에서 on-die ECC 코드워드 크기와 정확히 일치한다(§ 10).</text>
     </svg>
     </div>
-    <figcaption><b>도표 7 · 프리페치 깊이의 변천</b>
+    <figcaption><b>도표 8 · 프리페치 깊이의 변천</b>
       DDR5 x8 디바이스는 한 번의 컬럼 액세스에서 8 DQ × 16 = <strong>128비트</strong>를 내부에서 끌어올린다.
       이 128이라는 숫자가 §10에서 다시 등장한다.</figcaption>
   </figure>
@@ -963,7 +1082,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="296" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">양쪽 모두 한 번의 버스트가 정확히 64 byte = CPU 캐시라인 하나를 채운다. DDR5는 그것을 두 갈래로 독립 수행한다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 8 · 코어는 그대로, 프리페치만 두 배</b>
+    <figcaption><b>도표 9 · 코어는 그대로, 프리페치만 두 배</b>
       DDR5가 DDR4의 두 배 속도를 내는 직접적 이유. 대가는 한 번의 접근이 가져오는 데이터가 커진다는 것이고,
       그래서 버스 폭을 32-bit로 쪼개 <em>버스트당 64 byte</em>를 유지했다.</figcaption>
   </figure>
@@ -1036,7 +1155,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="284" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">tCCD_L은 ns 단위 하한을 갖기 때문에 속도가 오를수록 tCK 환산값이 커진다. 그림의 12 tCK는 예시다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 9 · 뱅크 그룹이 버스를 채우는 방식</b>
+    <figcaption><b>도표 10 · 뱅크 그룹이 버스를 채우는 방식</b>
       BL16 버스트는 8 tCK를 점유한다. 같은 뱅크그룹을 연속으로 때리면 <code>tCCD_L</code>이 그보다 길어 공백이 생기고,
       그룹을 번갈아 쓰면 <code>tCCD_S</code>(=8 tCK)로 버스트가 맞물린다. DDR5가 뱅크그룹을 8개로 늘린 이유가 이것이다.</figcaption>
   </figure>
@@ -1063,7 +1182,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
 
   <div class="tbl">
   <table>
-    <caption>표 1 · DDR5 버스트 모드</caption>
+    <caption>표 5 · DDR5 버스트 모드</caption>
     <thead><tr><th>모드</th><th>전송 횟수</th><th>점유 시간</th><th>서브채널 페이로드</th><th>용도와 한계</th></tr></thead>
     <tbody>
       <tr><td class="num"><strong>BL16</strong></td><td class="num">16</td><td class="num">8 tCK</td><td class="num">32 bit × 16 = <strong>64 byte</strong></td>
@@ -1143,10 +1262,10 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="700" y="260" font-family="IBM Plex Mono, monospace" font-size="9.5" style="fill:var(--danger)">시간은 그대로</text>
 
       <line x1="20" y1="284" x2="880" y2="284" stroke="currentColor" stroke-width="1" opacity=".2"></line>
-      <text x="20" y="306" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">셀 하나 = 1 전송(클럭 반주기). BL16의 16셀은 정확히 8 tCK를 채운다 — 도표 9의 tCCD_S와 같은 길이다.</text>
+      <text x="20" y="306" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">셀 하나 = 1 전송(클럭 반주기). BL16의 16셀은 정확히 8 tCK를 채운다 — 도표 10의 tCCD_S와 같은 길이다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 10 · 세 가지 버스트가 버스를 쓰는 방식</b>
+    <figcaption><b>도표 11 · 세 가지 버스트가 버스를 쓰는 방식</b>
       BC8은 데이터를 절반만 쓰지만 버스 시간은 대개 그대로 소모한다. “작게 읽으면 빨라진다”는 직관이
       DDR5에서 성립하지 않는 이유다.</figcaption>
   </figure>
@@ -1188,7 +1307,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="262" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">채널 분할은 병렬성을 노린 설계가 아니라, 캐시라인 제약을 지키려다 얻은 결과였다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 11 · 세 가지 안 중 하나만 남았다</b>
+    <figcaption><b>도표 12 · 세 가지 안 중 하나만 남았다</b>
       DDR5의 서브채널 구조는 <strong>병렬성을 목표로 설계된 것이 아니라</strong>, 16n 프리페치와 64 byte 캐시라인을
       동시에 만족시키려다 도출된 해였다. 병렬성은 부산물이다.</figcaption>
   </figure>
@@ -1207,7 +1326,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
 
   <div class="tbl">
   <table>
-    <caption>표 2 · 데이터 폭 구성</caption>
+    <caption>표 6 · 데이터 폭 구성</caption>
     <thead><tr><th>구성</th><th>DDR4 (채널 1개)</th><th>DDR5 (서브채널 1개)</th><th>DDR5 (DIMM 합계)</th></tr></thead>
     <tbody>
       <tr><td>데이터</td><td class="num">64 bit</td><td class="num">32 bit</td><td class="num">64 bit</td></tr>
@@ -1272,7 +1391,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="270" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">DDR5의 on-die ECC는 다이 내부 오류 정정일 뿐, 서버용 시스템 ECC(모듈 레벨)를 대체하지 않는다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 12 · DDR5가 채널을 쪼갠 이유</b>
+    <figcaption><b>도표 13 · DDR5가 채널을 쪼갠 이유</b>
       프리페치를 16n으로 올리면서도 버스트 페이로드를 캐시라인(64 byte)에 고정하려면 데이터 폭을 절반으로
       줄여야 했다. 부산물로 얻은 것이 <strong>서브채널 병렬성</strong>이다.</figcaption>
   </figure>
@@ -1338,7 +1457,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="30" y="336" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">40 bit (A) + 40 bit (B) = 80 bit — DDR4의 72 bit보다 ECC 몫이 8 bit 더 든다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 13 · 같은 288핀, 다른 배분</b>
+    <figcaption><b>도표 14 · 같은 288핀, 다른 배분</b>
       DDR5 모듈이 좌우 5칩씩 갈라지고 가운데에 부품이 몰려 있는 물리적 배치는 우연이 아니라
       서브채널 경계 그 자체다. 중앙 부품군은 §09에서 다룬다.</figcaption>
   </figure>
@@ -1391,7 +1510,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="560" y="280" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">단, 두 요청이 같은 서브채널에 몰리면 이득은 사라진다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 14 · 큐가 둘이면 앞이 막혀도 뒤가 간다</b>
+    <figcaption><b>도표 15 · 큐가 둘이면 앞이 막혀도 뒤가 간다</b>
       DDR5의 실측 성능 향상이 클럭 상승분을 초과하는 구간은 대부분 이 병렬성에서 나온다.
       반대로 접근 패턴이 한쪽 서브채널에 쏠리면 이득은 0이다.</figcaption>
   </figure>
@@ -1487,7 +1606,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="290" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">DDR4의 VPP는 2.5 V였다. DDR5는 이를 1.8 V로 낮추면서 모든 레일을 모듈 위로 옮겼다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 15 · 전원 경로와 레일 트리</b>
+    <figcaption><b>도표 16 · 전원 경로와 레일 트리</b>
       12 V 전환의 1차 동기는 커넥터 전류 감소다. 짧아진 전원 경로에서 얻는 노이즈·IR drop 개선은
       그 결과로 따라온 이득이다.<sup class="rf">18,19</sup></figcaption>
   </figure>
@@ -1497,7 +1616,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
 
   <div class="tbl">
   <table>
-    <caption>표 3 · DDR4 → DDR5 모듈 실장 부품 변화</caption>
+    <caption>표 7 · DDR4 → DDR5 모듈 실장 부품 변화</caption>
     <thead><tr><th>부품</th><th>DDR4</th><th>DDR5</th><th>역할과 파급</th></tr></thead>
     <tbody>
       <tr><td><strong>PMIC</strong></td><td><span class="tag no">없음</span></td><td><span class="tag on">필수</span></td>
@@ -1588,7 +1707,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="228" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">8 bit 패리티로 128 bit를 보호하면 SEC는 되지만 DED(2비트 검출)는 성립하지 않는다 — 해밍 거리가 모자란다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 16 · (136,128) SEC의 능력과 한계</b>
+    <figcaption><b>도표 17 · (136,128) SEC의 능력과 한계</b>
       단일 비트는 조용히 정정된다. 2비트 오류에서는 신드롬이 다른 비트로 “별칭(alias)”되어
       멀쩡한 비트를 뒤집을 수도 있다.<sup class="rf">16</sup></figcaption>
   </figure>
@@ -1598,9 +1717,13 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   그 이후 구간 — 모듈 PCB 배선, 커넥터 골드핑거, 메인보드 트레이스, 메모리 컨트롤러 수신단 — 에서 발생한
   오류는 on-die ECC가 존재조차 모른다. 서버용 사이드밴드 ECC는 컨트롤러가 검사하므로 이 전 구간을 덮는다.</p>
 
+  <p>DDR5가 버스 구간에 마련한 것은 <strong>읽기·쓰기 CRC</strong>다. DDR4의 쓰기 CRC에 읽기 CRC를 더해 양방향 전송 데이터에
+  검사 코드를 붙였다.<sup class="rf">15</sup> 그러나 CRC는 오류를 <em>검출</em>해 재전송을 요구할 뿐 정정하지 않으며,
+  옵션 기능이라 클라이언트 플랫폼에서는 대개 꺼져 있다. “정정 주체가 없는 구간”이라는 판단은 CRC를 감안해도 유지된다.</p>
+
   <figure>
     <div class="fig-scroll">
-    <svg viewBox="0 0 900 300" role="img" aria-label="데이터 경로 위에 on-die ECC의 커버 구간은 셀부터 다이 내부까지로 짧고, 시스템 사이드밴드 ECC는 셀부터 메모리 컨트롤러까지 전 구간을 덮는다">
+    <svg viewBox="0 0 900 336" role="img" aria-label="데이터 경로 위에 on-die ECC의 커버 구간은 셀부터 다이 내부까지로 짧고, 버스 구간은 옵션인 CRC가 검출만 하며, 시스템 사이드밴드 ECC는 셀부터 메모리 컨트롤러까지 전 구간을 덮는다">
       <defs>
         <marker id="cv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
@@ -1633,21 +1756,23 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <rect x="20" y="118" width="394" height="30" rx="3" stroke-width="1.8" style="fill:var(--accent-wash);stroke:var(--accent)"></rect>
       <text x="217" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--accent-ink)">on-die ECC 커버 구간</text>
       <rect x="414" y="118" width="456" height="30" rx="3" fill="none" stroke-width="1.8" stroke-dasharray="5 4" style="stroke:var(--danger)"></rect>
-      <text x="642" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--danger)">on-die ECC 사각지대 — 아무도 검사하지 않는다</text>
+      <text x="642" y="138" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--danger)">on-die ECC 비커버 구간 — 정정 주체 없음</text>
+      <rect x="414" y="156" width="456" height="26" rx="3" fill="none" stroke-width="1.4" stroke-dasharray="3 3" style="stroke:var(--accent)"></rect>
+      <text x="642" y="173" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11" style="fill:var(--accent-ink)">읽기·쓰기 CRC (옵션) — 버스 오류를 검출해 재전송, 정정은 못 한다</text>
 
-      <rect x="20" y="164" width="850" height="30" rx="3" stroke-width="1.8" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
-      <text x="445" y="184" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--signal)">시스템(사이드밴드) ECC 커버 구간 — 서버 모듈에만 존재</text>
+      <rect x="20" y="200" width="850" height="30" rx="3" stroke-width="1.8" style="fill:var(--signal-wash);stroke:var(--signal)"></rect>
+      <text x="445" y="220" text-anchor="middle" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" font-weight="600" style="fill:var(--signal)">시스템(사이드밴드) ECC 커버 구간 — 서버 모듈에만 존재</text>
 
-      <line x1="20" y1="216" x2="880" y2="216" stroke="currentColor" stroke-width="1" opacity=".2"></line>
-      <text x="20" y="240" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
+      <line x1="20" y1="250" x2="880" y2="250" stroke="currentColor" stroke-width="1" opacity=".2"></line>
+      <text x="20" y="274" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
         소비자용 DDR5 UDIMM은 <tspan font-weight="600" style="fill:var(--accent-ink)">파란 구간만</tspan> 갖는다.
-        <tspan style="fill:var(--danger)">붉은 구간의 오류는 그대로 CPU에 전달된다.</tspan></text>
-      <text x="20" y="262" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
+        <tspan style="fill:var(--danger)">붉은 구간의 오류는 CRC를 켜지 않는 한 그대로 CPU에 전달된다.</tspan></text>
+      <text x="20" y="296" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="currentColor">
         서버용 ECC RDIMM은 여기에 <tspan font-weight="600" style="fill:var(--signal)">주황 구간</tspan>이 추가로 얹힌다 — 서브채널당 8 bit의 추가 폭을 지불하고서.</text>
-      <text x="20" y="288" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">on-die ECC는 미세 공정에서 무너진 셀 수율을 다이 안에서 흡수하는 장치이지, 시스템 신뢰성 기능이 아니다.</text>
+      <text x="20" y="322" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">on-die ECC는 미세 공정에서 무너진 셀 수율을 다이 안에서 흡수하는 장치이지, 시스템 신뢰성 기능이 아니다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 17 · 두 ECC가 덮는 구간은 겹치지 않는다</b>
+    <figcaption><b>도표 18 · 두 ECC가 덮는 구간은 겹치지 않는다</b>
       이 그림이 “DDR5 = ECC 메모리” 주장에 대한 답이다. 두 기능은 목적도, 관측 지점도, 보고 경로도 다르다.</figcaption>
   </figure>
 
@@ -1665,8 +1790,9 @@ tbody tr:hover td.stick{background:var(--surface-2)}
     <div class="m"><div class="h">흔한 오해</div>
       <p>“on-die ECC가 row hammer도 막아준다.”</p></div>
     <div class="f"><div class="h">실제</div>
-      <p>row hammer는 인접 행에서 다중 비트를 뒤집는다. SEC 한 개로는 무력하다.
-      JEDEC이 JESD79-5C에서 별도의 row hammer 대응 기능을 추가한 이유가 이것이다.</p></div>
+      <p>row hammer는 인접 행에서 다중 비트를 뒤집는다. SEC 한 개로는 무력하다. DDR5는 처음부터 RFM(Refresh Management)
+      명령을 두었고, JESD79-5C는 워드라인 단위로 활성화 횟수를 세는 <strong>PRAC(Per Row Activation Counting)</strong>을 추가해
+      임계치 초과 시 시스템에 완화 시간을 요구하도록 했다.<sup class="rf">4,6</sup> on-die ECC와는 무관한 별도 메커니즘이다.</p></div>
   </div>
 
   <h3>왜 강제됐는가</h3>
@@ -1745,14 +1871,14 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       <text x="20" y="314" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">주황색 문구는 각 단계가 지불한 대가다. 다섯 항목 어디에도 “셀이 빨라졌다”는 항목은 없다.</text>
     </svg>
     </div>
-    <figcaption><b>도표 18 · 다섯 겹의 인과 사슬</b>
+    <figcaption><b>도표 19 · 다섯 겹의 인과 사슬</b>
       §06이 §07을 낳고, §07의 문제가 §08을 강제하며, §08의 전기적 부담이 §09를 요구한다.
       §10만은 다른 축 — 미세화에 따른 셀 취약화 — 에서 직접 내려오지만, 그 코드워드 크기는 §06이 정한다.</figcaption>
   </figure>
 
   <div class="tbl">
   <table>
-    <caption>표 4 · 다섯 항목 요약</caption>
+    <caption>표 8 · 다섯 항목 요약</caption>
     <thead><tr><th>항목</th><th>DDR4</th><th>DDR5</th><th>얻은 것</th><th>지불한 것</th></tr></thead>
     <tbody>
       <tr><td><strong>프리페치</strong></td><td class="num">8n</td><td class="num">16n</td>
@@ -1770,6 +1896,53 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   </div>
 </section>
 
+<section id="extra">
+  <div class="sec-head">
+    <div class="sec-num">§ 12</div>
+    <h2>사슬 밖의 기능들 — 다섯 겹이 다루지 않은 DDR5 신규 항목</h2>
+    <p>인과 사슬에 직접 걸리지 않지만, 사슬이 만든 문제(신호 무결성·리프레시 부담·보안·은닉 오류)를 뒤에서 받치는 기능들이다.</p>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>표 9 · 그 밖의 DDR5 신규 기능</caption>
+    <thead><tr><th>기능</th><th>무엇을 하는가</th><th>왜 필요해졌는가</th><th>사슬의 어느 단계를 받치는가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>DFE</strong><br><span class="tag">Decision Feedback Equalization</span></td>
+        <td>DRAM 수신단의 다중 탭 결정 궤환 등화기. 반사·크로스토크로 닫힌 DQ 데이터 아이를 DRAM 내부에서 다시 연다.</td>
+        <td>4,800 MT/s 이상에서 채널 손실이 단순 종단(ODT)만으로 감당되지 않는다.</td>
+        <td>§06 · §08 — 프리페치가 끌어올린 I/O 속도의 신호 무결성 비용</td></tr>
+      <tr><td><strong>읽기·쓰기 CRC</strong></td>
+        <td>DQ 버스 전송 데이터에 검사 코드를 붙여 수신측이 검출하고 재전송을 요구한다. DDR4는 쓰기 방향만 있었다.</td>
+        <td>on-die ECC가 버스 구간을 덮지 못한다.</td>
+        <td>§10 — 비커버 구간의 검출 보완(정정은 아님)</td></tr>
+      <tr><td><strong>같은 뱅크 리프레시</strong><br><span class="tag">REFsb</span></td>
+        <td>전 뱅크를 멈추는 REFab 대신 각 뱅크그룹의 같은 번호 뱅크만 리프레시하고, 나머지 뱅크는 계속 동작시킨다.</td>
+        <td>밀도가 오를수록 리프레시 시간(tRFC)이 길어져 대역폭 손실이 커진다.</td>
+        <td>§06 — 8개 뱅크그룹 구조의 두 번째 용도</td></tr>
+      <tr><td><strong>RFM · PRAC</strong></td>
+        <td>활성화 횟수를 추적해 row hammer 임계치 전에 완화 리프레시를 요구한다. PRAC(JESD79-5C)은 행 단위 카운터로 정밀화했다.</td>
+        <td>셀 간격이 좁아져 인접 행 간섭이 커졌다.</td>
+        <td>§10 — SEC가 막지 못하는 다중 비트 오류의 예방</td></tr>
+      <tr><td><strong>ECS</strong><br><span class="tag">Error Check and Scrub</span></td>
+        <td>다이가 주기적으로 자체 읽기 → 정정 → 재기록을 수행하고 오류 카운트를 남긴다.</td>
+        <td>on-die ECC가 정정 사실을 호스트에 알리지 않는다.</td>
+        <td>§10 — 은닉된 오류율의 부분적 가시화</td></tr>
+      <tr><td><strong>루프백 · DQS 오실레이터</strong></td>
+        <td>링크 트레이닝 검증용 루프백 모드와, 전압·온도 변화에 따른 DRAM 내부 지연 드리프트를 감시해 재트레이닝 시점을 알리는 오실레이터.</td>
+        <td>고속에서 타이밍 마진이 피코초 단위로 줄었다.</td>
+        <td>§06 · §09 — 속도와 전원 변동의 결합 효과</td></tr>
+      <tr><td><strong>MRDIMM · CKD</strong><br><span class="tag">모듈 레벨</span></td>
+        <td>링크 속도를 2배로 올리는 멀티플렉스 버퍼(MDB)와 클럭 재구동기(CKD).</td>
+        <td>다이 속도 한계를 모듈에서 우회한다.</td>
+        <td>§08 · §09 — 1부 <a href="#s3">§ 03</a> 도표 3·4 참조</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="caveat"><p>표의 기능은 마이크론 DDR5 신기능 백서와 JEDEC 발표문에 명시된 항목으로 한정했다.<sup class="rf">4,6,15</sup>
+  각 기능의 활성화 여부와 세부 동작은 플랫폼·펌웨어에 따라 다르며, 특히 CRC·ECS·PRAC은 컨트롤러 지원이 있어야 의미가 있다.</p></div>
+</section>
 
 <div class="part">
   <div class="p-n">부록 · 참고</div>
@@ -1786,7 +1959,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
 
   <div class="tbl">
   <table>
-    <caption>표 4 · DDR 세대 전면 대조</caption>
+    <caption>표 10 · DDR 세대 전면 대조</caption>
     <thead><tr>
       <th class="stick">항목</th><th>DDR</th><th>DDR2</th><th>DDR3</th><th>DDR4</th><th>DDR5</th>
     </tr></thead>
@@ -1821,7 +1994,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   <h3>A-1. 반복된 트릭 — 코어는 그대로 두고 프리페치를 늘린다</h3>
   <p>DDR 계보의 성능 향상은 대부분 하나의 아이디어에서 나온다. DRAM 셀 어레이는 물리적으로 빨라지지 않으므로,
   한 번의 컬럼 접근에서 <em>더 많은 비트를 한꺼번에 꺼내</em> 빠른 I/O로 직렬화한다. 이것이 프리페치이고,
-  <code>데이터 레이트 = 코어 클럭 × 프리페치</code>가 성립한다. 그 메커니즘은 <a href="#m1">§ 06</a>에서 도표 7·8로 자세히 다뤘다.</p>
+  <code>데이터 레이트 = 코어 클럭 × 프리페치</code>가 성립한다. 그 메커니즘은 <a href="#m1">§ 06</a>에서 도표 8·9로 자세히 다뤘다.</p>
 
   
 
@@ -1880,7 +2053,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
       </g>
     </svg>
     </div>
-    <figcaption><b>도표 19 · 25년간 벌어진 간격</b>
+    <figcaption><b>도표 20 · 25년간 벌어진 간격</b>
       두 선 사이의 수직 거리가 곧 프리페치 배수다. DRAM 셀의 물리적 속도가 정체된 상태에서 인터페이스만
       가속해 왔다는 사실이 DDR 계보 전체를 관통한다.</figcaption>
   </figure>
@@ -1889,7 +2062,18 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   <p>DDR1~DDR4는 모두 64-bit 채널 하나였다. DDR5는 프리페치를 16n으로 올리면서 버스트당 데이터가
   128 byte가 되는 것을 피하기 위해 채널을 32-bit 두 개로 쪼갰다. 결과적으로 <strong>버스트당 64 byte라는
   캐시라인 정합은 유지되고, 동시에 진행 가능한 독립 접근이 두 개로 늘었다</strong>. DDR5의 실효 성능 향상은
-  클럭보다 이 구조 변경에서 나오는 부분이 크다. 페이로드 산술과 모듈 신호 분할은 <a href="#m3">§ 08</a>의 도표 12·13에서 다뤘다.</p>
+  클럭보다 이 구조 변경에서 나오는 부분이 크다. 페이로드 산술과 모듈 신호 분할은 <a href="#m3">§ 08</a>의 도표 13·14에서 다뤘다.</p>
+
+  <h3>A-3. 다음 칸 — DDR6는 아직 비어 있다</h3>
+  <p>이 문서의 기준일 현재 DDR6(JESD79-6)는 발행되지 않았다. 확인되는 사실은 셋뿐이다.
+  첫째, JEDEC이 2025년 7월 발행한 LPDDR6(JESD209-6)가 6세대 계열의 첫 규격이며 기본 데이터 레이트 10,667~14,400 MT/s를 정의한다.<sup class="rf">36</sup>
+  둘째, 업계 보도는 DDR6가 8,800 MT/s에서 출발해 17,600 MT/s를 목표로 하고, 채널을 <strong>24-bit 서브채널 4개</strong>로 나눈다고 전한다 —
+  DDR5의 32-bit ×2에서 한 번 더 좁힌 구조다.<sup class="rf">37</sup>
+  셋째, 규격 비준은 2026년으로 밀렸고 양산 채택은 2027년 이후로 보도된다.<sup class="rf">37</sup>
+  둘째와 셋째는 규격 발행 전 보도이므로 확정으로 취급해서는 안 된다.</p>
+
+  <div class="caveat"><p>보도가 맞다면 DDR6의 서브채널 폭 축소는 이 문서의 논지 — 셀은 그대로 두고 인터페이스를 쪼개어 가속한다 — 를
+  한 번 더 반복하는 것이다. 아래 부록 결론에서 제기한 128 byte 문제에 대한 DDR6의 답이 “채널을 4개로”라는 뜻이다.</p></div>
 
   
 
@@ -1905,7 +2089,7 @@ tbody tr:hover td.stick{background:var(--surface-2)}
   <div class="sec-head">
     <div class="sec-num">출처</div>
     <h2>참고 문헌</h2>
-    <p>본문의 <sup class="rf">n</sup> 표기와 대응한다. [1]–[14]는 1부, [15]–[24]는 2부에서 인용했다. 검증 불가하거나 2차 보도에 의존한 항목은 본문에 명시했다.</p>
+    <p>본문의 <sup class="rf">n</sup> 표기와 대응한다. [1]–[14]는 1부, [15]–[24]는 2부, [25]–[37]은 검토 보강분(1·2부·부록에 분산)이다. 검증 불가하거나 2차 보도에 의존한 항목은 본문에 명시했다.</p>
   </div>
   <ol class="refs">
     <li>JEDEC, “JEDEC Publishes New DDR5 Standard for Advancing Next-Generation High Performance Computing Systems”(JESD79-5, 2020.07) — <a href="https://www.jedec.org/news/pressreleases/jedec-publishes-new-ddr5-standard-advancing-next-generation-high-performance">jedec.org</a></li>
@@ -1932,6 +2116,19 @@ tbody tr:hover td.stick{background:var(--surface-2)}
     <li>Micron, “DDR5: Key Module Features” 기술 브리프 — DDR4 대 DDR5 모듈 실장 부품 비교 — <a href="https://www.mouser.com/pdfDocs/ddr5_key_module_features_tech_brief.pdf">mouser.com</a></li>
     <li>Kingston, “DDR5 Memory Standard” 개요 — 1.1 V, 서브채널, PMIC — <a href="https://www.kingston.com/en/blog/pc-performance/ddr5-overview">kingston.com</a></li>
     <li>288-Pin DDR5 RDIMM Core Product Description — 모듈 레벨 전원 레일 및 SPD/TS 구성 — <a href="https://www.mouser.com/datasheet/2/671/ddr5_rdimm_core-3310292.pdf">mouser.com</a></li>
+    <li>Samsung Semiconductor Newsroom, “Samsung Starts Mass Production of Most Advanced 14nm EUV DDR5 DRAM”(2021.10.12) — EUV 5개 층, 최대 7.2 Gbps — <a href="https://semiconductor.samsung.com/news-events/news/samsung-starts-mass-production-of-most-advanced-14nm-euv-ddr5-dram/">semiconductor.samsung.com</a></li>
+    <li>Samsung Semiconductor Newsroom, “Samsung Electronics Unveils Industry’s Highest-Capacity 12nm-Class 32Gb DDR5 DRAM”(2023.09.01) — TSV 없는 128 GB, 1 TB 모듈 — <a href="https://news.samsungsemiconductor.com/global/samsung-electronics-unveils-industrys-highest-capacity-12nm-class-32gb-ddr5-dram-ideal-for-the-ai-era/">news.samsungsemiconductor.com</a></li>
+    <li>SK hynix Newsroom, “SK hynix becomes the Industry’s First to Ship 24Gb DDR5 Samples” — <a href="https://news.skhynix.com/en/sk-hynix-becomes-the-industrys-first-to-ship-24gb-ddr5-samples/">news.skhynix.com</a></li>
+    <li>Tom’s Hardware, “Micron Unveils 24GB and 48GB DDR5 Memory Modules” — <a href="https://www.tomshardware.com/news/micron-unveils-24gb-and-48gb-ddr5-memory-modules">tomshardware.com</a></li>
+    <li>JEDEC, “JEDEC Publishes New CAMM2 Memory Module Standard”(JESD318, 2023.12) — <a href="https://www.jedec.org/news/pressreleases/jedec-publishes-new-camm2-memory-module-standard">jedec.org</a></li>
+    <li>Tom’s Hardware, “AMD Confirms Twelve DDR5 Memory Channels For Zen 4 EPYC CPUs”(Genoa, DDR5-4800) — <a href="https://www.tomshardware.com/news/amd-confirms-12-ddr5-memory-channels-on-genoa">tomshardware.com</a></li>
+    <li>Kingston, “AMD 5th Gen EPYC (Turin) Memory Population Rules”(DDR5-6000, 6400은 1DPC 검증 시스템 한정) — <a href="https://www.kingston.com/en/memory/server-memory/turin">kingston.com</a></li>
+    <li>Tom’s Hardware, “Intel’s Arrow Lake official memory speeds are unchanged with standard memory sticks — pricier CUDIMM memory needed for faster base spec” — <a href="https://www.tomshardware.com/pc-components/ram/intels-arrow-lake-official-memory-speeds-are-unchanged-with-standard-memory-sticks-pricier-cudimm-memory-needed-for-faster-base-spec">tomshardware.com</a></li>
+    <li>Tom’s Hardware, “Intel Arrow Lake Refresh CPUs arrive with native DDR5-7200 CUDIMM support” — <a href="https://www.tomshardware.com/pc-components/ram/intel-arrow-lake-refresh-cpus-arrive-with-native-ddr5-7200-cudimm-support-12-5-percent-higher-speeds-than-initial-arrow-lake-chips">tomshardware.com</a></li>
+    <li>PC Gamer, “RAM manufacturer reveals Ryzen 7000 will support DDR5-5200” — <a href="https://www.pcgamer.com/ram-manufacturer-reveals-ryzen-7000-will-support-ddr5-5200/">pcgamer.com</a></li>
+    <li>AMD, Ryzen 5 9600X 제품 사양(시스템 메모리 DDR5-5600) — <a href="https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-5-9600x.html">amd.com</a></li>
+    <li>JEDEC, “JEDEC Releases New LPDDR6 Standard to Enhance Mobile and AI Memory Performance”(JESD209-6, 2025.07) — <a href="https://www.jedec.org/news/pressreleases/jedec%C2%AE-releases-new-lpddr6-standard-enhance-mobile-and-ai-memory-performance">jedec.org</a></li>
+    <li>2차 보도: TrendForce, “DDR6 Set for 2027 Mass Adoption as Memory Giants Reportedly Finalize Prototype Designs”(2025.07) — 규격 발행 전 보도, 확정 아님 — <a href="https://www.trendforce.com/news/2025/07/23/news-ddr6-set-for-2027-mass-adoption-as-memory-giants-reportedly-finalize-prototype-designs/">trendforce.com</a></li>
   </ol>
   <p class="foot">파생 계산에 쓴 식 — 대역폭 = MT/s × 8 byte · tCL(ns) = CL × 2000 ÷ MT/s · 데이터 레이트 = 코어 클럭 × 프리페치 · 전류 I = P ÷ V · 버스트 페이로드 = 버스 폭 × BL ÷ 8 · 내부 폭 = DQ 폭 × 프리페치. 표와 도표의 모든 수치는 이 여섯 식으로 재검증할 수 있다.</p>
 </section>
