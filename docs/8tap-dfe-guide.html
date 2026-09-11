@@ -1,0 +1,1438 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>8탭 DFE 해부도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#E9EDEC; --card:#F7F9F9; --sunk:#DFE5E4;
+  --ink:#14222A; --ink-2:#4A5C66; --ink-3:#7C8C95;
+  --rule:#C7D0D2; --rule-2:#D9E0E1;
+  --sig:#B5531E; --fb:#0E7C7B; --clk:#6B4FA0; --err:#A5271F; --ok:#3D6B46;
+  --sig-w:#F3E2D6; --fb-w:#D9EBEA; --clk-w:#E6DFF2; --err-w:#F3DEDC;
+  --f-head:'Archivo','IBM Plex Sans KR',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F191E; --card:#17242B; --sunk:#131F25;
+    --ink:#E4EBED; --ink-2:#A3B3BA; --ink-3:#7A8C94;
+    --rule:#2B3B44; --rule-2:#223039;
+    --sig:#E3934F; --fb:#45BCB4; --clk:#AE93E0; --err:#E8776C; --ok:#79B383;
+    --sig-w:#33241A; --fb-w:#12302F; --clk-w:#241E33; --err-w:#331D1B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F191E; --card:#17242B; --sunk:#131F25;
+  --ink:#E4EBED; --ink-2:#A3B3BA; --ink-3:#7A8C94;
+  --rule:#2B3B44; --rule-2:#223039;
+  --sig:#E3934F; --fb:#45BCB4; --clk:#AE93E0; --err:#E8776C; --ok:#79B383;
+  --sig-w:#33241A; --fb-w:#12302F; --clk-w:#241E33; --err-w:#331D1B;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:15.5px;line-height:1.78;-webkit-font-smoothing:antialiased;margin:0}
+.wrap{max-width:1210px;margin-inline:auto;padding-inline:clamp(16px,3.6vw,44px)}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink);padding-block:clamp(28px,5vw,54px) 18px}
+.kicker{font-family:var(--f-mono);font-size:11px;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--ink-2);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.kicker .dot{width:5px;height:5px;background:var(--sig);border-radius:50%;display:inline-block}
+h1{font-family:var(--f-head);font-stretch:88%;font-weight:700;
+  font-size:clamp(2.2rem,6.4vw,4.05rem);line-height:1.02;letter-spacing:-.022em;
+  margin:.32em 0 .18em;text-wrap:balance}
+.dek{max-width:60ch;color:var(--ink-2);font-size:clamp(1rem,1.5vw,1.12rem);line-height:1.68;margin:0}
+.mast-meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:22px;
+  font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+.mast-meta b{color:var(--ink-2);font-weight:500}
+
+/* ---------- legend ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:6px 8px;margin:18px 0 0;padding:0;list-style:none}
+.legend li{font-family:var(--f-mono);font-size:11px;letter-spacing:.03em;
+  border:1px solid var(--rule);padding:3px 9px 3px 7px;display:flex;align-items:center;gap:7px;
+  background:var(--card);color:var(--ink-2)}
+.legend i{width:15px;height:0;border-top-width:2.5px;border-top-style:solid;display:inline-block}
+.lg-sig i{border-color:var(--sig)} .lg-fb i{border-color:var(--fb)}
+.lg-clk i{border-color:var(--clk);border-top-style:dashed} .lg-err i{border-color:var(--err)}
+
+/* ---------- layout ---------- */
+.doc{display:grid;grid-template-columns:208px minmax(0,1fr);gap:clamp(26px,4vw,64px);
+  padding-block:clamp(26px,4vw,48px) 80px;align-items:start}
+nav.toc{position:sticky;top:20px;font-family:var(--f-mono);font-size:11.5px;line-height:1.5}
+nav.toc h2{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 12px;font-weight:500;font-family:var(--f-mono)}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+nav.toc a{color:var(--ink-2);text-decoration:none;display:grid;grid-template-columns:22px 1fr;gap:6px}
+nav.toc a span{color:var(--ink-3)}
+nav.toc a:hover{color:var(--sig)} nav.toc a:hover span{color:var(--sig)}
+@media (max-width:900px){
+  .doc{grid-template-columns:1fr;gap:0}
+  nav.toc{position:static;border:1px solid var(--rule);background:var(--card);padding:16px 18px;margin-bottom:34px}
+  nav.toc ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px 18px}
+}
+
+/* ---------- sections ---------- */
+section{padding-block:14px 40px;scroll-margin-top:16px}
+section+section{border-top:1px solid var(--rule-2)}
+.sec-h{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;margin:22px 0 18px}
+.sec-n{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--sig);
+  letter-spacing:.06em;border:1px solid var(--sig);padding:2px 7px;align-self:start;
+  margin-top:.35em;background:var(--sig-w)}
+h2{font-family:var(--f-head);font-stretch:90%;font-weight:700;font-size:clamp(1.42rem,3vw,2.05rem);
+  line-height:1.14;letter-spacing:-.016em;margin:0;text-wrap:balance}
+h3{font-family:var(--f-head);font-stretch:92%;font-weight:600;font-size:1.09rem;line-height:1.35;
+  margin:36px 0 10px;letter-spacing:-.006em;padding-left:11px;border-left:3px solid var(--ink-3)}
+h4{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-2);margin:26px 0 8px;font-weight:500}
+p{max-width:70ch;margin:0 0 15px}
+ul,ol.body{max-width:70ch;padding-left:1.15em;margin:0 0 15px}
+li{margin-bottom:7px}
+strong{font-weight:600}
+em{font-style:normal;background:var(--sig-w);box-shadow:0 -0.36em 0 var(--sig-w) inset;
+  padding:0 .12em;color:var(--ink)}
+code,.m{font-family:var(--f-mono);font-size:.9em;background:var(--sunk);padding:1px 5px;
+  border-radius:2px;white-space:nowrap}
+.lead{font-size:1.05rem;color:var(--ink-2);max-width:66ch}
+a{color:var(--sig);text-underline-offset:2px}
+a:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+
+/* ---------- figures ---------- */
+figure{margin:28px 0 30px;border:1px solid var(--rule);background:var(--card)}
+.fig-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  border-bottom:1px solid var(--rule);padding:7px 13px;font-family:var(--f-mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.fig-hd b{color:var(--ink-2);font-weight:600;letter-spacing:.1em}
+.fig-bd{padding:18px 14px 6px;overflow-x:auto}
+figcaption{padding:0 15px 14px;font-size:13px;line-height:1.62;color:var(--ink-2);max-width:76ch}
+figcaption b{color:var(--ink);font-weight:600}
+figure svg{display:block;width:100%;height:auto;min-width:560px;margin-inline:auto}
+figure svg text{font-family:var(--f-mono);fill:currentColor}
+.fig-bd{color:var(--ink)}
+.n{fill:var(--card);stroke:currentColor;stroke-width:1.4}
+.n2{fill:var(--sunk);stroke:currentColor;stroke-width:1.4}
+.nf{fill:none;stroke:currentColor;stroke-width:1.4}
+.ln{fill:none;stroke:currentColor;stroke-width:1.4}
+.ln-t{fill:none;stroke:currentColor;stroke-width:1;opacity:.42}
+.ln-sig{fill:none;stroke:var(--sig);stroke-width:1.9}
+.ln-fb{fill:none;stroke:var(--fb);stroke-width:1.9}
+.ln-clk{fill:none;stroke:var(--clk);stroke-width:1.6;stroke-dasharray:5 3.5}
+.ln-err{fill:none;stroke:var(--err);stroke-width:1.9}
+.dash{stroke-dasharray:4.5 3.5}
+.bx-sig{fill:var(--sig-w);stroke:var(--sig);stroke-width:1.5}
+.bx-fb{fill:var(--fb-w);stroke:var(--fb);stroke-width:1.5}
+.bx-clk{fill:var(--clk-w);stroke:var(--clk);stroke-width:1.5}
+.bx-err{fill:var(--err-w);stroke:var(--err);stroke-width:1.5}
+.f-sig{fill:var(--sig)} .f-fb{fill:var(--fb)} .f-clk{fill:var(--clk)}
+.f-err{fill:var(--err)} .f-mut{fill:var(--ink-3)} .f-ink{fill:var(--ink)}
+.f-card{fill:var(--card)} .f-sunk{fill:var(--sunk)} .f-none{fill:none}
+.t{font-size:12px} .ts{font-size:10.5px;letter-spacing:.03em} .tb{font-size:12px;font-weight:600}
+.tl{font-size:13.5px;font-weight:600} .tt{font-size:9.5px;letter-spacing:.05em}
+.ctr{text-anchor:middle} .end{text-anchor:end}
+
+/* ---------- callouts ---------- */
+.key{border-left:3px solid var(--sig);background:var(--sig-w);padding:14px 17px;margin:22px 0;max-width:72ch}
+.key p:last-child{margin-bottom:0}
+.key .key-t{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--sig);margin:0 0 6px;font-weight:600}
+.warn{border-left:3px solid var(--err);background:var(--err-w);padding:14px 17px;margin:22px 0;max-width:72ch}
+.warn .key-t{color:var(--err)}
+.warn p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:13.2px;background:var(--card)}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-2);background:var(--sunk);border-bottom:1px solid var(--rule);font-weight:500;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td.num{white-space:nowrap}
+.tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;padding:1px 6px;border:1px solid currentColor;white-space:nowrap}
+.tag-sig{color:var(--sig)} .tag-fb{color:var(--fb)} .tag-err{color:var(--err)}
+.tag-ok{color:var(--ok)} .tag-clk{color:var(--clk)}
+
+/* ---------- equations ---------- */
+.eq{font-family:var(--f-mono);font-size:14px;background:var(--sunk);border-left:3px solid var(--ink-3);
+  padding:13px 16px;margin:18px 0;overflow-x:auto;line-height:1.9;max-width:72ch}
+.eq b{color:var(--sig);font-weight:600}
+.eq .an{color:var(--ink-3);font-size:11.5px}
+
+/* ---------- glossary / refs ---------- */
+dl.gl{margin:0;max-width:74ch;border-top:1px solid var(--rule-2)}
+dl.gl div{display:grid;grid-template-columns:170px minmax(0,1fr);gap:4px 18px;
+  padding:11px 0;border-bottom:1px solid var(--rule-2)}
+dl.gl dt{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink)}
+dl.gl dd{margin:0;font-size:14px;color:var(--ink-2)}
+@media (max-width:600px){dl.gl div{grid-template-columns:1fr;gap:2px}}
+ol.refs{list-style:none;counter-reset:r;padding:0;margin:0;max-width:78ch}
+ol.refs li{counter-increment:r;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--rule-2);font-size:13.4px;line-height:1.6;color:var(--ink-2)}
+ol.refs li::before{content:"[" counter(r) "]";font-family:var(--f-mono);font-size:11.5px;color:var(--sig)}
+ol.refs cite{font-style:normal;color:var(--ink);font-weight:500}
+.vt{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;padding:1px 5px;border:1px solid currentColor;margin-left:6px;white-space:nowrap}
+.v-ok{color:var(--ok)} .v-std{color:var(--ink-3)}
+sup.c{font-family:var(--f-mono);font-size:10.5px;font-weight:500}
+sup.c a{text-decoration:none;padding:0 1px}
+footer{border-top:2px solid var(--ink);padding-block:20px 60px;font-family:var(--f-mono);
+  font-size:11px;letter-spacing:.05em;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:8px 24px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <marker id="mk" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7.5" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" fill="currentColor"/></marker>
+    <marker id="mk-sig" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="5.6" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" class="f-sig"/></marker>
+    <marker id="mk-fb" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="5.6" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" class="f-fb"/></marker>
+    <marker id="mk-clk" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="5.6" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" class="f-clk"/></marker>
+    <marker id="mk-err" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="5.6" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" class="f-err"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header class="mast">
+  <div class="kicker"><span class="dot"></span>WIRELINE RX &nbsp;/&nbsp; 설계 노트 &nbsp;/&nbsp; NRZ 25 Gb/s 기준</div>
+  <h1>8탭 DFE 해부도</h1>
+  <p class="dek">“8탭 DFE에 static latch를 쓰고, full-rate MUX로 summer의 스위치 역할을 시킨다” —
+  이 한 문장이 가리키는 회로를 신호 모델부터 트랜지스터 레벨까지 분해한다.
+  DFE를 처음 보는 사람이 읽어도 각 부품이 <em>왜 거기에 그 형태로 있어야 하는지</em>까지 도달하는 것이 목표다.</p>
+  <ul class="legend">
+    <li class="lg-sig"><i></i>순방향 아날로그 경로 (연속 신호)</li>
+    <li class="lg-fb"><i></i>피드백 경로 (판정된 디지털 비트)</li>
+    <li class="lg-clk"><i></i>클럭</li>
+    <li class="lg-err"><i></i>임계 경로 · 위반 · 오류</li>
+  </ul>
+  <div class="mast-meta">
+    <span><b>대상</b> NRZ 25 Gb/s · 1 UI = 40 ps</span>
+    <span><b>구조</b> half-rate · 1탭 투기 + 7탭 직접</span>
+    <span><b>도면</b> 16</span>
+    <span><b>수치</b> 모두 예시값(illustrative)</span>
+  </div>
+</header>
+
+<div class="doc">
+<nav class="toc" aria-label="목차">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s0"><span>00</span>세 단어 먼저 풀기</a></li>
+    <li><a href="#s1"><span>01</span>왜 DFE인가 — 채널과 커서</a></li>
+    <li><a href="#s2"><span>02</span>DFE의 동작 원리</a></li>
+    <li><a href="#s3"><span>03</span>1 UI 타이밍 예산</a></li>
+    <li><a href="#s4"><span>04</span>1번 탭과 루프 언롤링</a></li>
+    <li><a href="#s5"><span>05</span>Summer — MUX가 스위치인 이유</a></li>
+    <li><a href="#s6"><span>06</span>슬라이서와 Static Latch</a></li>
+    <li><a href="#s7"><span>07</span>Half-rate 8탭 매핑</a></li>
+    <li><a href="#s8"><span>08</span>전체 블록도</a></li>
+    <li><a href="#s9"><span>09</span>계수 적응 (LMS)</a></li>
+    <li><a href="#s10"><span>10</span>고장 모드 체크리스트</a></li>
+    <li><a href="#s11"><span>11</span>PAM-4에서 달라지는 것</a></li>
+    <li><a href="#s12"><span>12</span>용어집</a></li>
+    <li><a href="#s13"><span>13</span>참고문헌</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="s0">
+<div class="sec-h"><span class="sec-n">00</span><h2>세 단어 먼저 풀기</h2></div>
+<p class="lead">들은 문장을 그대로 분해하면 이렇다. 세 용어는 서로 다른 계층의 이야기이고, 그래서 한 문장에 섞여 나오면 헷갈린다.</p>
+
+<div class="tw"><table>
+<thead><tr><th style="width:23%">들은 말</th><th style="width:19%">계층</th><th>실제로 가리키는 것</th></tr></thead>
+<tbody>
+<tr><td class="mono"><b>8탭 DFE</b></td><td><span class="tag tag-sig">시스템</span></td>
+<td>직전 8개 비트가 현재 비트에 남긴 잔상(post-cursor ISI)을 8개의 가중치로 빼내는 등화기. 탭 수 = 기억하는 과거 비트 수.</td></tr>
+<tr><td class="mono"><b>summer</b></td><td><span class="tag tag-sig">아날로그 회로</span></td>
+<td>수신 파형에서 8개의 탭 전류를 더하거나 빼는 가산기. DFE의 뺄셈이 실제로 일어나는 유일한 지점.</td></tr>
+<tr><td class="mono"><b>full-rate MUX</b></td><td><span class="tag tag-fb">회로 = 스위치</span></td>
+<td>판정된 비트가 <em>탭 전류의 부호를 고르는 선택기</em>. 전류 스티어링 MUX와 summer의 탭 셀은 같은 회로여서, 설계자는 이 둘을 구분하지 않고 “MUX가 스위치 역할”이라고 말한다.</td></tr>
+<tr><td class="mono"><b>static latch</b></td><td><span class="tag tag-fb">디지털 회로</span></td>
+<td>판정된 비트를 클럭 없이도 유지하는 래치. 깊은 탭(2~8번)의 비트를 최대 8 UI 동안 흔들림 없이 붙잡아 탭 스위치의 게이트를 확정된 DC 레벨로 고정한다.</td></tr>
+</tbody></table></div>
+
+<p>당신이 본 회로는 <b>even·odd 센스앰프가 각각 1개</b>이고, 그 출력이 <b>static latch</b>와 <b>full-rate MUX</b> 양쪽으로 동시에 갈라지는 구조다. 이 한 가지 관찰이 아키텍처 전체를 거의 확정한다 — 5장에서 그 귀결을 따진다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 01</span><b>용어 지도</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 300" role="img" aria-label="수신기 체인 위에 summer의 탭 스위치, full-rate MUX, static latch 체인의 위치를 표시한 지도">
+    <rect x="150" y="24" width="196" height="38" class="bx-sig"/>
+    <text x="248" y="41" class="ts ctr f-sig">탭 전류 스위치 ×8</text>
+    <text x="248" y="55" class="tt ctr f-sig">SUMMER 내부 · 5장</text>
+    <path d="M248 62 L248 118" class="ln-sig dash" marker-end="url(#mk-sig)"/>
+
+    <rect x="366" y="24" width="150" height="38" class="bx-sig"/>
+    <text x="441" y="41" class="ts ctr f-sig">full-rate MUX</text>
+    <text x="441" y="55" class="tt ctr f-sig">위상 선택 + 탭1 스위칭</text>
+    <path d="M441 62 L441 120" class="ln-sig dash" marker-end="url(#mk-sig)"/>
+
+    <rect x="540" y="24" width="216" height="38" class="bx-fb"/>
+    <text x="648" y="41" class="ts ctr f-fb">static latch 체인 ×8</text>
+    <text x="648" y="55" class="tt ctr f-fb">깊은 탭 비트 보관 · 6장</text>
+    <path d="M648 62 L648 118" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+
+    <rect x="14" y="122" width="76" height="54" class="n"/>
+    <text x="52" y="146" class="t ctr">채널</text><text x="52" y="162" class="tt ctr f-mut">30 dB</text>
+    <path d="M90 149 L108 149" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <rect x="112" y="122" width="76" height="54" class="n"/>
+    <text x="150" y="146" class="t ctr">CTLE</text><text x="150" y="162" class="tt ctr f-mut">+VGA</text>
+    <path d="M188 149 L212 149" class="ln-sig" marker-end="url(#mk-sig)"/>
+
+    <circle cx="248" cy="149" r="28" class="n"/>
+    <text x="248" y="154" class="tl ctr">Σ</text>
+    <text x="248" y="192" class="tt ctr f-mut">SUMMER</text>
+    <path d="M276 149 L296 149" class="ln-sig" marker-end="url(#mk-sig)"/>
+
+    <rect x="300" y="122" width="88" height="54" class="n"/>
+    <text x="344" y="146" class="t ctr">슬라이서</text><text x="344" y="162" class="tt ctr f-mut">StrongARM</text>
+    <path d="M388 149 L410 149" class="ln-fb" marker-end="url(#mk-fb)"/>
+
+    <path d="M414 124 L470 138 L470 160 L414 174 Z" class="bx-sig"/>
+    <text x="440" y="153" class="ts ctr f-sig">MUX</text>
+    <path d="M470 149 L494 149" class="ln-fb" marker-end="url(#mk-fb)"/>
+
+    <rect x="498" y="122" width="54" height="54" class="bx-fb"/><text x="525" y="154" class="tb ctr f-fb">L1</text>
+    <path d="M552 149 L564 149" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="568" y="122" width="54" height="54" class="bx-fb"/><text x="595" y="154" class="tb ctr f-fb">L2</text>
+    <path d="M622 149 L634 149" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="638" y="122" width="54" height="54" class="bx-fb"/><text x="665" y="154" class="tb ctr f-fb">···</text>
+    <path d="M692 149 L704 149" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="708" y="122" width="54" height="54" class="bx-fb"/><text x="735" y="154" class="tb ctr f-fb">L8</text>
+    <text x="630" y="192" class="tt ctr f-mut">STATIC LATCH CHAIN</text>
+
+    <path d="M762 149 L800 149 L800 240 L248 240 L248 181" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="524" y="262" class="ts ctr f-fb">판정된 비트 â[n−1] … â[n−8] — 8개의 탭으로 되돌아감</text>
+    <text x="268" y="212" class="tt f-mut">−</text>
+  </svg>
+  </div>
+  <figcaption><b>“summer의 스위치”</b>는 Σ 안에서 탭 전류의 방향을 고르는 차동쌍이고, <b>MUX</b>는 그 차동쌍을 구동하는(또는 그 자체인) 선택 회로이며, <b>static latch</b>는 8 UI 동안 그 선택 신호를 흔들리지 않게 잡아 두는 기억 소자다. 세 용어는 <em>하나의 피드백 경로를 서로 다른 각도에서 부른 이름</em>에 가깝다.</figcaption>
+</figure>
+</section>
+
+<section id="s1">
+<div class="sec-h"><span class="sec-n">01</span><h2>왜 DFE인가 — 채널과 커서</h2></div>
+<p>동축이나 PCB 트레이스는 주파수가 올라갈수록 손실이 커지는 저역통과 필터다. 25 Gb/s NRZ의 나이퀴스트 주파수 12.5 GHz에서 30 dB 손실이면, 송신단이 보낸 사각 펄스는 수신단에서 <em>수 UI에 걸쳐 번지는 꼬리</em>가 된다. 그 꼬리가 다음 비트들의 판정 시점에 남아 있는 것이 ISI(심볼 간 간섭)다.</p>
+
+<p>펄스 응답을 1 UI 간격으로 샘플한 값 <span class="m">h[k]</span>를 <b>커서</b>라 부른다. 판정하려는 비트 자신이 <span class="m">h0</span>(main cursor), 그보다 먼저 오는 잔상이 pre-cursor(<span class="m">h−1</span>, <span class="m">h−2</span>), 뒤에 끌리는 잔상이 post-cursor(<span class="m">h1</span>…<span class="m">h8</span>)다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 02</span><b>펄스 응답과 커서</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 336" role="img" aria-label="단일 펄스의 채널 응답을 UI 간격으로 샘플한 커서 막대그래프. 메인 커서 h0, 프리커서, 포스트커서 h1부터 h8까지와 h5 부근의 반사 융기를 표시">
+    <line x1="86" y1="248" x2="856" y2="248" class="ln"/>
+    <line x1="86" y1="60" x2="86" y2="268" class="ln"/>
+    <line x1="86" y1="88" x2="856" y2="88" class="ln-t"/>
+    <line x1="86" y1="168" x2="856" y2="168" class="ln-t"/>
+    <text x="78" y="92" class="tt end f-mut">1.0</text>
+    <text x="78" y="172" class="tt end f-mut">0.5</text>
+    <text x="78" y="252" class="tt end f-mut">0</text>
+    <text x="34" y="160" class="ts f-mut" transform="rotate(-90 34 160)">정규화 진폭</text>
+
+    <rect x="92" y="248" width="18" height="0" class="f-mut"/>
+    <rect x="158" y="248" width="18" height="10" class="f-mut"/>
+    <rect x="224" y="88" width="18" height="160" class="f-sig"/>
+    <rect x="290" y="152" width="18" height="96" class="f-fb"/>
+    <rect x="356" y="203" width="18" height="45" class="f-fb"/>
+    <rect x="422" y="224" width="18" height="24" class="f-fb"/>
+    <rect x="488" y="235" width="18" height="13" class="f-fb"/>
+    <rect x="554" y="228" width="18" height="20" class="f-fb"/>
+    <rect x="620" y="234" width="18" height="14" class="f-fb"/>
+    <rect x="686" y="242" width="18" height="6" class="f-fb"/>
+    <rect x="752" y="244" width="18" height="4" class="f-fb"/>
+
+    <path d="M101 248 C120 248 140 262 167 258 C190 254 205 180 233 88 C252 120 258 140 299 152 C326 166 340 192 365 203 C390 213 404 220 431 224 C452 228 470 236 497 235 C520 233 538 226 563 228 C588 231 604 232 629 234 C654 239 670 241 695 242 C720 244 736 244 761 244" class="ln-sig"/>
+
+    <text x="101" y="266" class="tt ctr f-mut">h−2</text>
+    <text x="167" y="266" class="tt ctr f-mut">h−1</text>
+    <text x="233" y="266" class="tt ctr f-sig">h0</text>
+    <text x="299" y="266" class="tt ctr f-fb">h1</text>
+    <text x="365" y="266" class="tt ctr f-fb">h2</text>
+    <text x="431" y="266" class="tt ctr f-fb">h3</text>
+    <text x="497" y="266" class="tt ctr f-fb">h4</text>
+    <text x="563" y="266" class="tt ctr f-fb">h5</text>
+    <text x="629" y="266" class="tt ctr f-fb">h6</text>
+    <text x="695" y="266" class="tt ctr f-fb">h7</text>
+    <text x="761" y="266" class="tt ctr f-fb">h8</text>
+    <text x="856" y="262" class="ts end f-mut">시간 (UI)</text>
+
+    <path d="M200 46 L200 76" class="ln-t" marker-end="url(#mk)"/>
+    <text x="200" y="38" class="ts ctr">메인 커서 — 판정할 비트</text>
+    <line x1="290" y1="286" x2="778" y2="286" class="ln-fb"/>
+    <line x1="290" y1="280" x2="290" y2="292" class="ln-fb"/>
+    <line x1="778" y1="280" x2="778" y2="292" class="ln-fb"/>
+    <text x="534" y="308" class="ts ctr f-fb">DFE 8탭이 제거하는 구간 : post-cursor h1 … h8</text>
+    <line x1="101" y1="286" x2="180" y2="286" class="ln-sig"/>
+    <text x="140" y="308" class="ts ctr f-sig">pre-cursor</text>
+    <text x="140" y="324" class="tt ctr f-mut">DFE로는 불가 → TX FFE</text>
+
+    <rect x="556" y="110" width="314" height="48" class="bx-err"/>
+    <text x="713" y="130" class="ts ctr f-err">반사 융기 — 커넥터 · 비아 스터브</text>
+    <text x="713" y="148" class="tt ctr f-err">h5~h6에서 꼬리가 다시 솟는다 → 탭 8개가 필요한 이유</text>
+    <path d="M618 158 L570 220" class="ln-err" marker-end="url(#mk-err)"/>
+  </svg>
+  </div>
+  <figcaption>손실만 있는 채널이라면 꼬리는 단조 감소하고 탭 3~4개면 충분하다. <b>8탭이 필요해지는 진짜 이유는 반사</b>다. 커넥터·비아 스터브·패키지 불연속에서 되돌아온 에너지가 왕복 지연만큼 늦게 도착해 먼 위치의 커서를 다시 키운다. 수치는 예시값.</figcaption>
+</figure>
+
+<h3>다른 등화기와의 분업</h3>
+<p>DFE만으로 모든 것을 해결하지 않는다. 세 가지가 각자 다른 약점을 맡는다.</p>
+<div class="tw"><table>
+<thead><tr><th>기법</th><th>위치</th><th>제거 대상</th><th>결정적 대가</th></tr></thead>
+<tbody>
+<tr><td class="mono">TX FFE</td><td>송신</td><td>pre-cursor + 일부 post-cursor</td><td>송신 진폭 손실(de-emphasis). 채널 정보를 back-channel으로 받아야 함</td></tr>
+<tr><td class="mono">CTLE</td><td>수신 아날로그</td><td>고주파 손실 전반</td><td><span class="tag tag-err">노이즈·크로스토크도 같이 증폭</span></td></tr>
+<tr><td class="mono">RX DFE</td><td>수신 판정 후</td><td>post-cursor만</td><td><span class="tag tag-err">오류 전파</span> · 1 UI 타이밍 제약</td></tr>
+</tbody></table></div>
+<div class="key"><p class="key-t">DFE의 고유 가치</p>
+<p>DFE는 <em>이미 0/1로 확정된 비트</em>만 빼기 때문에 노이즈를 증폭하지 않는다. 선형 등화기(CTLE·RX FFE)는 신호를 키울 때 노이즈를 같이 키우지만, DFE는 깨끗한 디지털 값 × 계수를 빼므로 SNR이 손해를 보지 않는다. 이 성질 하나 때문에 손실이 큰 채널에서 DFE는 대체 불가능하다.<sup class="c"><a href="#r1">[1]</a></sup></p></div>
+
+<figure>
+  <div class="fig-hd"><span>그림 03</span><b>아이 다이어그램 — 등화 전후</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 250" role="img" aria-label="DFE 적용 전 닫힌 아이와 적용 후 열린 아이의 비교. 판정 마진과 타이밍 마진이 생기는 모습">
+    <text x="30" y="26" class="ts f-err">등화 전 — ISI로 닫힌 아이</text>
+    <rect x="30" y="36" width="370" height="176" class="nf"/>
+    <path d="M40 70 C110 70 120 74 180 74 C250 74 270 66 390 66" class="ln-t"/>
+    <path d="M40 92 C110 92 130 88 200 88 C260 88 280 96 390 96" class="ln-t"/>
+    <path d="M40 78 C120 78 150 170 215 178 C270 185 300 182 390 180" class="ln-t"/>
+    <path d="M40 100 C120 100 150 160 215 172 C280 184 310 186 390 188" class="ln-t"/>
+    <path d="M40 182 C110 182 130 178 195 176 C260 174 280 180 390 180" class="ln-t"/>
+    <path d="M40 168 C110 168 140 176 205 178 C270 180 300 172 390 170" class="ln-t"/>
+    <path d="M40 176 C120 176 150 92 215 80 C270 70 300 74 390 72" class="ln-t"/>
+    <path d="M40 190 C120 190 150 100 215 92 C280 84 310 80 390 78" class="ln-t"/>
+    <ellipse cx="215" cy="128" rx="26" ry="16" class="bx-err" opacity=".55"/>
+    <text x="215" y="132" class="tt ctr f-err">마진 ≈ 0</text>
+    <line x1="215" y1="36" x2="215" y2="212" class="ln-clk"/>
+    <text x="215" y="230" class="tt ctr f-clk">판정 시점</text>
+
+    <text x="480" y="26" class="ts f-fb">등화 후 — 8탭 DFE + CTLE</text>
+    <rect x="480" y="36" width="370" height="176" class="nf"/>
+    <path d="M490 68 L840 68" class="ln-t"/><path d="M490 74 L840 74" class="ln-t"/>
+    <path d="M490 180 L840 180" class="ln-t"/><path d="M490 186 L840 186" class="ln-t"/>
+    <path d="M490 70 C560 70 600 178 665 180 C730 182 780 181 840 181" class="ln-t"/>
+    <path d="M490 76 C566 76 606 184 665 186 C730 188 780 186 840 186" class="ln-t"/>
+    <path d="M490 182 C560 182 600 72 665 70 C730 68 780 69 840 69" class="ln-t"/>
+    <path d="M490 188 C566 188 606 78 665 76 C730 74 780 75 840 74" class="ln-t"/>
+    <polygon points="600,127 665,88 730,127 665,166" class="bx-fb" opacity=".5"/>
+    <text x="665" y="122" class="tt ctr f-fb">전압 마진</text>
+    <text x="665" y="140" class="tt ctr f-fb">타이밍 마진</text>
+    <line x1="665" y1="36" x2="665" y2="212" class="ln-clk"/>
+    <text x="665" y="230" class="tt ctr f-clk">판정 시점</text>
+  </svg>
+  </div>
+  <figcaption>DFE의 성과는 결국 이 그림 하나로 평가된다. 오른쪽 마름모(아이 마스크)의 <b>세로 = 슬라이서가 견딜 수 있는 오프셋·노이즈</b>, <b>가로 = CDR이 견딜 수 있는 지터</b>다. 탭을 늘려도 마진이 더 안 늘면 그 탭은 낭비다.</figcaption>
+</figure>
+</section>
+
+<section id="s2">
+<div class="sec-h"><span class="sec-n">02</span><h2>DFE의 동작 원리</h2></div>
+<p>수신 파형은 과거·현재 비트가 커서로 가중되어 겹친 합이다.</p>
+<div class="eq">y[n] &nbsp;=&nbsp; h<sub>0</sub>·a[n] &nbsp;+&nbsp; <b>Σ<sub>k=1..8</sub> h<sub>k</sub>·a[n−k]</b> &nbsp;+&nbsp; (pre-cursor) &nbsp;+&nbsp; noise<br>
+<span class="an">　　　　　　　　　　　　　└ 이 항이 post-cursor ISI. DFE가 없애려는 대상.</span></div>
+<p>이미 판정이 끝난 비트 <span class="m">â[n−k]</span>는 값을 정확히 알고 있으므로, 계수 <span class="m">w<sub>k</sub></span>를 <span class="m">h<sub>k</sub></span>와 같게 맞춰 그대로 빼면 된다.</p>
+<div class="eq">v[n] &nbsp;=&nbsp; y[n] &nbsp;−&nbsp; <b>Σ<sub>k=1..8</sub> w<sub>k</sub>·â[n−k]</b>　　　â[n] = sign( v[n] )<br>
+<span class="an">　　　　　　　　　　└ summer가 수행 · 각 항이 탭 하나 · w<sub>k</sub>는 전류 DAC, â는 스위치 선택 신호</span></div>
+<p>여기서 곱셈 <span class="m">w<sub>k</sub>·â[n−k]</span>는 <em>â가 ±1 둘 중 하나이므로 진짜 곱셈기가 필요 없다</em>. 크기 <span class="m">w<sub>k</sub></span>는 DAC가 미리 정해 둔 전류이고, 남는 일은 그 전류를 <b>+쪽에 흘릴지 −쪽에 흘릴지 고르는 것</b>뿐이다. 이 한 줄이 5장에서 “MUX = 스위치”가 되는 근거다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 04</span><b>DFE 기본형 (개념 블록도)</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 300" role="img" aria-label="가산기, 슬라이서, 8단 지연 체인과 각 탭의 가중치로 구성된 DFE 기본 블록도">
+    <path d="M18 110 L112 110" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="20" y="100" class="ts f-sig">y[n]</text>
+    <text x="20" y="132" class="tt f-mut">CTLE 출력</text>
+    <circle cx="142" cy="110" r="28" class="n"/><text x="142" y="116" class="tl ctr">Σ</text>
+    <text x="142" y="72" class="tt ctr f-mut">SUMMER</text>
+    <text x="120" y="148" class="tb f-sig">−</text>
+    <path d="M170 110 L216 110" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="193" y="100" class="tt ctr f-sig">v[n]</text>
+    <rect x="220" y="84" width="104" height="52" class="n"/>
+    <text x="272" y="108" class="t ctr">슬라이서</text><text x="272" y="124" class="tt ctr f-mut">sign( · )</text>
+    <path d="M272 84 L272 62" class="ln-clk" marker-end="url(#mk-clk)"/>
+    <text x="280" y="58" class="tt f-clk">CLK</text>
+    <path d="M324 110 L470 110" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="400" y="100" class="ts ctr f-fb">â[n] &nbsp;복원된 비트</text>
+    <path d="M440 110 L440 228 L432 228" class="ln-fb"/>
+    <path d="M440 228 L768 228 L768 228" class="ln-fb"/>
+    <path d="M796 228 L768 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+
+    <rect x="717" y="208" width="46" height="40" class="bx-fb"/><text x="740" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="637" y="208" width="46" height="40" class="bx-fb"/><text x="660" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="557" y="208" width="46" height="40" class="bx-fb"/><text x="580" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="477" y="208" width="46" height="40" class="bx-fb"/><text x="500" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="397" y="208" width="46" height="40" class="bx-fb"/><text x="420" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="317" y="208" width="46" height="40" class="bx-fb"/><text x="340" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="237" y="208" width="46" height="40" class="bx-fb"/><text x="260" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <rect x="157" y="208" width="46" height="40" class="bx-fb"/><text x="180" y="233" class="ts ctr f-fb">z⁻¹</text>
+    <path d="M717 228 L683 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M637 228 L603 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M557 228 L523 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M477 228 L443 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M397 228 L363 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M317 228 L283 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M237 228 L203 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M157 228 L128 228 L128 268 L820 268" class="ln-fb"/>
+    <text x="474" y="286" class="ts ctr f-mut">8 UI 깊이의 비트 파이프라인 — 실제 구현은 그림 13의 static latch 체인</text>
+
+    <path d="M717 208 L717 176" class="ln-fb"/><polygon points="710,176 724,176 717,162" class="bx-fb"/><text x="740" y="172" class="tt f-fb">w₁</text>
+    <path d="M637 208 L637 176" class="ln-fb"/><polygon points="630,176 644,176 637,162" class="bx-fb"/><text x="660" y="172" class="tt f-fb">w₂</text>
+    <path d="M557 208 L557 176" class="ln-fb"/><polygon points="550,176 564,176 557,162" class="bx-fb"/><text x="580" y="172" class="tt f-fb">w₃</text>
+    <path d="M477 208 L477 176" class="ln-fb"/><polygon points="470,176 484,176 477,162" class="bx-fb"/><text x="500" y="172" class="tt f-fb">w₄</text>
+    <path d="M397 208 L397 176" class="ln-fb"/><polygon points="390,176 404,176 397,162" class="bx-fb"/><text x="420" y="172" class="tt f-fb">w₅</text>
+    <path d="M317 208 L317 176" class="ln-fb"/><polygon points="310,176 324,176 317,162" class="bx-fb"/><text x="340" y="172" class="tt f-fb">w₆</text>
+    <path d="M237 208 L237 176" class="ln-fb"/><polygon points="230,176 244,176 237,162" class="bx-fb"/><text x="260" y="172" class="tt f-fb">w₇</text>
+    <path d="M157 208 L157 176" class="ln-fb"/><polygon points="150,176 164,176 157,162" class="bx-fb"/><text x="180" y="172" class="tt f-fb">w₈</text>
+    <line x1="157" y1="158" x2="717" y2="158" class="ln-fb"/>
+    <path d="M157 158 L142 158 L142 138" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="437" y="150" class="tt ctr f-mut">Σ wₖ·â[n−k] &nbsp;→ summer에서 감산</text>
+  </svg>
+  </div>
+  <figcaption>개념도의 <span class="mono">z⁻¹</span>는 1 UI 지연이고, 삼각형은 계수 곱셈이다. 실제 회로에서 지연은 <b>클럭된 래치</b>가, 곱셈은 <b>전류 DAC + 차동쌍</b>이 맡는다. 개념도에서 자연스러워 보이는 이 루프가 실리콘에서 왜 어려운지는 다음 장의 타이밍 문제 때문이다.</figcaption>
+</figure>
+
+<div class="warn"><p class="key-t">오류 전파 — DFE가 공짜가 아닌 이유</p>
+<p>â가 한 번 틀리면 그 틀린 값이 <b>이후 8 UI 동안</b> 잘못된 부호로 8개 탭에 주입된다. 특히 <span class="m">w₁</span>이 크면 한 번의 오류가 다음 비트의 판정 마진을 <span class="m">2·w₁</span>만큼 갉아먹어 연쇄 오류(error burst)가 된다. 그래서 실제 BER은 단일 판정 오류 확률보다 나쁘고, 이 열화분까지 감안해 마진을 잡아야 한다.</p></div>
+</section>
+
+<section id="s3">
+<div class="sec-h"><span class="sec-n">03</span><h2>1 UI 타이밍 예산 — DFE 설계의 전부</h2></div>
+<p>DFE의 피드백 루프는 <em>닫힌 루프</em>다. 비트 <span class="m">n</span>을 판정하려면 비트 <span class="m">n−1</span>의 판정이 이미 끝나 있어야 하고, 그 결과가 summer까지 돌아와 전압으로 반영되어 있어야 한다. 그 모든 일이 <b>1 UI 안에</b> 끝나야 한다.</p>
+<div class="eq">t<sub>CK→Q</sub> &nbsp;+&nbsp; t<sub>feedback</sub> &nbsp;+&nbsp; t<sub>setup</sub> &nbsp;≤&nbsp; <b>1 UI</b> &nbsp;=&nbsp; 40 ps &nbsp;<span class="an">(25 Gb/s)</span><sup class="c"><a href="#r4">[4]</a></sup><br>
+<span class="an">슬라이서가 값을 내놓는 시간 + 탭 전류가 summer 노드를 움직이는 시간 + 다음 판정 전 안정 시간</span></div>
+
+<figure>
+  <div class="fig-hd"><span>그림 05</span><b>임계 경로 예산 — 직접 피드백 vs 1탭 언롤</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 300" role="img" aria-label="1 UI 40 피코초 예산 안에서 직접 피드백은 42 피코초로 위반하고, 1탭 언롤은 31 피코초로 9 피코초 여유를 남기는 비교 막대">
+    <path d="M140 74 L140 36 L272 36 L272 74 L404 74 L404 36 L536 36 L536 74 L668 74 L668 36 L800 36" class="ln-clk"/>
+    <text x="20" y="58" class="ts">CLK</text>
+    <line x1="140" y1="30" x2="140" y2="264" class="ln-t dash"/>
+    <line x1="668" y1="30" x2="668" y2="264" class="ln-err dash"/>
+    <text x="668" y="24" class="ts ctr f-err">다음 판정 에지 · 1 UI = 40 ps</text>
+    <text x="140" y="24" class="ts ctr f-mut">판정 에지 n−1</text>
+
+    <text x="20" y="116" class="ts">직접 피드백</text><text x="20" y="130" class="tt f-mut">tap1 = summer 경유</text>
+    <rect x="140" y="98" width="185" height="30" class="bx-fb"/><text x="232" y="118" class="tt ctr f-fb">t CK→Q  14</text>
+    <rect x="325" y="98" width="264" height="30" class="bx-sig"/><text x="457" y="118" class="tt ctr f-sig">summer 정착  20</text>
+    <rect x="589" y="98" width="106" height="30" class="n2"/><text x="642" y="118" class="tt ctr">setup 8</text>
+    <rect x="668" y="94" width="27" height="38" class="bx-err"/>
+    <path d="M700 113 L740 113" class="ln-err" marker-end="url(#mk-err)"/>
+    <text x="746" y="110" class="ts f-err">42 ps</text><text x="746" y="126" class="tt f-err">2 ps 위반 → 동작 불가</text>
+
+    <text x="20" y="192" class="ts">1탭 언롤</text><text x="20" y="206" class="tt f-mut">tap1 = MUX 경유</text>
+    <rect x="140" y="174" width="185" height="30" class="bx-fb"/><text x="232" y="194" class="tt ctr f-fb">t CK→Q  14</text>
+    <rect x="325" y="174" width="119" height="30" class="bx-sig"/><text x="384" y="194" class="tt ctr f-sig">MUX 9</text>
+    <rect x="444" y="174" width="106" height="30" class="n2"/><text x="497" y="194" class="tt ctr">setup 8</text>
+    <line x1="550" y1="189" x2="664" y2="189" class="ln"/>
+    <line x1="550" y1="180" x2="550" y2="198" class="ln"/><line x1="664" y1="180" x2="664" y2="198" class="ln"/>
+    <text x="607" y="212" class="tt ctr">여유 9 ps</text>
+    <path d="M700 189 L740 189" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="746" y="186" class="ts f-fb">31 ps</text><text x="746" y="202" class="tt f-fb">통과</text>
+
+    <line x1="140" y1="248" x2="800" y2="248" class="ln"/>
+    <line x1="140" y1="248" x2="140" y2="256" class="ln"/><text x="140" y="270" class="tt ctr f-mut">0</text>
+    <line x1="272" y1="248" x2="272" y2="256" class="ln"/><text x="272" y="270" class="tt ctr f-mut">10</text>
+    <line x1="404" y1="248" x2="404" y2="256" class="ln"/><text x="404" y="270" class="tt ctr f-mut">20</text>
+    <line x1="536" y1="248" x2="536" y2="256" class="ln"/><text x="536" y="270" class="tt ctr f-mut">30</text>
+    <line x1="668" y1="248" x2="668" y2="256" class="ln"/><text x="668" y="270" class="tt ctr f-mut">40</text>
+    <line x1="800" y1="248" x2="800" y2="256" class="ln"/><text x="800" y="270" class="tt ctr f-mut">50 ps</text>
+  </svg>
+  </div>
+  <figcaption>탭이 8개면 summer의 합산 노드에 차동쌍 8쌍의 기생 용량이 매달리므로 <b>summer 정착 시간이 늘어난다</b>. 탭을 더 넣을수록 1번 탭의 타이밍이 더 어려워지는 구조적 악순환이다. 수치는 65 nm급 예시값이며 공정·설계에 따라 달라진다.</figcaption>
+</figure>
+
+<h3>탭 번호가 곧 시간 예산이다</h3>
+<p>여기서 이 문서 전체의 핵심 분기가 나온다. <span class="m">k</span>번 탭이 필요로 하는 비트는 <span class="m">â[n−k]</span>, 즉 <b><span class="m">k</span> UI 전에 이미 판정된 값</b>이다. 따라서 <span class="m">k</span>번 탭의 피드백 경로에 허용된 시간은 1 UI가 아니라 <b><span class="m">k</span> UI</b>다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 06</span><b>탭별 가용 시간과 회로 선택</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 330" role="img" aria-label="탭 1부터 8까지 가용 시간이 1 UI에서 8 UI로 선형 증가하며, 탭 1은 투기 실행, 탭 2 이상은 정적 래치로 처리된다는 막대 그래프">
+    <line x1="150" y1="46" x2="150" y2="292" class="ln-t dash"/>
+    <line x1="228" y1="46" x2="228" y2="292" class="ln-err dash"/>
+    <text x="228" y="40" class="tt ctr f-err">1 UI = 40 ps</text>
+    <line x1="384" y1="46" x2="384" y2="292" class="ln-t dash"/><text x="384" y="40" class="tt ctr f-mut">3 UI</text>
+    <line x1="618" y1="46" x2="618" y2="292" class="ln-t dash"/><text x="618" y="40" class="tt ctr f-mut">6 UI = 240 ps</text>
+
+    <rect x="150" y="56" width="78" height="22" class="bx-err"/>
+    <text x="16" y="72" class="ts">w₁</text><text x="238" y="72" class="tt f-err">40 ps — 투기 실행(언롤)로만 해결</text>
+    <rect x="150" y="86" width="156" height="22" class="bx-sig"/>
+    <text x="16" y="102" class="ts">w₂</text><text x="316" y="102" class="tt f-sig">80 ps — 직접 피드백, 경로 최적화 필요</text>
+    <rect x="150" y="116" width="234" height="22" class="bx-fb"/>
+    <text x="16" y="132" class="ts">w₃</text><text x="394" y="132" class="tt f-fb">120 ps</text>
+    <rect x="150" y="146" width="312" height="22" class="bx-fb"/>
+    <text x="16" y="162" class="ts">w₄</text><text x="472" y="162" class="tt f-fb">160 ps</text>
+    <rect x="150" y="176" width="390" height="22" class="bx-fb"/>
+    <text x="16" y="192" class="ts">w₅</text><text x="550" y="192" class="tt f-fb">200 ps</text>
+    <rect x="150" y="206" width="468" height="22" class="bx-fb"/>
+    <text x="16" y="222" class="ts">w₆</text><text x="628" y="222" class="tt f-fb">240 ps</text>
+    <rect x="150" y="236" width="546" height="22" class="bx-fb"/>
+    <text x="16" y="252" class="ts">w₇</text><text x="706" y="252" class="tt f-fb">280 ps</text>
+    <rect x="150" y="266" width="624" height="22" class="bx-fb"/>
+    <text x="16" y="282" class="ts">w₈</text><text x="784" y="282" class="tt f-fb">320 ps</text>
+
+    <path d="M96 86 L96 288" class="ln-fb"/>
+    <path d="M96 86 L104 86" class="ln-fb"/><path d="M96 288 L104 288" class="ln-fb"/>
+    <text x="76" y="196" class="ts ctr f-fb" transform="rotate(-90 76 196)">static latch 영역</text>
+    <path d="M96 56 L104 56" class="ln-err"/><path d="M96 78 L104 78" class="ln-err"/>
+    <path d="M96 56 L96 78" class="ln-err"/>
+    <text x="310" y="314" class="ts ctr f-mut">회로 선택은 취향이 아니라 이 그래프의 결과다 — 시간이 없으면 투기, 시간이 남으면 정적 논리</text>
+  </svg>
+  </div>
+  <figcaption><b>1번 탭만 예외적으로 어렵다.</b> 2번 탭부터는 80 ps 이상이 주어지므로 클럭-Q 25~30 ps짜리 느리고 견고한 <b>static latch</b>를 써도 충분하다. “왜 굳이 느린 static latch를 쓰나”에 대한 답이 바로 이것 — 필요 없는 속도를 버리고 <em>유지 능력과 견고성을 사는 거래</em>다.</figcaption>
+</figure>
+</section>
+
+<section id="s4">
+<div class="sec-h"><span class="sec-n">04</span><h2>1번 탭과 루프 언롤링(투기 실행)</h2></div>
+<p>1번 탭의 타이밍을 만족시키는 표준 해법은 <b>루프를 풀어버리는 것</b>이다. <span class="m">â[n−1]</span>이 0일 경우와 1일 경우를 <em>미리 둘 다 계산해 두고</em>, 실제 값이 나오면 둘 중 하나를 고른다. 1991년 Kasturia와 Winters가 “서로 다른 임계값을 가진 복수의 판정기 + 예측 계산”으로 정식화했고<sup class="c"><a href="#r3">[3]</a></sup>, 오늘날 거의 모든 고속 DFE가 이 구조를 쓴다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 07</span><b>1탭 언롤링과 투기 MUX</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 360" role="img" aria-label="두 개의 임계값 슬라이서와 2대1 먹스로 구성된 1탭 루프 언롤링 구조. 임계 경로가 래치에서 먹스 선택 단자를 거쳐 다시 래치로 돌아온다">
+    <path d="M14 176 L96 176" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="14" y="166" class="ts f-sig">v′[n]</text>
+    <text x="14" y="200" class="tt f-mut">= y[n] − Σ w₂..₈ â</text>
+    <path d="M96 176 L96 100 L132 100" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <path d="M96 176 L96 252 L132 252" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <circle cx="96" cy="176" r="3.2" class="f-sig"/>
+
+    <rect x="136" y="74" width="132" height="52" class="n"/>
+    <text x="202" y="96" class="t ctr">슬라이서 A</text><text x="202" y="112" class="tt ctr f-sig">임계값 = +w₁</text>
+    <rect x="136" y="226" width="132" height="52" class="n"/>
+    <text x="202" y="248" class="t ctr">슬라이서 B</text><text x="202" y="264" class="tt ctr f-sig">임계값 = −w₁</text>
+    <path d="M202 74 L202 48 L340 48" class="ln-clk"/><text x="208" y="42" class="tt f-clk">CLK</text>
+    <path d="M202 278 L202 306 L340 306" class="ln-clk"/>
+    <path d="M268 100 L322 100 L322 132" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M268 252 L322 252 L322 220" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="292" y="92" class="tt ctr f-fb">d⁺</text><text x="292" y="268" class="tt ctr f-fb">d⁻</text>
+
+    <path d="M300 132 L380 154 L380 198 L300 220 Z" class="bx-sig"/>
+    <text x="340" y="172" class="ts ctr f-sig">2:1</text><text x="340" y="188" class="tt ctr f-sig">MUX</text>
+    <text x="340" y="116" class="tt ctr f-mut">full-rate</text>
+    <path d="M380 176 L432 176" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="436" y="150" width="112" height="52" class="bx-fb"/>
+    <text x="492" y="172" class="ts ctr f-fb">static latch</text><text x="492" y="188" class="tt ctr f-fb">출력 유지</text>
+    <path d="M548 176 L640 176" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="596" y="166" class="ts ctr f-fb">â[n]</text>
+
+    <path d="M600 176 L600 330 L340 330 L340 246" class="ln-err" marker-end="url(#mk-err)"/>
+    <circle cx="600" cy="176" r="3.2" class="f-fb"/>
+    <path d="M340 246 L340 224" class="ln-err" marker-end="url(#mk-err)"/>
+    <text x="470" y="348" class="ts ctr f-err">SELECT = â[n−1] — 임계 경로 : t CK→Q + t MUX + t setup ≤ 1 UI</text>
+
+    <rect x="656" y="56" width="212" height="166" class="n2"/>
+    <text x="762" y="76" class="tt ctr f-mut">투기의 의미</text>
+    <line x1="702" y1="104" x2="856" y2="104" class="ln-sig dash"/>
+    <text x="696" y="108" class="tt end f-sig">+w₁</text>
+    <line x1="702" y1="164" x2="856" y2="164" class="ln-sig dash"/>
+    <text x="696" y="168" class="tt end f-sig">−w₁</text>
+    <path d="M702 134 C724 96 750 180 778 134 C804 94 832 174 856 134" class="ln"/>
+    <text x="762" y="198" class="tt ctr f-mut">이전 비트가 1이면 위,</text>
+    <text x="762" y="212" class="tt ctr f-mut">0이면 아래 임계값이 정답</text>
+  </svg>
+  </div>
+  <figcaption>두 슬라이서는 <b>임계값을 ±w₁만큼 미리 옮겨 둔 것</b>이고, 실제로 빼는 대신 기준선을 움직여 같은 효과를 낸다. 판정은 클럭 에지에서 두 개 동시에 일어나므로 1번 탭의 피드백이 summer를 거칠 필요가 없다. <b>임계 경로는 “래치 → MUX 선택 단자 → MUX 출력 → 래치 입력”으로 짧아진다.</b></figcaption>
+</figure>
+
+<h3>“full-rate MUX”의 첫 번째 의미</h3>
+<p>이 MUX는 매 UI마다 새 선택을 내놓아야 한다. 데이터율이 25 Gb/s면 이 MUX도 25 GHz로 토글한다. 수신기 안에서 슬라이서를 제외하면 <em>사실상 유일하게 데이터율 그대로 동작하는 논리 게이트</em>이고, 그래서 문헌과 설계 회의에서 그냥 <b>“full-rate MUX”</b>라고 부른다. 서브레이트(half/quarter-rate) 구조에서도 이 MUX만은 full-rate 특성을 요구받는 경우가 많다.</p>
+
+<div class="tw"><table>
+<thead><tr><th>항목</th><th>직접 피드백 tap1</th><th>1탭 언롤 tap1</th></tr></thead>
+<tbody>
+<tr><td>임계 경로</td><td class="mono">CK→Q + summer + setup</td><td class="mono">CK→Q + MUX + setup</td></tr>
+<tr><td>슬라이서 개수</td><td class="num">1</td><td class="num">2 <span class="tag tag-err">2배</span></td></tr>
+<tr><td>summer 출력 부하</td><td>슬라이서 1개</td><td><span class="tag tag-err">슬라이서 2개 → 대역폭 하락</span></td></tr>
+<tr><td>오프셋 보정</td><td>1채널</td><td>2채널 + 임계값 정확도 = w₁ 정확도</td></tr>
+<tr><td><span class="m">N</span>탭 언롤 시</td><td>—</td><td class="mono">슬라이서 2<sup>N</sup>개 — 2탭까지가 실용 한계</td></tr>
+</tbody></table></div>
+<p>즉 언롤링은 <b>타이밍을 면적·전력·오프셋 보정 부담으로 바꾸는 거래</b>다. IBM의 10 Gb/s 송수신기가 “1탭 투기 + 4탭 직접 피드백”을 택한 것도 이 균형점을 찾은 결과다.<sup class="c"><a href="#r2">[2]</a></sup></p>
+
+<div class="warn"><p class="key-t">용어 함정</p>
+<p>DFE 논문에서 <span class="m">dynamic feedback</span>은 <b>회로가 동적(dynamic) 논리라는 뜻이 아니다.</b> “투기(speculative)가 아닌 <em>직접(direct) 피드백 탭</em>”을 가리키는 관용어다. 반면 <span class="m">static latch / dynamic latch</span>의 static·dynamic은 진짜 회로 방식(정적 유지 vs 전하 보관)을 뜻한다. 같은 단어가 두 계층에서 다른 의미로 쓰이므로, 문맥이 “탭”이면 전자, “래치·게이트”면 후자로 읽어야 한다.<sup class="c"><a href="#r2">[2]</a></sup></p></div>
+</section>
+
+<section id="s5">
+<div class="sec-h"><span class="sec-n">05</span><h2>Summer — MUX가 스위치인 이유</h2></div>
+<p>이제 핵심이다. summer는 “더하기 회로”가 아니라 <b>전류를 합치는 노드</b>다. CML(current-mode logic) summer에서 모든 입력은 전류로 바뀌어 같은 부하 저항 두 개에 모이고, 그 저항에서 전압으로 되돌아온다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 08</span><b>CML Summer — 메인 입력 + 8개 탭</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 400" role="img" aria-label="부하 저항 두 개에 메인 입력 차동쌍과 여덟 개의 탭 차동쌍이 병렬로 전류를 주입하는 전류모드 가산기 회로도">
+    <line x1="120" y1="52" x2="850" y2="52" class="ln"/>
+    <text x="112" y="56" class="ts end">VDD</text>
+    <rect x="163" y="66" width="15" height="34" class="n"/><line x1="170.5" y1="52" x2="170.5" y2="66" class="ln"/>
+    <line x1="170.5" y1="100" x2="170.5" y2="120" class="ln"/><text x="158" y="82" class="tt end">R_L</text>
+    <rect x="203" y="66" width="15" height="34" class="n"/><line x1="210.5" y1="52" x2="210.5" y2="66" class="ln"/>
+    <path d="M210.5 100 L210.5 116 M206.5 120 a4 4 0 0 1 8 0 M210.5 124 L210.5 150" class="ln"/><text x="228" y="82" class="tt">R_L</text>
+    <line x1="120" y1="120" x2="836" y2="120" class="ln-sig"/>
+    <line x1="120" y1="150" x2="836" y2="150" class="ln-sig"/>
+    <text x="842" y="114" class="tt f-sig">OUT+</text>
+    <text x="842" y="168" class="tt f-sig">OUT−</text>
+    <text x="470" y="104" class="tt ctr f-mut">합산 노드 — 모든 전류가 여기서 만난다</text>
+
+    <g>
+      <path d="M216 200 L216 136 M212 120 a4 4 0 0 1 8 0 M216 136 L216 124" class="ln"/>
+      <line x1="216" y1="200" x2="216" y2="250" class="ln"/>
+      <line x1="208" y1="208" x2="208" y2="242" class="ln"/><line x1="184" y1="225" x2="208" y2="225" class="ln"/>
+      <line x1="284" y1="200" x2="284" y2="150" class="ln"/>
+      <line x1="284" y1="200" x2="284" y2="250" class="ln"/>
+      <line x1="292" y1="208" x2="292" y2="242" class="ln"/><line x1="292" y1="225" x2="316" y2="225" class="ln"/>
+      <line x1="216" y1="250" x2="284" y2="250" class="ln"/>
+      <line x1="250" y1="250" x2="250" y2="272" class="ln"/>
+      <circle cx="250" cy="288" r="16" class="n"/><path d="M250 280 L250 296 M245 290 L250 296 L255 290" class="ln"/>
+      <line x1="250" y1="304" x2="250" y2="326" class="ln"/>
+      <text x="178" y="222" class="tt end">VIN+</text><text x="322" y="222" class="tt">VIN−</text>
+      <text x="250" y="348" class="tt ctr">I_main</text>
+      <text x="250" y="184" class="tt ctr f-mut">메인 입력</text>
+    </g>
+
+    <rect x="366" y="170" width="132" height="176" class="bx-fb" opacity=".28"/>
+    <g>
+      <path d="M398 200 L398 136 M394 120 a4 4 0 0 1 8 0 M398 136 L398 124" class="ln-fb"/>
+      <line x1="398" y1="200" x2="398" y2="250" class="ln-fb"/>
+      <line x1="390" y1="208" x2="390" y2="242" class="ln-fb"/><line x1="366" y1="225" x2="390" y2="225" class="ln-fb"/>
+      <line x1="466" y1="200" x2="466" y2="150" class="ln-fb"/>
+      <line x1="466" y1="200" x2="466" y2="250" class="ln-fb"/>
+      <line x1="474" y1="208" x2="474" y2="242" class="ln-fb"/><line x1="474" y1="225" x2="498" y2="225" class="ln-fb"/>
+      <line x1="398" y1="250" x2="466" y2="250" class="ln-fb"/>
+      <line x1="432" y1="250" x2="432" y2="272" class="ln-fb"/>
+      <circle cx="432" cy="288" r="16" class="bx-fb"/><path d="M432 280 L432 296 M427 290 L432 296 L437 290" class="ln-fb"/>
+      <line x1="432" y1="304" x2="432" y2="326" class="ln-fb"/>
+      <text x="362" y="222" class="tt end f-fb">+</text><text x="502" y="222" class="tt f-fb">−</text>
+      <text x="432" y="348" class="tt ctr f-fb">I₁ = w₁·I_LSB</text>
+      <text x="432" y="184" class="tt ctr f-fb">탭 1 · â[n−1]</text>
+    </g>
+
+    <g>
+      <path d="M574 200 L574 136 M570 120 a4 4 0 0 1 8 0 M574 136 L574 124" class="ln-fb"/>
+      <line x1="574" y1="200" x2="574" y2="250" class="ln-fb"/>
+      <line x1="566" y1="208" x2="566" y2="242" class="ln-fb"/><line x1="542" y1="225" x2="566" y2="225" class="ln-fb"/>
+      <line x1="642" y1="200" x2="642" y2="150" class="ln-fb"/>
+      <line x1="642" y1="200" x2="642" y2="250" class="ln-fb"/>
+      <line x1="650" y1="208" x2="650" y2="242" class="ln-fb"/><line x1="650" y1="225" x2="674" y2="225" class="ln-fb"/>
+      <line x1="574" y1="250" x2="642" y2="250" class="ln-fb"/>
+      <line x1="608" y1="250" x2="608" y2="272" class="ln-fb"/>
+      <circle cx="608" cy="288" r="16" class="bx-fb"/><path d="M608 280 L608 296 M603 290 L608 296 L613 290" class="ln-fb"/>
+      <line x1="608" y1="304" x2="608" y2="326" class="ln-fb"/>
+      <text x="538" y="222" class="tt end f-fb">+</text><text x="678" y="222" class="tt f-fb">−</text>
+      <text x="608" y="348" class="tt ctr f-fb">I₂ = w₂·I_LSB</text>
+      <text x="608" y="184" class="tt ctr f-fb">탭 2 · â[n−2]</text>
+    </g>
+
+    <text x="712" y="232" class="tl ctr f-mut">···</text>
+    <g>
+      <path d="M772 200 L772 136 M768 120 a4 4 0 0 1 8 0 M772 136 L772 124" class="ln-fb"/>
+      <line x1="772" y1="200" x2="772" y2="250" class="ln-fb"/>
+      <line x1="764" y1="208" x2="764" y2="242" class="ln-fb"/><line x1="740" y1="225" x2="764" y2="225" class="ln-fb"/>
+      <line x1="826" y1="200" x2="826" y2="150" class="ln-fb"/>
+      <line x1="826" y1="200" x2="826" y2="250" class="ln-fb"/>
+      <line x1="834" y1="208" x2="834" y2="242" class="ln-fb"/>
+      <line x1="772" y1="250" x2="826" y2="250" class="ln-fb"/>
+      <line x1="799" y1="250" x2="799" y2="272" class="ln-fb"/>
+      <circle cx="799" cy="288" r="16" class="bx-fb"/><path d="M799 280 L799 296 M794 290 L799 296 L804 290" class="ln-fb"/>
+      <line x1="799" y1="304" x2="799" y2="326" class="ln-fb"/>
+      <text x="736" y="222" class="tt end f-fb">+</text>
+      <text x="799" y="348" class="tt ctr f-fb">I₈</text>
+      <text x="799" y="184" class="tt ctr f-fb">탭 8 · â[n−8]</text>
+    </g>
+
+    <line x1="120" y1="326" x2="850" y2="326" class="ln"/><text x="112" y="330" class="ts end">VSS</text>
+    <path d="M432 366 L432 352" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="432" y="384" class="ts ctr f-fb">이 차동쌍 한 쌍이 곧 “스위치” — 그림 09에서 MUX와 같은 회로임을 보인다</text>
+  </svg>
+  </div>
+  <figcaption>탭의 <b>크기</b>는 꼬리 전류원 <span class="mono">I<sub>k</sub></span>(전류 DAC, 보통 5~6 bit의 sign+magnitude)가 정하고, 탭의 <b>부호</b>는 차동쌍의 게이트에 들어온 판정 비트가 정한다. 8개 탭이 모두 같은 두 개의 노드에 매달리므로 <span class="mono">R<sub>L</sub>·C<sub>총</sub></span>가 커지고, 이것이 그림 05에서 summer 정착 시간이 20 ps까지 늘어난 이유다.</figcaption>
+</figure>
+
+<h3>차동쌍 = 2:1 전류 MUX</h3>
+<p>탭 차동쌍이 하는 일을 다시 보자. 꼬리 전류 <span class="m">I<sub>k</sub></span>는 항상 흐른다. 게이트에 들어온 비트가 1이면 그 전류가 <em>전부</em> OUT+ 쪽 저항으로, 0이면 <em>전부</em> OUT− 쪽으로 간다. 중간은 없다 — 차동 입력 진폭이 충분히 크면 차동쌍은 선형 증폭기가 아니라 <b>완전 스위치</b>로 동작한다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 09</span><b>세 가지 그림, 같은 회로</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 270" role="img" aria-label="탭 차동쌍, 이상적인 전류 스위치, 2대1 먹스 심볼이 서로 등가임을 보이는 세 패널 비교도">
+    <rect x="14" y="28" width="254" height="196" class="nf"/>
+    <text x="141" y="20" class="ts ctr f-mut">A · 실제 트랜지스터</text>
+    <line x1="58" y1="56" x2="112" y2="56" class="ln-sig"/>
+    <line x1="170" y1="56" x2="224" y2="56" class="ln-sig"/>
+    <text x="52" y="50" class="tt end f-sig">OUT+</text><text x="230" y="50" class="tt f-sig">OUT−</text>
+    <line x1="86" y1="56" x2="86" y2="112" class="ln-fb"/><line x1="196" y1="56" x2="196" y2="112" class="ln-fb"/>
+    <line x1="86" y1="112" x2="86" y2="152" class="ln-fb"/><line x1="78" y1="118" x2="78" y2="146" class="ln-fb"/>
+    <line x1="56" y1="132" x2="78" y2="132" class="ln-fb"/><text x="52" y="128" class="tt end f-fb">â+</text>
+    <line x1="196" y1="112" x2="196" y2="152" class="ln-fb"/><line x1="204" y1="118" x2="204" y2="146" class="ln-fb"/>
+    <line x1="204" y1="132" x2="226" y2="132" class="ln-fb"/><text x="230" y="128" class="tt f-fb">â−</text>
+    <line x1="86" y1="152" x2="196" y2="152" class="ln-fb"/>
+    <line x1="141" y1="152" x2="141" y2="170" class="ln-fb"/>
+    <circle cx="141" cy="186" r="15" class="bx-fb"/><path d="M141 178 L141 194 M136 188 L141 194 L146 188" class="ln-fb"/>
+    <line x1="141" y1="201" x2="141" y2="212" class="ln-fb"/>
+    <text x="141" y="222" class="tt ctr f-fb">Iₖ</text>
+
+    <text x="288" y="134" class="tl ctr f-mut">≡</text>
+
+    <rect x="310" y="28" width="254" height="196" class="nf"/>
+    <text x="437" y="20" class="ts ctr f-mut">B · 이상 스위치</text>
+    <line x1="354" y1="56" x2="408" y2="56" class="ln-sig"/>
+    <line x1="466" y1="56" x2="520" y2="56" class="ln-sig"/>
+    <text x="348" y="50" class="tt end f-sig">OUT+</text><text x="526" y="50" class="tt f-sig">OUT−</text>
+    <line x1="382" y1="56" x2="382" y2="96" class="ln-fb"/><line x1="492" y1="56" x2="492" y2="96" class="ln-fb"/>
+    <circle cx="382" cy="99" r="3" class="f-fb"/><circle cx="492" cy="99" r="3" class="f-fb"/>
+    <line x1="437" y1="146" x2="386" y2="104" class="ln-fb"/>
+    <line x1="437" y1="146" x2="488" y2="118" class="ln-fb dash"/>
+    <circle cx="437" cy="149" r="3" class="f-fb"/>
+    <line x1="437" y1="152" x2="437" y2="170" class="ln-fb"/>
+    <circle cx="437" cy="186" r="15" class="bx-fb"/><path d="M437 178 L437 194 M432 188 L437 194 L442 188" class="ln-fb"/>
+    <line x1="437" y1="201" x2="437" y2="212" class="ln-fb"/>
+    <text x="437" y="222" class="tt ctr f-fb">Iₖ</text>
+    <path d="M530 149 L470 149" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <text x="534" y="146" class="tt f-fb">â가</text><text x="534" y="160" class="tt f-fb">경로 선택</text>
+
+    <text x="584" y="134" class="tl ctr f-mut">≡</text>
+
+    <rect x="606" y="28" width="254" height="196" class="nf"/>
+    <text x="733" y="20" class="ts ctr f-mut">C · 논리 심볼</text>
+    <path d="M690 86 L756 108 L756 160 L690 182 Z" class="bx-sig"/>
+    <text x="723" y="130" class="ts ctr f-sig">2:1</text><text x="723" y="146" class="tt ctr f-sig">MUX</text>
+    <path d="M634 100 L690 100" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="630" y="96" class="tt end f-fb">+Iₖ</text>
+    <path d="M634 168 L690 168" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="630" y="164" class="tt end f-fb">−Iₖ</text>
+    <path d="M756 134 L822 134" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="826" y="130" class="tt f-sig">→ Σ</text>
+    <path d="M723 208 L723 186" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="723" y="218" class="tt ctr f-fb">SEL = â[n−k]</text>
+  </svg>
+  </div>
+  <figcaption>세 그림은 <b>완전히 동일한 회로</b>다. CML 2:1 MUX의 선택 차동쌍과 DFE 탭의 데이터 차동쌍은 레이아웃까지 같은 셀인 경우가 많다. 그래서 “MUX를 summer의 스위치로 쓴다”는 말은 비유가 아니라 <em>문자 그대로 같은 셀을 재사용한다</em>는 뜻이다.</figcaption>
+</figure>
+
+<h3>실제 구조 — even/odd 센스앰프 → static latch + full-rate MUX</h3>
+<p>half-rate 수신기에서는 센스앰프(StrongARM)가 even 위상 하나, odd 위상 하나로 총 두 개다. 각 센스앰프의 출력은 <b>성질이 정반대인 두 소비처</b>로 동시에 나간다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 10</span><b>센스앰프 출력의 두 갈래 — 보관 경로와 스위칭 경로</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 400" role="img" aria-label="even과 odd 센스앰프의 출력이 각각 정적 래치와 풀레이트 먹스로 분기되고, 먹스 출력이 가산기의 탭 스위치를 직접 구동하는 구조도">
+    <rect x="14" y="150" width="86" height="96" class="n"/>
+    <text x="57" y="192" class="tl ctr">Σ</text><text x="57" y="212" class="tt ctr f-mut">SUMMER</text>
+    <text x="57" y="140" class="tt ctr f-mut">full-rate</text>
+    <path d="M100 176 L146 176" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <path d="M100 220 L146 220" class="ln-sig" marker-end="url(#mk-sig)"/>
+
+    <rect x="150" y="130" width="118" height="62" class="n"/>
+    <text x="209" y="156" class="ts ctr">센스앰프</text><text x="209" y="174" class="tb ctr f-sig">EVEN</text>
+    <path d="M209 130 L209 106" class="ln-clk" marker-end="url(#mk-clk)"/><text x="215" y="102" class="tt f-clk">CLK</text>
+    <rect x="150" y="204" width="118" height="62" class="n"/>
+    <text x="209" y="230" class="ts ctr">센스앰프</text><text x="209" y="248" class="tb ctr f-sig">ODD</text>
+    <path d="M209 266 L209 290" class="ln-clk" marker-end="url(#mk-clk)"/><text x="215" y="300" class="tt f-clk">CLKB</text>
+
+    <circle cx="296" cy="161" r="3.4" class="f-fb"/>
+    <path d="M268 161 L296 161" class="ln-fb"/>
+    <path d="M296 161 L296 60 L368 60" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M296 161 L296 148 L368 148" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <circle cx="296" cy="235" r="3.4" class="f-fb"/>
+    <path d="M268 235 L296 235" class="ln-fb"/>
+    <path d="M296 235 L296 336 L368 336" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M296 235 L296 248 L368 248" class="ln-fb" marker-end="url(#mk-fb)"/>
+
+    <rect x="372" y="36" width="128" height="48" class="bx-fb"/>
+    <text x="436" y="58" class="ts ctr f-fb">static latch</text><text x="436" y="74" class="tt ctr f-fb">EVEN · 2 UI 유지</text>
+    <rect x="372" y="312" width="128" height="48" class="bx-fb"/>
+    <text x="436" y="334" class="ts ctr f-fb">static latch</text><text x="436" y="350" class="tt ctr f-fb">ODD · 2 UI 유지</text>
+
+    <path d="M368 124 L440 148 L440 248 L368 272 Z" class="bx-sig"/>
+    <text x="404" y="192" class="ts ctr f-sig">full-rate</text><text x="404" y="208" class="ts ctr f-sig">2:1 MUX</text>
+    <path d="M404 296 L404 262" class="ln-clk" marker-end="url(#mk-clk)"/>
+    <text x="404" y="310" class="tt ctr f-clk">SEL = CLK</text>
+    <path d="M440 198 L508 198" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="474" y="188" class="tt ctr f-sig">â 전류 스트림</text>
+
+    <rect x="512" y="166" width="128" height="64" class="bx-sig"/>
+    <text x="576" y="190" class="ts ctr f-sig">탭 스위치</text><text x="576" y="208" class="tt ctr f-sig">차동쌍 = MUX 출력단</text>
+    <text x="576" y="224" class="tt ctr f-sig">I₁ = w₁·I_LSB</text>
+    <path d="M576 166 L576 118 L57 118 L57 146" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="320" y="112" class="ts ctr f-sig">탭 1 — summer 합산 노드로 되돌아가는 전류</text>
+
+    <path d="M500 60 L560 60 L560 92 L672 92" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M500 336 L560 336 L560 304 L672 304" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="676" y="68" width="180" height="48" class="bx-fb"/>
+    <text x="766" y="90" class="ts ctr f-fb">래치 체인 w₂ … w₈</text><text x="766" y="106" class="tt ctr f-fb">그림 14</text>
+    <rect x="676" y="280" width="180" height="48" class="n2"/>
+    <text x="766" y="302" class="ts ctr">디시리얼라이저</text><text x="766" y="318" class="tt ctr f-mut">CDR · LMS 적응</text>
+    <path d="M766 116 L766 150 L640 150" class="ln-fb"/>
+    <path d="M640 150 L640 166" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="700" y="164" class="tt ctr f-fb">깊은 탭 전류</text>
+  </svg>
+  </div>
+  <figcaption>같은 센스앰프 출력이 두 갈래로 갈라지는 이유는 <b>두 소비처의 요구가 정반대</b>이기 때문이다. 탭 1은 <em>지연이 0에 가까워야</em> 하므로 래치를 거치지 않고 MUX로 직행하고, 탭 2~8은 <em>값이 여러 UI 동안 흔들리면 안 되므로</em> static latch를 거친다. 하나의 회로로 두 요구를 동시에 만족시킬 방법은 없다.</figcaption>
+</figure>
+
+<h3>왜 래치가 아니라 MUX여야 하는가</h3>
+<p>여기가 가장 오해하기 쉬운 지점이다. StrongARM 센스앰프의 출력은 <b>클럭의 절반 구간에서만 유효</b>하다. 리셋(프리차지) 구간에는 두 출력이 모두 같은 레벨로 끌려가 <em>판정 결과가 사라진다</em>. 이 출력을 그대로 탭 스위치 게이트에 물리면, 탭 전류가 반 UI만 흐르고 반 UI는 양쪽으로 반씩 갈라진다 — 탭 계수가 실효적으로 절반이 되고, 그 오차가 매 UI 주기적으로 발생해 ISI를 새로 만든다.</p>
+<div class="key"><p class="key-t">full-rate MUX가 해결하는 것</p>
+<p>even과 odd 센스앰프는 <b>서로 반대 위상에서 유효</b>하다. MUX의 선택 신호를 half-rate 클럭 자신으로 주면, MUX는 항상 <em>지금 막 판정을 끝낸 쪽</em>을 고른다. 결과적으로 MUX 출력은 리셋 구간이 없는 <b>연속 유효 full-rate 비트 스트림</b>이 되고, 그 출력 차동쌍이 그대로 summer의 탭 스위치가 된다. 재직렬화(2:1 serialize) · 유효 위상 선택 · 전류 스위칭 세 가지 일을 한 셀이 동시에 한다.</p></div>
+
+<figure>
+  <div class="fig-hd"><span>그림 11</span><b>타이밍 — 왜 MUX 출력만 항상 유효한가</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 350" role="img" aria-label="클럭, even 센스앰프 출력, odd 센스앰프 출력, 먹스 출력, 정적 래치 출력의 타이밍 파형. 센스앰프 출력에는 리셋 구간이 있지만 먹스 출력은 항상 유효하다">
+    <line x1="120" y1="36" x2="120" y2="318" class="ln-t dash"/>
+    <line x1="210" y1="36" x2="210" y2="318" class="ln-t dash"/>
+    <line x1="300" y1="36" x2="300" y2="318" class="ln-t dash"/>
+    <line x1="390" y1="36" x2="390" y2="318" class="ln-t dash"/>
+    <line x1="480" y1="36" x2="480" y2="318" class="ln-t dash"/>
+    <line x1="570" y1="36" x2="570" y2="318" class="ln-t dash"/>
+    <line x1="660" y1="36" x2="660" y2="318" class="ln-t dash"/>
+    <line x1="750" y1="36" x2="750" y2="318" class="ln-t dash"/>
+    <line x1="840" y1="36" x2="840" y2="318" class="ln-t dash"/>
+    <text x="120" y="30" class="tt ctr f-mut">0</text><text x="210" y="30" class="tt ctr f-mut">1 UI</text>
+    <text x="300" y="30" class="tt ctr f-mut">2</text><text x="390" y="30" class="tt ctr f-mut">3</text>
+    <text x="480" y="30" class="tt ctr f-mut">4</text><text x="570" y="30" class="tt ctr f-mut">5</text>
+    <text x="660" y="30" class="tt ctr f-mut">6</text><text x="750" y="30" class="tt ctr f-mut">7</text>
+    <text x="840" y="30" class="tt ctr f-mut">8 UI</text>
+
+    <text x="14" y="60" class="ts f-clk">CLK</text><text x="14" y="74" class="tt f-mut">half-rate</text>
+    <path d="M120 46 L210 46 L210 76 L300 76 L300 46 L390 46 L390 76 L480 76 L480 46 L570 46 L570 76 L660 76 L660 46 L750 46 L750 76 L840 76" class="ln-clk"/>
+
+    <text x="14" y="112" class="ts">SA EVEN</text><text x="14" y="126" class="tt f-mut">출력</text>
+    <rect x="120" y="96" width="90" height="32" class="bx-fb"/><text x="165" y="117" class="tt ctr f-fb">â[0]</text>
+    <rect x="210" y="96" width="90" height="32" class="n2" opacity=".7"/><text x="255" y="117" class="tt ctr f-mut">RESET</text>
+    <rect x="300" y="96" width="90" height="32" class="bx-fb"/><text x="345" y="117" class="tt ctr f-fb">â[2]</text>
+    <rect x="390" y="96" width="90" height="32" class="n2" opacity=".7"/><text x="435" y="117" class="tt ctr f-mut">RESET</text>
+    <rect x="480" y="96" width="90" height="32" class="bx-fb"/><text x="525" y="117" class="tt ctr f-fb">â[4]</text>
+    <rect x="570" y="96" width="90" height="32" class="n2" opacity=".7"/><text x="615" y="117" class="tt ctr f-mut">RESET</text>
+    <rect x="660" y="96" width="90" height="32" class="bx-fb"/><text x="705" y="117" class="tt ctr f-fb">â[6]</text>
+    <rect x="750" y="96" width="90" height="32" class="n2" opacity=".7"/><text x="795" y="117" class="tt ctr f-mut">RESET</text>
+
+    <text x="14" y="162" class="ts">SA ODD</text><text x="14" y="176" class="tt f-mut">출력</text>
+    <rect x="120" y="146" width="90" height="32" class="n2" opacity=".7"/><text x="165" y="167" class="tt ctr f-mut">RESET</text>
+    <rect x="210" y="146" width="90" height="32" class="bx-fb"/><text x="255" y="167" class="tt ctr f-fb">â[1]</text>
+    <rect x="300" y="146" width="90" height="32" class="n2" opacity=".7"/><text x="345" y="167" class="tt ctr f-mut">RESET</text>
+    <rect x="390" y="146" width="90" height="32" class="bx-fb"/><text x="435" y="167" class="tt ctr f-fb">â[3]</text>
+    <rect x="480" y="146" width="90" height="32" class="n2" opacity=".7"/><text x="525" y="167" class="tt ctr f-mut">RESET</text>
+    <rect x="570" y="146" width="90" height="32" class="bx-fb"/><text x="615" y="167" class="tt ctr f-fb">â[5]</text>
+    <rect x="660" y="146" width="90" height="32" class="n2" opacity=".7"/><text x="705" y="167" class="tt ctr f-mut">RESET</text>
+    <rect x="750" y="146" width="90" height="32" class="bx-fb"/><text x="795" y="167" class="tt ctr f-fb">â[7]</text>
+
+    <text x="14" y="212" class="ts f-sig">MUX 출력</text><text x="14" y="226" class="tt f-mut">→ 탭 스위치</text>
+    <rect x="120" y="196" width="90" height="32" class="bx-sig"/><text x="165" y="217" class="tt ctr f-sig">â[0]</text>
+    <rect x="210" y="196" width="90" height="32" class="bx-sig"/><text x="255" y="217" class="tt ctr f-sig">â[1]</text>
+    <rect x="300" y="196" width="90" height="32" class="bx-sig"/><text x="345" y="217" class="tt ctr f-sig">â[2]</text>
+    <rect x="390" y="196" width="90" height="32" class="bx-sig"/><text x="435" y="217" class="tt ctr f-sig">â[3]</text>
+    <rect x="480" y="196" width="90" height="32" class="bx-sig"/><text x="525" y="217" class="tt ctr f-sig">â[4]</text>
+    <rect x="570" y="196" width="90" height="32" class="bx-sig"/><text x="615" y="217" class="tt ctr f-sig">â[5]</text>
+    <rect x="660" y="196" width="90" height="32" class="bx-sig"/><text x="705" y="217" class="tt ctr f-sig">â[6]</text>
+    <rect x="750" y="196" width="90" height="32" class="bx-sig"/><text x="795" y="217" class="tt ctr f-sig">â[7]</text>
+    <text x="480" y="248" class="ts ctr f-sig">리셋 구간 없음 — 매 UI 새 값, 탭 전류가 끊기지 않는다</text>
+
+    <text x="14" y="284" class="ts f-fb">STATIC LATCH</text><text x="14" y="298" class="tt f-mut">EVEN 출력</text>
+    <rect x="210" y="268" width="180" height="32" class="bx-fb"/><text x="300" y="289" class="tt ctr f-fb">â[0] — 2 UI 유지</text>
+    <rect x="390" y="268" width="180" height="32" class="bx-fb"/><text x="480" y="289" class="tt ctr f-fb">â[2] — 2 UI 유지</text>
+    <rect x="570" y="268" width="180" height="32" class="bx-fb"/><text x="660" y="289" class="tt ctr f-fb">â[4] — 2 UI 유지</text>
+    <rect x="750" y="268" width="90" height="32" class="bx-fb"/><text x="795" y="289" class="tt ctr f-fb">â[6]</text>
+    <text x="480" y="322" class="ts ctr f-fb">깊은 탭(w₂~w₈)의 게이트를 DC 레벨로 고정 · 리셋도 글리치도 없음</text>
+  </svg>
+  </div>
+  <figcaption>센스앰프 출력을 그대로 쓰면 탭 전류가 <b>매 UI 절반만 흐른다</b>(회색 RESET 구간). MUX는 유효한 쪽을 번갈아 고르는 것만으로 이 구멍을 메우고, static latch는 값 자체를 2 UI 붙잡아 깊은 탭에 공급한다. 두 회로는 경쟁 관계가 아니라 <em>서로 다른 결함을 막는 짝</em>이다.</figcaption>
+</figure>
+
+<h3>센스앰프가 위상당 1개라는 사실이 말해주는 것</h3>
+<div class="tw"><table>
+<thead><tr><th style="width:34%">관찰</th><th>귀결</th></tr></thead>
+<tbody>
+<tr><td>데이터 센스앰프가 even·odd <b>각 1개</b>, 총 2개</td>
+<td>1번 탭은 <b>언롤(투기)하지 않았다</b>. 1탭 언롤이면 위상당 2개, 총 4개의 데이터 센스앰프가 필요하다(±w₁ 두 임계값). 즉 이 설계는 <span class="tag tag-sig">직접 피드백 tap1</span>을 택했고, 그래서 그 경로에서 래치를 빼고 MUX로 직결하는 최적화가 필수였다.</td></tr>
+<tr><td>MUX가 <b>full-rate</b>로 명시됨</td>
+<td>MUX 출력이 half-rate 두 경로 중 하나가 아니라 <b>재합성된 full-rate 스트림</b>이다. → summer가 두 개로 쪼개진 half-rate 구조가 아니라 <b>단일 full-rate summer</b>일 가능성이 높다.</td></tr>
+<tr><td>센스앰프 출력이 latch와 MUX <b>양쪽</b>으로 감</td>
+<td>센스앰프의 출력 부하가 두 배가 된다. 센스앰프의 재생 시간(regeneration)과 kickback이 나빠지므로, MUX 입력단은 <b>게이트 용량이 작게</b> 설계되어야 하고 보통 그 사이에 최소 크기 버퍼 1단이 들어간다.</td></tr>
+<tr><td>MUX의 SEL이 클럭</td>
+<td>MUX는 데이터 선택기가 아니라 <b>위상 선택기</b>로 쓰이고 있다. 따라서 <span class="tag tag-clk">SEL 클럭의 듀티비</span>가 곧 탭 전류의 폭을 결정한다 — 듀티 왜곡이 그대로 탭 계수 오차가 된다.</td></tr>
+</tbody></table></div>
+
+<h3>summer 설계에서 실제로 싸우는 것들</h3>
+<div class="tw"><table>
+<thead><tr><th>제약</th><th>원인</th><th>일반적인 대응</th></tr></thead>
+<tbody>
+<tr><td>대역폭</td><td>탭 8개 × 차동쌍 기생 용량이 합산 노드에 누적</td><td>R_L 축소(이득 희생) · 션트 피킹 인덕터 · T-coil · 탭을 2단 summer로 분리</td></tr>
+<tr><td>이득</td><td>R_L을 줄이면 <span class="mono">A = g<sub>m</sub>R<sub>L</sub></span> 감소</td><td>I_main 증대(전력) · CTLE로 사전 증폭 · 인버터 기반 전압모드 summer로 전환</td></tr>
+<tr><td>탭 선형성</td><td>전류 DAC의 정합, 꼬리 전류원 출력 임피던스</td><td>캐스코드 전류원 · 단위 셀 기반 DAC · 더미 셀로 노드 용량 균일화</td></tr>
+<tr><td>먼 탭의 비용</td><td>w₆~w₈은 값이 작은데 셀 면적·용량은 동일</td><td>먼 탭을 <b>IIR 탭</b> 하나로 근사(RC 필터가 꼬리를 통째로 모사)</td></tr>
+<tr><td>공통모드</td><td>탭 전류가 항상 흐르므로 탭 수만큼 DC 전류 증가</td><td>공통모드 피드백 · 탭 전류를 차동 주입만 하도록 설계</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s6">
+<div class="sec-h"><span class="sec-n">06</span><h2>슬라이서와 Static Latch</h2></div>
+<p>“슬라이서”는 보통 두 개의 회로가 붙은 것이다. 앞은 <b>센스앰프(StrongARM latch)</b>, 뒤는 <b>정적 래치(SR latch)</b>다. 둘을 하나로 뭉뚱그려 부르기 때문에 처음 보면 왜 래치가 두 번 나오는지 이해가 안 된다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 12</span><b>StrongARM 센스앰프 + SR(static) 래치</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 380" role="img" aria-label="StrongARM 센스앰프의 프리차지 스위치, 재생 루프, 입력 차동쌍, 테일 트랜지스터 구조와 그 출력 파형, 그리고 뒤에 붙은 SR 정적 래치">
+    <line x1="70" y1="46" x2="470" y2="46" class="ln"/><text x="62" y="50" class="ts end">VDD</text>
+    <rect x="132" y="62" width="16" height="30" class="n"/><line x1="140" y1="46" x2="140" y2="62" class="ln"/>
+    <line x1="134" y1="90" x2="146" y2="64" class="ln"/><line x1="140" y1="92" x2="140" y2="190" class="ln"/>
+    <text x="126" y="82" class="tt end f-clk">CLK</text>
+    <rect x="422" y="62" width="16" height="30" class="n"/><line x1="430" y1="46" x2="430" y2="62" class="ln"/>
+    <line x1="424" y1="90" x2="436" y2="64" class="ln"/><line x1="430" y1="92" x2="430" y2="190" class="ln"/>
+    <text x="444" y="82" class="tt f-clk">CLK</text>
+    <rect x="177" y="62" width="16" height="30" class="n"/><line x1="185" y1="46" x2="185" y2="62" class="ln"/>
+    <line x1="179" y1="90" x2="191" y2="64" class="ln"/><line x1="185" y1="92" x2="185" y2="130" class="ln"/>
+    <rect x="377" y="62" width="16" height="30" class="n"/><line x1="385" y1="46" x2="385" y2="62" class="ln"/>
+    <line x1="379" y1="90" x2="391" y2="64" class="ln"/><line x1="385" y1="92" x2="385" y2="130" class="ln"/>
+    <text x="285" y="40" class="ts ctr f-mut">프리차지 스위치 ×4 — CLK가 낮을 때 모든 노드를 VDD로</text>
+
+    <rect x="215" y="100" width="140" height="60" class="bx-sig"/>
+    <text x="285" y="124" class="ts ctr f-sig">크로스커플 인버터</text>
+    <text x="285" y="142" class="tt ctr f-sig">양의 피드백 · 재생</text>
+    <line x1="185" y1="130" x2="215" y2="130" class="ln"/>
+    <line x1="355" y1="130" x2="385" y2="130" class="ln"/>
+    <line x1="140" y1="190" x2="240" y2="190" class="ln"/>
+    <line x1="330" y1="190" x2="430" y2="190" class="ln"/>
+    <line x1="240" y1="160" x2="240" y2="190" class="ln"/>
+    <line x1="330" y1="160" x2="330" y2="190" class="ln"/>
+    <text x="205" y="182" class="tt ctr f-mut">X</text><text x="366" y="182" class="tt ctr f-mut">Y</text>
+
+    <line x1="240" y1="190" x2="240" y2="244" class="ln"/>
+    <line x1="232" y1="204" x2="232" y2="236" class="ln"/><line x1="208" y1="220" x2="232" y2="220" class="ln"/>
+    <text x="202" y="216" class="tt end f-sig">VIN+</text>
+    <line x1="330" y1="190" x2="330" y2="244" class="ln"/>
+    <line x1="338" y1="204" x2="338" y2="236" class="ln"/><line x1="338" y1="220" x2="362" y2="220" class="ln"/>
+    <text x="368" y="216" class="tt f-sig">VIN−</text>
+    <text x="285" y="212" class="tt ctr f-mut">입력 차동쌍</text>
+    <line x1="240" y1="244" x2="330" y2="244" class="ln"/>
+    <line x1="285" y1="244" x2="285" y2="264" class="ln"/>
+    <line x1="277" y1="272" x2="277" y2="304" class="ln"/><line x1="253" y1="288" x2="277" y2="288" class="ln"/>
+    <text x="247" y="284" class="tt end f-clk">CLK</text>
+    <line x1="285" y1="264" x2="285" y2="318" class="ln"/>
+    <line x1="70" y1="318" x2="470" y2="318" class="ln"/><text x="62" y="322" class="ts end">VSS</text>
+    <text x="285" y="344" class="ts ctr f-mut">정적 전류 0 — 재생이 끝나면 전류가 흐르지 않는다</text>
+
+    <text x="690" y="30" class="ts ctr f-mut">출력 파형</text>
+    <path d="M514 74 L578 74 L578 52 L706 52 L706 74 L770 74 L770 52 L860 52" class="ln-clk"/>
+    <text x="514" y="48" class="tt f-clk">CLK</text>
+    <rect x="514" y="92" width="64" height="44" class="n2" opacity=".7"/>
+    <text x="546" y="118" class="tt ctr f-mut">VDD</text>
+    <path d="M578 114 C596 114 600 100 620 98 L706 98" class="ln-fb"/>
+    <path d="M578 114 C596 114 600 130 620 132 L706 132" class="ln-fb"/>
+    <path d="M706 98 C724 98 726 112 742 114 L770 114" class="ln-fb"/>
+    <path d="M706 132 C724 132 726 116 742 114 L770 114" class="ln-fb"/>
+    <rect x="770" y="92" width="64" height="44" class="n2" opacity=".7"/>
+    <text x="802" y="118" class="tt ctr f-mut">VDD</text>
+    <text x="642" y="90" class="tt ctr f-fb">OUT+</text><text x="642" y="146" class="tt ctr f-fb">OUT−</text>
+    <text x="546" y="160" class="tt ctr f-err">무효</text><text x="642" y="160" class="tt ctr f-fb">유효</text>
+    <text x="802" y="160" class="tt ctr f-err">무효</text>
+    <text x="686" y="180" class="ts ctr f-err">판정 결과가 반 UI마다 사라진다</text>
+
+    <path d="M686 194 L686 220" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="576" y="226" width="220" height="66" class="bx-fb"/>
+    <text x="686" y="252" class="ts ctr f-fb">SR 래치 — static</text>
+    <text x="686" y="270" class="tt ctr f-fb">교차결합 NAND 2개 · 클럭 불필요</text>
+    <path d="M686 292 L686 318" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="576" y="324" width="220" height="34" class="n2"/>
+    <text x="686" y="346" class="ts ctr">Q — 끊김 없는 full-UI 레벨</text>
+  </svg>
+  </div>
+  <figcaption>StrongARM이 널리 쓰이는 이유는 셋이다 — <b>정적 전류 0</b>, <b>레일 투 레일 출력</b>, <b>오프셋이 주로 입력 차동쌍 하나에서만 발생</b>.<sup class="c"><a href="#r5">[5]</a></sup> 대가는 출력이 <em>동적</em>이라는 것이고, 그래서 뒤에 반드시 정적 래치가 붙는다. 이것이 “static latch”가 DFE 회로도에 등장하는 첫 번째 자리다.</figcaption>
+</figure>
+
+<h3>static과 dynamic의 실제 차이</h3>
+<p>정적 래치는 교차결합된 인버터 두 개가 <b>서로의 입력을 붙잡아</b> 값을 유지한다. 동적 래치는 노드의 <b>기생 커패시터에 전하로</b> 값을 보관한다. 클럭이 계속 돌면 둘 다 동작하지만, 값을 오래 붙잡아야 하는 순간 차이가 드러난다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 13</span><b>동적 래치 vs 정적 래치 — 유지 능력</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 330" role="img" aria-label="동적 래치는 전하 누설로 값이 무너지고 정적 래치는 키퍼 인버터의 되먹임으로 값을 무한히 유지하는 비교도">
+    <text x="20" y="28" class="ts f-err">동적 래치 — 전하 보관</text>
+    <rect x="20" y="38" width="400" height="118" class="nf"/>
+    <path d="M40 96 L78 96" class="ln-fb" marker-end="url(#mk-fb)"/><text x="40" y="86" class="tt f-fb">D</text>
+    <rect x="80" y="80" width="30" height="32" class="n"/>
+    <line x1="84" y1="110" x2="106" y2="82" class="ln"/>
+    <line x1="95" y1="80" x2="95" y2="62" class="ln-clk"/><text x="101" y="60" class="tt f-clk">CLK</text>
+    <line x1="110" y1="96" x2="170" y2="96" class="ln-fb"/>
+    <circle cx="140" cy="96" r="3.2" class="f-fb"/>
+    <line x1="140" y1="96" x2="140" y2="122" class="ln-fb"/>
+    <line x1="126" y1="122" x2="154" y2="122" class="ln-fb"/><line x1="130" y1="130" x2="150" y2="130" class="ln-fb"/>
+    <text x="160" y="134" class="tt f-mut">C_node</text>
+    <polygon points="170,80 170,112 198,96" class="n"/><circle cx="202" cy="96" r="3.5" class="nf"/>
+    <path d="M206 96 L250 96" class="ln-fb" marker-end="url(#mk-fb)"/><text x="256" y="92" class="tt f-fb">Q</text>
+    <path d="M140 140 L140 150" class="ln-err"/>
+    <text x="330" y="114" class="tt ctr f-err">되먹임 경로 없음</text>
+    <text x="330" y="130" class="tt ctr f-err">유지 = 전하가 남아 있는 동안만</text>
+    <text x="330" y="148" class="tt ctr f-mut">누설 · 전하 공유 · 커플링에 무방비</text>
+
+    <text x="460" y="28" class="ts f-fb">정적 래치 — 되먹임 유지</text>
+    <rect x="460" y="38" width="400" height="118" class="nf"/>
+    <path d="M480 96 L518 96" class="ln-fb" marker-end="url(#mk-fb)"/><text x="480" y="86" class="tt f-fb">D</text>
+    <rect x="520" y="80" width="30" height="32" class="n"/>
+    <line x1="524" y1="110" x2="546" y2="82" class="ln"/>
+    <line x1="535" y1="80" x2="535" y2="62" class="ln-clk"/><text x="541" y="60" class="tt f-clk">CLK</text>
+    <line x1="550" y1="96" x2="610" y2="96" class="ln-fb"/>
+    <circle cx="580" cy="96" r="3.2" class="f-fb"/>
+    <polygon points="610,80 610,112 638,96" class="n"/><circle cx="642" cy="96" r="3.5" class="nf"/>
+    <line x1="646" y1="96" x2="700" y2="96" class="ln-fb"/>
+    <circle cx="676" cy="96" r="3.2" class="f-fb"/>
+    <path d="M700 96 L740 96" class="ln-fb" marker-end="url(#mk-fb)"/><text x="746" y="92" class="tt f-fb">Q</text>
+    <path d="M676 96 L676 136 L600 136" class="ln-fb"/>
+    <polygon points="600,122 600,150 576,136" class="n"/><circle cx="572" cy="136" r="3.5" class="nf"/>
+    <path d="M568 136 L580 136 L580 100" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="640" y="152" class="tt ctr f-fb">키퍼 인버터 — 값을 되돌려 붙잡는다</text>
+
+    <line x1="120" y1="196" x2="840" y2="196" class="ln-t"/>
+    <text x="20" y="200" class="ts">CLK 정지</text><text x="20" y="214" class="tt f-mut">후 유지 시간</text>
+    <line x1="120" y1="188" x2="120" y2="290" class="ln-t dash"/>
+    <text x="120" y="308" class="tt ctr f-mut">0</text>
+    <line x1="300" y1="188" x2="300" y2="290" class="ln-t dash"/><text x="300" y="308" class="tt ctr f-mut">100 ns</text>
+    <line x1="480" y1="188" x2="480" y2="290" class="ln-t dash"/><text x="480" y="308" class="tt ctr f-mut">1 µs</text>
+    <line x1="660" y1="188" x2="660" y2="290" class="ln-t dash"/><text x="660" y="308" class="tt ctr f-mut">1 ms</text>
+    <line x1="840" y1="188" x2="840" y2="290" class="ln-t dash"/><text x="840" y="308" class="tt ctr f-mut">∞</text>
+    <path d="M120 216 L300 218 C380 222 420 246 470 266 L520 276" class="ln-err"/>
+    <text x="556" y="282" class="tt f-err">동적 — 누설로 붕괴, 판정값 소실</text>
+    <path d="M120 240 L840 240" class="ln-fb"/>
+    <text x="600" y="234" class="tt f-fb">정적 — 전원이 살아 있는 한 유지</text>
+    <text x="430" y="326" class="ts ctr f-mut">DFE 피드백에서 이 차이가 문제가 되는 순간 : 저속 디버그 · 스캔 · 클럭 게이팅 · 긴 UI 보관</text>
+  </svg>
+  </div>
+  <figcaption>동작 속도만 보면 동적 래치가 더 빠르고 작다. 그럼에도 DFE 피드백 경로가 정적 래치를 택하는 이유는 <b>속도가 남는 자리에서 견고성을 사기 때문</b>이다(그림 06).</figcaption>
+</figure>
+
+<h3>DFE 피드백에 static latch를 쓰는 네 가지 이유</h3>
+<ol class="body">
+<li><b>탭 스위치 게이트를 DC 레벨로 확정한다.</b> 가장 중요한 이유다. 탭 차동쌍의 게이트 전압이 어중간한 레벨로 떠 있으면 꼬리 전류가 양쪽으로 <em>반씩</em> 갈라진다. 탭 계수가 의도한 <span class="m">w<sub>k</sub></span>가 아니라 그 일부만 적용되고, 나머지는 공통모드로 낭비된다. 정적 래치는 레일 투 레일 레벨을 유지해 이 오차를 원천 차단한다.</li>
+<li><b>여러 UI 동안 값을 보관한다.</b> half-rate에서 각 래치는 한 값을 2 UI 동안 붙잡고, 8번 탭의 비트는 파이프라인 전체를 통과하며 최대 8 UI를 산다. 이 시간 동안 동적 노드는 누설·전하 공유·인접 배선 커플링에 노출된다.</li>
+<li><b>글리치를 만들지 않는다.</b> 동적 노드가 잠깐이라도 무너졌다 복구되면 탭 전류에 스파이크가 생기고, 그 스파이크는 summer 합산 노드에 <em>새 ISI로 주입</em>된다. 등화기가 등화 대상을 만들어내는 셈이다.</li>
+<li><b>테스트·브링업이 가능하다.</b> 저속 클럭, 싱글 스텝, 스캔 체인, 클럭 게이팅 상태에서도 값이 살아 있어야 실리콘 디버그가 된다. 동적 래치로 만든 피드백 체인은 클럭을 늦추는 순간 값을 잃어 디버그 자체가 불가능해진다.</li>
+</ol>
+
+<div class="tw"><table>
+<thead><tr><th>항목</th><th>Dynamic latch</th><th>Static latch</th><th>CML latch</th></tr></thead>
+<tbody>
+<tr><td>유지 원리</td><td>노드 전하</td><td>교차결합 되먹임</td><td>교차결합 차동쌍 + 부하</td></tr>
+<tr><td>최저 동작 주파수</td><td class="num"><span class="tag tag-err">있음</span></td><td class="num"><span class="tag tag-ok">DC</span></td><td class="num"><span class="tag tag-ok">DC</span></td></tr>
+<tr><td>속도</td><td>가장 빠름</td><td>중간</td><td>빠름</td></tr>
+<tr><td>정적 소비 전력</td><td class="num">0</td><td class="num">0</td><td class="num"><span class="tag tag-err">항상 소비</span></td></tr>
+<tr><td>면적 · 입력 부하</td><td>작음</td><td>중간</td><td>큼</td></tr>
+<tr><td>DFE에서의 자리</td><td>거의 안 씀</td><td><b>탭 2~8 피드백 · 디시리얼라이저</b></td><td>고속 CMOS가 안 되는 공정에서 전체 경로</td></tr>
+</tbody></table></div>
+<div class="key"><p class="key-t">한 문장 요약</p>
+<p>static latch는 <b>비트를 “보관”하는 부품</b>이고 full-rate MUX는 <b>비트를 “전달·스위칭”하는 부품</b>이다. 전자는 시간 여유가 있는 깊은 탭을 담당하고, 후자는 시간이 없는 1번 탭을 담당한다. 같은 센스앰프 출력이 두 갈래로 나뉘는 이유가 정확히 이것이다.</p></div>
+</section>
+
+<section id="s7">
+<div class="sec-h"><span class="sec-n">07</span><h2>Half-rate 8탭 매핑</h2></div>
+<p>25 GHz 클럭을 칩 전체에 돌리는 것은 전력·지터 양쪽에서 감당이 안 된다. 그래서 클럭을 12.5 GHz로 낮추고 <b>짝수 비트와 홀수 비트를 두 경로가 나눠 맡는다</b>. 각 경로는 2 UI에 한 번만 동작하면 되므로 래치·디시리얼라이저의 부담이 절반이 된다.</p>
+<p>대신 탭 매핑이 꼬인다. even 경로가 비트 <span class="m">n</span>을 판정할 때 필요한 <span class="m">â[n−1]</span>은 <em>자기 것이 아니라 odd 경로의 최신 판정</em>이다. 규칙은 단순하다 — <b>홀수 번 탭은 반대 경로에서, 짝수 번 탭은 자기 경로에서</b> 온다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 14</span><b>Half-rate 래치 파이프라인과 8탭 매핑</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 400" role="img" aria-label="odd 경로와 even 경로의 4단 정적 래치 체인이 교대로 탭 1부터 8까지를 공급하는 매핑도">
+    <text x="20" y="40" class="ts">ODD 경로</text><text x="20" y="54" class="tt f-mut">2 UI 주기</text>
+    <path d="M110 66 L138 66" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="110" y="56" class="tt f-mut">SA ODD</text>
+    <rect x="140" y="44" width="104" height="44" class="bx-fb"/><text x="192" y="62" class="ts ctr f-fb">O1</text>
+    <text x="192" y="78" class="tt ctr f-fb">â[n−1]</text>
+    <path d="M244 66 L280 66" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="282" y="44" width="104" height="44" class="bx-fb"/><text x="334" y="62" class="ts ctr f-fb">O2</text>
+    <text x="334" y="78" class="tt ctr f-fb">â[n−3]</text>
+    <path d="M386 66 L422 66" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="424" y="44" width="104" height="44" class="bx-fb"/><text x="476" y="62" class="ts ctr f-fb">O3</text>
+    <text x="476" y="78" class="tt ctr f-fb">â[n−5]</text>
+    <path d="M528 66 L564 66" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="566" y="44" width="104" height="44" class="bx-fb"/><text x="618" y="62" class="ts ctr f-fb">O4</text>
+    <text x="618" y="78" class="tt ctr f-fb">â[n−7]</text>
+    <path d="M192 88 L192 116" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M334 88 L334 116" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M476 88 L476 116" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M618 88 L618 116" class="ln-fb" marker-end="url(#mk-fb)"/>
+
+    <text x="20" y="222" class="ts">EVEN 경로</text><text x="20" y="236" class="tt f-mut">2 UI 주기</text>
+    <path d="M110 248 L138 248" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <text x="110" y="238" class="tt f-mut">SA EVEN</text>
+    <rect x="140" y="226" width="104" height="44" class="bx-fb" opacity=".55"/><text x="192" y="244" class="ts ctr f-fb">E1</text>
+    <text x="192" y="260" class="tt ctr f-fb">â[n−2]</text>
+    <path d="M244 248 L280 248" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <rect x="282" y="226" width="104" height="44" class="bx-fb" opacity=".55"/><text x="334" y="244" class="ts ctr f-fb">E2</text>
+    <text x="334" y="260" class="tt ctr f-fb">â[n−4]</text>
+    <path d="M386 248 L422 248" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <rect x="424" y="226" width="104" height="44" class="bx-fb" opacity=".55"/><text x="476" y="244" class="ts ctr f-fb">E3</text>
+    <text x="476" y="260" class="tt ctr f-fb">â[n−6]</text>
+    <path d="M528 248 L564 248" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <rect x="566" y="226" width="104" height="44" class="bx-fb" opacity=".55"/><text x="618" y="244" class="ts ctr f-fb">E4</text>
+    <text x="618" y="260" class="tt ctr f-fb">â[n−8]</text>
+    <path d="M192 226 L192 198" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <path d="M334 226 L334 198" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <path d="M476 226 L476 198" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+    <path d="M618 226 L618 198" class="ln-fb dash" marker-end="url(#mk-fb)"/>
+
+    <rect x="140" y="120" width="530" height="74" class="n2"/>
+    <text x="405" y="140" class="ts ctr">EVEN summer가 보는 탭 순서</text>
+    <rect x="152" y="150" width="58" height="34" class="bx-sig"/><text x="181" y="164" class="tt ctr f-sig">탭 1</text><text x="181" y="178" class="tt ctr f-sig">O1</text>
+    <rect x="216" y="150" width="58" height="34" class="bx-fb"/><text x="245" y="164" class="tt ctr f-fb">탭 2</text><text x="245" y="178" class="tt ctr f-fb">E1</text>
+    <rect x="280" y="150" width="58" height="34" class="bx-fb"/><text x="309" y="164" class="tt ctr f-fb">탭 3</text><text x="309" y="178" class="tt ctr f-fb">O2</text>
+    <rect x="344" y="150" width="58" height="34" class="bx-fb"/><text x="373" y="164" class="tt ctr f-fb">탭 4</text><text x="373" y="178" class="tt ctr f-fb">E2</text>
+    <rect x="408" y="150" width="58" height="34" class="bx-fb"/><text x="437" y="164" class="tt ctr f-fb">탭 5</text><text x="437" y="178" class="tt ctr f-fb">O3</text>
+    <rect x="472" y="150" width="58" height="34" class="bx-fb"/><text x="501" y="164" class="tt ctr f-fb">탭 6</text><text x="501" y="178" class="tt ctr f-fb">E3</text>
+    <rect x="536" y="150" width="58" height="34" class="bx-fb"/><text x="565" y="164" class="tt ctr f-fb">탭 7</text><text x="565" y="178" class="tt ctr f-fb">O4</text>
+    <rect x="600" y="150" width="58" height="34" class="bx-fb"/><text x="629" y="164" class="tt ctr f-fb">탭 8</text><text x="629" y="178" class="tt ctr f-fb">E4</text>
+
+    <path d="M670 167 L716 167" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <circle cx="748" cy="167" r="30" class="n"/><text x="748" y="174" class="tl ctr">Σ</text>
+    <text x="748" y="212" class="tt ctr f-mut">EVEN SUMMER</text>
+    <text x="181" y="204" class="tt ctr f-sig">MUX 경유</text>
+
+    <text x="405" y="300" class="ts ctr f-mut">홀수 탭 = 반대 경로 · 짝수 탭 = 자기 경로 &nbsp;|&nbsp; ODD summer는 O와 E가 뒤바뀐 대칭 구조</text>
+    <rect x="140" y="318" width="530" height="56" class="n2"/>
+    <text x="405" y="338" class="ts ctr">체인 깊이 = 4단 × 2 UI = 8 UI</text>
+    <text x="405" y="358" class="tt ctr f-mut">full-rate라면 8단이 필요하지만 half-rate에서는 경로당 4단이면 8탭을 모두 덮는다</text>
+  </svg>
+  </div>
+  <figcaption>half-rate의 실질적 이득은 클럭 주파수 절반만이 아니다. <b>래치 체인 단수도 절반</b>(8단 → 경로당 4단)이 되고, 각 단이 값을 붙잡아야 하는 시간은 2배(2 UI)가 되어 정적 래치를 쓸 여유가 더 커진다. quarter-rate로 가면 경로 4개 × 체인 2단, 각 단 4 UI가 된다.</figcaption>
+</figure>
+</section>
+
+<section id="s8">
+<div class="sec-h"><span class="sec-n">08</span><h2>전체 블록도</h2></div>
+<p>지금까지의 조각을 한 장에 놓으면 이렇게 된다. 실제 수신기는 여기에 오프셋 보정 DAC, 전원 레귤레이터, 아이 모니터가 더 붙는다.</p>
+
+<figure>
+  <div class="fig-hd"><span>그림 15</span><b>8탭 half-rate DFE 수신기 — 전체</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 470" role="img" aria-label="채널부터 CTLE, 가산기, even odd 센스앰프, 풀레이트 먹스, 정적 래치 체인, 에러 슬라이서와 LMS 적응, CDR까지를 포함한 8탭 하프레이트 DFE 수신기 전체 블록도">
+    <rect x="14" y="104" width="72" height="56" class="n"/>
+    <text x="50" y="130" class="ts ctr">채널</text><text x="50" y="146" class="tt ctr f-mut">30 dB</text>
+    <path d="M86 132 L112 132" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <rect x="114" y="104" width="78" height="56" class="n"/>
+    <text x="153" y="130" class="ts ctr">CTLE</text><text x="153" y="146" class="tt ctr f-mut">+ VGA</text>
+    <path d="M192 132 L222 132" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <circle cx="252" cy="132" r="30" class="n"/><text x="252" y="139" class="tl ctr">Σ</text>
+    <text x="252" y="90" class="tt ctr f-mut">SUMMER · full-rate</text>
+    <text x="222" y="174" class="tb f-sig">−</text>
+    <path d="M282 132 L318 132" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <path d="M300 132 L300 60 L336 60" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <circle cx="300" cy="132" r="3.2" class="f-sig"/>
+
+    <rect x="338" y="38" width="108" height="44" class="n2"/>
+    <text x="392" y="56" class="ts ctr">에러 슬라이서</text><text x="392" y="72" class="tt ctr f-mut">임계값 ±V_ref</text>
+    <rect x="320" y="104" width="108" height="26" class="n"/><text x="374" y="122" class="ts ctr">SA EVEN</text>
+    <rect x="320" y="136" width="108" height="26" class="n"/><text x="374" y="154" class="ts ctr">SA ODD</text>
+    <text x="374" y="178" class="tt ctr f-mut">센스앰프 각 1개</text>
+
+    <path d="M428 117 L466 117" class="ln-fb"/><path d="M428 149 L466 149" class="ln-fb"/>
+    <circle cx="452" cy="117" r="3.2" class="f-fb"/><circle cx="452" cy="149" r="3.2" class="f-fb"/>
+    <path d="M452 117 L452 206 L500 206" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M452 149 L452 250 L500 250" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M466 117 L494 110 L494 156 L466 149" class="bx-sig"/>
+    <text x="480" y="136" class="tt ctr f-sig">MUX</text>
+    <text x="516" y="108" class="tt f-sig">full-rate â</text>
+    <path d="M494 133 L560 133" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <rect x="562" y="110" width="96" height="46" class="bx-sig"/>
+    <text x="610" y="130" class="ts ctr f-sig">탭 1 스위치</text><text x="610" y="146" class="tt ctr f-sig">w₁ DAC</text>
+    <path d="M610 110 L610 62 L252 62 L252 102" class="ln-sig" marker-end="url(#mk-sig)"/>
+
+    <rect x="502" y="188" width="106" height="36" class="bx-fb"/>
+    <text x="555" y="210" class="ts ctr f-fb">static latch E</text>
+    <rect x="502" y="232" width="106" height="36" class="bx-fb" opacity=".55"/>
+    <text x="555" y="254" class="ts ctr f-fb">static latch O</text>
+    <path d="M608 206 L646 206" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <path d="M608 250 L646 250" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="648" y="188" width="128" height="80" class="bx-fb"/>
+    <text x="712" y="216" class="ts ctr f-fb">래치 체인 ×4단</text>
+    <text x="712" y="234" class="tt ctr f-fb">E1..E4 / O1..O4</text>
+    <text x="712" y="252" class="tt ctr f-fb">그림 14</text>
+    <path d="M776 228 L812 228" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <rect x="814" y="196" width="54" height="64" class="bx-fb"/>
+    <text x="841" y="222" class="ts ctr f-fb">w₂</text><text x="841" y="238" class="ts ctr f-fb">…w₈</text>
+    <path d="M841 260 L841 300 L252 300 L252 162" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="546" y="294" class="ts ctr f-fb">7개 탭 전류 — 깊은 탭 경로</text>
+
+    <path d="M392 82 L392 340" class="ln-err" marker-end="url(#mk-err)"/>
+    <text x="398" y="330" class="tt f-err">e[n]</text>
+    <path d="M712 268 L712 340" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="718" y="330" class="tt f-fb">â[n−k]</text>
+    <rect x="300" y="344" width="470" height="48" class="n2"/>
+    <text x="535" y="364" class="ts ctr">Sign-Sign LMS 적응 엔진</text>
+    <text x="535" y="382" class="tt ctr f-mut">w₁…w₈ · CTLE 피킹 · 오프셋 · V_ref 를 모두 갱신 (그림 16)</text>
+    <path d="M300 368 L232 368 L232 314" class="ln" marker-end="url(#mk)"/>
+    <text x="150" y="372" class="tt">→ 탭 DAC 코드</text>
+
+    <rect x="14" y="212" width="96" height="56" class="bx-clk"/>
+    <text x="62" y="234" class="ts ctr f-clk">CDR + PI</text><text x="62" y="252" class="tt ctr f-clk">12.5 GHz</text>
+    <path d="M110 240 L280 240 L280 240" class="ln-clk"/>
+    <path d="M280 240 L280 176 L374 176 L374 166" class="ln-clk" marker-end="url(#mk-clk)"/>
+    <path d="M280 240 L440 240 L440 172 L480 172 L480 160" class="ln-clk" marker-end="url(#mk-clk)"/>
+    <text x="330" y="256" class="tt f-clk">CLK / CLKB 분배 — 센스앰프 · MUX SEL · 래치 전부</text>
+    <path d="M62 268 L62 420" class="ln-clk"/>
+    <path d="M62 420 L300 420" class="ln-clk" marker-end="url(#mk-clk)"/>
+    <text x="306" y="424" class="tt f-clk">위상 코드 ← 에지 샘플러</text>
+    <rect x="790" y="344" width="78" height="48" class="n2"/>
+    <text x="829" y="364" class="ts ctr">DES</text><text x="829" y="382" class="tt ctr f-mut">1:16</text>
+    <path d="M776 228 L790 228 L790 344" class="ln-t"/>
+    <path d="M829 392 L829 420" class="ln" marker-end="url(#mk)"/>
+    <text x="829" y="440" class="tt ctr f-mut">디지털 코어로</text>
+  </svg>
+  </div>
+  <figcaption>세 개의 피드백 루프가 동시에 돈다 — <span class="tag tag-sig">탭 1</span>은 MUX를 통해 1 UI 안에, <span class="tag tag-fb">탭 2~8</span>은 래치 체인을 통해 여유 있게, <span class="tag tag-clk">CDR</span>은 수천 UI의 시상수로. 셋의 대역폭이 겹치면 서로 싸우므로 적응 루프의 <span class="mono">µ</span>와 CDR 루프 대역은 의도적으로 크게 분리한다.</figcaption>
+</figure>
+</section>
+
+<section id="s9">
+<div class="sec-h"><span class="sec-n">09</span><h2>계수 적응 — 탭 값은 누가 정하는가</h2></div>
+<p>탭 계수 <span class="m">w<sub>k</sub></span>는 채널마다 다르고, 온도·전압에 따라 변한다. 고정값으로 구울 수 없으므로 수신기가 스스로 찾아야 한다. 표준 해법은 <b>sign-sign LMS</b>다 — 곱셈기 없이 XOR 하나와 누산기만으로 구현된다.</p>
+<div class="eq">w<sub>k</sub>[m+1] &nbsp;=&nbsp; w<sub>k</sub>[m] &nbsp;+&nbsp; <b>µ · sgn( e[n] ) · sgn( â[n−k] )</b><br>
+<span class="an">e[n] = v[n] − 목표 레벨 · sgn(x)의 곱은 XOR 한 게이트 · µ는 누산기 비트 시프트</span></div>
+
+<figure>
+  <div class="fig-hd"><span>그림 16</span><b>Sign-Sign LMS 적응 루프</b></div>
+  <div class="fig-bd">
+  <svg viewBox="0 0 880 280" role="img" aria-label="데이터 슬라이서와 에러 슬라이서의 부호를 XOR로 곱해 누산기에 쌓고 탭 DAC 코드를 갱신하는 적응 루프">
+    <path d="M14 108 L64 108" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <text x="14" y="98" class="ts f-sig">v[n]</text>
+    <circle cx="64" cy="108" r="3.2" class="f-sig"/>
+    <path d="M64 108 L64 56 L104 56" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <path d="M64 108 L64 172 L104 172" class="ln-sig" marker-end="url(#mk-sig)"/>
+    <rect x="106" y="34" width="118" height="44" class="n"/>
+    <text x="165" y="52" class="ts ctr">데이터 슬라이서</text><text x="165" y="68" class="tt ctr f-mut">sgn( v )</text>
+    <rect x="106" y="150" width="118" height="44" class="bx-err"/>
+    <text x="165" y="168" class="ts ctr f-err">에러 슬라이서</text><text x="165" y="184" class="tt ctr f-err">임계값 ±V_ref</text>
+    <path d="M224 56 L286 56" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="255" y="46" class="tt ctr f-fb">â[n]</text>
+    <rect x="288" y="34" width="92" height="44" class="bx-fb"/>
+    <text x="334" y="60" class="ts ctr f-fb">z⁻ᵏ 탭 정렬</text>
+    <path d="M380 56 L430 56 L430 96" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="396" y="48" class="tt f-fb">â[n−k]</text>
+    <path d="M224 172 L410 172 L410 132" class="ln-err" marker-end="url(#mk-err)"/>
+    <text x="300" y="188" class="tt f-err">e[n] — 진폭이 목표보다 큰가 작은가</text>
+
+    <circle cx="420" cy="114" r="22" class="n"/>
+    <path d="M406 100 L434 128 M434 100 L406 128" class="ln"/>
+    <text x="420" y="150" class="tt ctr f-mut">XOR = 부호 곱</text>
+    <path d="M442 114 L494 114" class="ln" marker-end="url(#mk)"/>
+    <rect x="496" y="88" width="118" height="52" class="n2"/>
+    <text x="555" y="110" class="ts ctr">누산기</text><text x="555" y="128" class="tt ctr f-mut">이득 µ · 저역 통과</text>
+    <path d="M614 114 L664 114" class="ln" marker-end="url(#mk)"/>
+    <rect x="666" y="88" width="92" height="52" class="n"/>
+    <text x="712" y="110" class="ts ctr">wₖ 레지스터</text><text x="712" y="128" class="tt ctr f-mut">6 bit</text>
+    <path d="M758 114 L800 114" class="ln" marker-end="url(#mk)"/>
+    <rect x="802" y="88" width="64" height="52" class="bx-fb"/>
+    <text x="834" y="118" class="ts ctr f-fb">전류 DAC</text>
+    <path d="M834 140 L834 222 L180 222 L180 208" class="ln-fb" marker-end="url(#mk-fb)"/>
+    <text x="500" y="240" class="ts ctr f-fb">→ summer의 탭 꼬리 전류 Iₖ 로 · 8개 탭이 각자 독립된 루프를 돈다</text>
+    <text x="500" y="262" class="tt ctr f-mut">µ가 크면 빨리 수렴하고 지터가 커진다 — CDR 루프 대역과 겹치지 않게 분리한다</text>
+  </svg>
+  </div>
+  <figcaption>부호만 쓰기 때문에 오차의 <b>크기</b> 정보를 버리고 <b>방향</b>만 남긴다. 수렴이 느려지는 대신 곱셈기가 사라지고, 25 Gb/s에서 실시간으로 돌릴 수 있는 유일한 현실적 선택이 된다. 에러 슬라이서의 임계값 <span class="mono">V_ref</span> 자체도 같은 방식으로 적응시킨다.</figcaption>
+</figure>
+</section>
+
+<section id="s10">
+<div class="sec-h"><span class="sec-n">10</span><h2>고장 모드 체크리스트</h2></div>
+<p>DFE가 안 될 때 실제로 의심할 순서다. 위쪽일수록 흔하다.</p>
+<div class="tw"><table>
+<thead><tr><th style="width:22%">증상</th><th style="width:34%">원인</th><th>확인 방법</th></tr></thead>
+<tbody>
+<tr><td>탭을 켜면 아이가 오히려 닫힘</td><td>탭 <b>부호</b>가 반대 · 탭 <b>정렬(UI 인덱스)</b>이 한 칸 밀림</td><td>탭 하나만 켜고 스윕 — 최적점이 음수 코드에 있으면 부호 반전</td></tr>
+<tr><td>탭 계수가 이론값의 절반</td><td>탭 스위치 게이트가 레일까지 못 감 · 센스앰프 리셋 구간이 탭 전류를 끊음</td><td>MUX·래치 출력 진폭 확인. 그림 11의 RESET 구멍 여부</td></tr>
+<tr><td>특정 온도·전압에서만 실패</td><td>탭 1 임계 경로 위반 (CK→Q + MUX + setup &gt; 1 UI)</td><td>클럭 위상을 밀어 마진 스윕 · SS 코너 재검증</td></tr>
+<tr><td>오류가 연달아 터짐(burst)</td><td>오류 전파 — w₁이 과도하게 큼</td><td>오류 길이 히스토그램. 단발 오류 비중이 낮으면 전파</td></tr>
+<tr><td>적응이 발산·진동</td><td>µ 과대 · 탭 간 상호작용 · CDR 루프와 대역 충돌</td><td>µ를 4배 줄여 재수렴 · 탭을 하나씩 순차 개방</td></tr>
+<tr><td>저속 테스트에서만 동작 이상</td><td>피드백 경로에 <b>동적 노드</b>가 섞여 있음</td><td>클럭을 1 MHz까지 낮춰 데이터 유지 확인 — static latch의 존재 이유</td></tr>
+<tr><td>탭 수를 늘려도 마진이 안 늘음</td><td>summer 대역 포화 · 잔여 ISI가 pre-cursor 쪽</td><td>펄스 응답 측정 후 남은 커서 위치 확인 → TX FFE로 이관</td></tr>
+<tr><td>듀티비에 민감</td><td>MUX SEL 클럭 듀티 왜곡이 탭 전류 폭을 바꿈</td><td>DCC(duty cycle correction) 코드 스윕</td></tr>
+<tr><td>인접 채널 켜면 악화</td><td>크로스토크는 DFE가 못 없앰 (판정되지 않은 간섭)</td><td>공격 채널 on/off BER 비교</td></tr>
+<tr><td>BER 바닥이 안 내려감</td><td>슬라이서 오프셋 잔차 · 센스앰프 kickback</td><td>오프셋 DAC 재보정 · MUX 입력 부하 확인</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s11">
+<div class="sec-h"><span class="sec-n">11</span><h2>PAM-4에서 달라지는 것</h2></div>
+<p>같은 8탭이라도 PAM-4에서는 비용 구조가 완전히 바뀐다. 100G 이상 링크를 본다면 이 차이를 먼저 알아야 한다.</p>
+<div class="tw"><table>
+<thead><tr><th>항목</th><th>NRZ</th><th>PAM-4</th></tr></thead>
+<tbody>
+<tr><td>심볼당 비트</td><td class="num">1</td><td class="num">2 — 같은 대역폭에 2배 속도</td></tr>
+<tr><td>판정 임계값</td><td class="num">1개</td><td class="num">3개 → 데이터 슬라이서 3배</td></tr>
+<tr><td>수직 아이 높이</td><td class="num">1</td><td class="num"><span class="tag tag-err">1/3 — SNR 9.5 dB 손해</span></td></tr>
+<tr><td>탭이 취하는 값</td><td class="mono">±w<sub>k</sub> (2준위 스위치)</td><td class="mono">±w<sub>k</sub>, ±w<sub>k</sub>/3 (4준위) → 스위치가 아니라 <b>작은 DAC</b></td></tr>
+<tr><td>1탭 언롤 비용</td><td class="num">슬라이서 2개</td><td class="num">슬라이서 12개 + MUX 3개 (3임계 × 이전 심볼 4가지)</td></tr>
+<tr><td>현실적 선택</td><td>아날로그 DFE 8탭</td><td>1~2탭 아날로그 DFE + 나머지는 <b>ADC/DSP</b>로 이관</td></tr>
+</tbody></table></div>
+<p>PAM-4에서 언롤링이 사실상 포기되는 이유가 여기 있다. 그래서 최신 112G/224G 수신기는 아날로그 DFE를 최소화하고 ADC 기반 DSP로 넘어가는 흐름이며, 아날로그 DFE가 남는다면 <em>딱 1~2탭, 그것도 지금까지 설명한 full-rate MUX형 직접 피드백</em> 형태다.</p>
+</section>
+
+<section id="s12">
+<div class="sec-h"><span class="sec-n">12</span><h2>용어집</h2></div>
+<dl class="gl">
+<div><dt>UI</dt><dd>Unit Interval. 심볼 하나의 시간. 25 Gb/s NRZ에서 40 ps.</dd></div>
+<div><dt>ISI</dt><dd>Inter-Symbol Interference. 앞뒤 심볼의 잔상이 현재 판정에 섞이는 것.</dd></div>
+<div><dt>커서 / cursor</dt><dd>펄스 응답을 1 UI 간격으로 샘플한 값. h0가 main, h1~ 가 post, h−1~ 가 pre.</dd></div>
+<div><dt>탭 / tap</dt><dd>하나의 과거 비트에 대응하는 보정 항. 8탭 = 8개의 과거 비트를 보정.</dd></div>
+<div><dt>summer</dt><dd>수신 신호에서 탭 전류를 더하고 빼는 아날로그 가산기. DFE의 뺄셈이 일어나는 유일한 지점.</dd></div>
+<div><dt>슬라이서 / slicer</dt><dd>임계값 비교로 0/1을 정하는 판정기. 보통 센스앰프 + 정적 래치의 조합.</dd></div>
+<div><dt>StrongARM</dt><dd>정적 전류가 0인 동적 센스앰프 래치. 프리차지·평가 두 위상으로 동작하며 출력이 반 주기만 유효.</dd></div>
+<div><dt>static latch</dt><dd>교차결합 되먹임으로 값을 유지하는 래치. 클럭이 멈춰도 데이터가 살아 있다.</dd></div>
+<div><dt>dynamic latch</dt><dd>노드 전하로 값을 보관하는 래치. 빠르고 작지만 최저 동작 주파수가 존재한다.</dd></div>
+<div><dt>full-rate MUX</dt><dd>데이터율 그대로 토글하는 2:1 선택기. 서브레이트 판정을 full-rate 스트림으로 되돌리고, 그 출력 차동쌍이 summer의 탭 스위치가 된다.</dd></div>
+<div><dt>CML</dt><dd>Current-Mode Logic. 꼬리 전류를 차동쌍으로 스티어링하는 논리. MUX와 DFE 탭이 같은 셀이 되는 이유.</dd></div>
+<div><dt>current steering</dt><dd>전류를 두 경로 중 하나로 완전히 몰아주는 동작. 차동쌍의 스위치 모드.</dd></div>
+<div><dt>loop unrolling</dt><dd>speculation. 이전 비트의 두 경우를 미리 계산해 두고 MUX로 고르는 기법. 1번 탭 타이밍 해결책.</dd></div>
+<div><dt>direct feedback</dt><dd>투기 없이 판정 결과를 그대로 summer로 되돌리는 탭. 문헌에서 <em>dynamic feedback</em>으로도 불린다(회로의 동적/정적과 무관).</dd></div>
+<div><dt>half-rate</dt><dd>클럭을 데이터율의 절반으로 낮추고 짝/홀 비트를 두 경로가 나눠 처리하는 구조.</dd></div>
+<div><dt>CTLE</dt><dd>Continuous-Time Linear Equalizer. 고주파를 선형으로 부스트. 노이즈도 같이 키운다.</dd></div>
+<div><dt>FFE</dt><dd>Feed-Forward Equalizer. 판정 전 선형 필터. pre-cursor를 지울 수 있는 유일한 수단.</dd></div>
+<div><dt>IIR 탭</dt><dd>RC 필터로 꼬리 전체를 하나의 지수함수로 근사하는 탭. 먼 탭 여러 개를 대체한다.</dd></div>
+<div><dt>sign-sign LMS</dt><dd>오차와 데이터의 부호만 곱해 계수를 갱신하는 적응 알고리즘. XOR + 누산기로 구현.</dd></div>
+<div><dt>오류 전파</dt><dd>한 번의 오판정이 이후 탭 수만큼의 UI 동안 잘못된 보정을 주입해 연쇄 오류를 만드는 현상.</dd></div>
+</dl>
+</section>
+
+<section id="s13">
+<div class="sec-h"><span class="sec-n">13</span><h2>참고문헌과 검증 상태</h2></div>
+<p>문서의 주장은 세 종류다 — <span class="vt v-ok">확인</span> 원문 링크로 확인한 것, <span class="vt v-std">표준</span> 다수 문헌에 공통된 교과서 수준의 결과, <span class="vt" style="color:var(--sig)">추론</span> 당신이 설명한 회로 구조에서 도출한 것.</p>
+<ol class="refs">
+<li id="r1"><cite>B. Razavi, “The Decision-Feedback Equalizer [A Circuit for All Seasons],”</cite> IEEE Solid-State Circuits Magazine, vol. 9, no. 4, Fall 2017. <span class="vt v-ok">확인</span><br>
+DFE의 원리, 아날로그 구현, 노이즈 증폭이 없다는 성질. <a href="http://seas.ucla.edu/brweb/papers/Journals/BRFall17DFE.pdf">UCLA 전문 PDF</a> · <a href="https://ieeexplore.ieee.org/abstract/document/8110922/">IEEE Xplore</a></li>
+
+<li id="r2"><cite>J. F. Bulzacchelli et al., “A 10-Gb/s 5-Tap DFE/4-Tap FFE Transceiver in 90-nm CMOS Technology,”</cite> IEEE JSSC, vol. 41, no. 12, Dec. 2006. <span class="vt v-ok">확인</span><br>
+half-rate 수신기, <b>1탭 투기 피드백 + 4탭 직접(“dynamic”) 피드백</b>으로 루프 타이밍을 만족시킨 원전. 4장의 용어 함정과 언롤링 비용 논의의 근거. <a href="https://people.engr.tamu.edu/spalermo/ecen689/ibm_10G_5tap_dfe_4tap_ffe_bulzacchelli_jssc_2006.pdf">전문 PDF</a></li>
+
+<li id="r3"><cite>S. Kasturia and J. H. Winters, “Techniques for High-Speed Implementation of Nonlinear Cancellation,”</cite> IEEE JSAC, vol. 9, no. 6, 1991. <span class="vt v-ok">확인</span><br>
+“서로 다른 임계값을 가진 복수의 판정기 + 예측 계산으로 피드백 루프 병목을 우회한다” — 루프 언롤링의 최초 정식화. <a href="https://ieeexplore.ieee.org/document/87640/">IEEE Xplore</a></li>
+
+<li id="r4"><cite>DFE 임계 경로 제약 <span class="mono">t<sub>CK→Q</sub> + t<sub>feedback</sub> + t<sub>setup</sub> ≤ 1 UI</span></cite> <span class="vt v-std">표준</span><br>
+[1], [2]를 포함한 다수 문헌에 동일 형태로 등장하는 결과. 3장의 40 ps 예산표 수치(14 / 20 / 8 ps 등)는 65 nm급 <b>예시값</b>이며 실제 공정 수치가 아니다.</li>
+
+<li id="r5"><cite>B. Razavi, “The StrongARM Latch [A Circuit for All Seasons],”</cite> IEEE Solid-State Circuits Magazine, vol. 7, no. 2, 2015, pp. 12–17. <span class="vt v-ok">확인</span><br>
+정적 전류 0 · 레일 투 레일 출력 · 오프셋이 입력 차동쌍에서 지배적이라는 세 가지 장점, 그리고 출력이 동적이어서 SR 래치가 뒤따른다는 구조. <a href="https://ieeexplore.ieee.org/abstract/document/7130773/">IEEE Xplore</a></li>
+
+<li id="r6"><cite>Sign-sign LMS 기반 DFE 탭 적응</cite> <span class="vt v-std">표준</span><br>
+<span class="mono">w[m+1] = w[m] + 2µ·sgn(e)·sgn(d)</span> 형태로 상용 SerDes에 보편적으로 쓰이는 갱신식. 에러 슬라이서 출력을 부호 상관기로 처리한다.</li>
+
+<li id="r7"><cite>5장 “센스앰프가 위상당 1개”에서 도출한 귀결</cite> <span class="vt" style="color:var(--sig)">추론</span><br>
+데이터 센스앰프가 even·odd 각 1개(총 2개)라는 관찰로부터 <b>① 1번 탭은 언롤되지 않았고 ② full-rate MUX가 재직렬화와 탭 스위칭을 겸하며 ③ summer가 단일 full-rate 구조일 가능성이 높다</b>는 결론을 이끌었다. 1탭 언롤이었다면 ±w₁ 두 임계값 때문에 위상당 2개, 총 4개의 데이터 센스앰프가 필요하다는 사실이 근거다. 원본 회로도로 교차 확인이 필요한 부분이다.</li>
+</ol>
+</section>
+</main>
+</div>
+
+<footer>
+  <span>8탭 DFE 해부도</span>
+  <span>16 도면 · 7 참고문헌</span>
+  <span>수치는 모두 예시값 — 실제 설계 수치가 아님</span>
+</footer>
+</div>
+
+</body>
+</html>
