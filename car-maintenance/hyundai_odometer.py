@@ -5,16 +5,21 @@
 
   HYUNDAI_CLIENT_ID       디벨로퍼스 콘솔 프로젝트의 Client ID
   HYUNDAI_CLIENT_SECRET   같은 프로젝트의 Client Secret
-  HYUNDAI_REFRESH_TOKEN   최초 동의 후 받은 Refresh Token
+  HYUNDAI_REFRESH_TOKEN   (선택) Refresh Token. 없으면 --token-file 의 refreshToken 을 쓴다
   HYUNDAI_REDIRECT_URI    콘솔에 등록한 Redirect URI (토큰 요청에 같이 보낸다)
   HYUNDAI_CAR_ID          (선택) 차량 ID. 없으면 차량 목록의 첫 차를 쓴다
   HYUNDAI_AUTH_HOST       (선택) 기본 https://prd.kr-ccapi.hyundai.com
   HYUNDAI_API_HOST        (선택) 기본 https://dev.kr-ccapi.hyundai.com
 
 사용
-  python3 hyundai_odometer.py authorize-url      동의 화면 주소 출력
-  python3 hyundai_odometer.py odometer           {"km":..,"date":..} 한 줄 JSON 출력
-  python3 hyundai_odometer.py cars               연결된 차량 목록 출력
+  python3 hyundai_odometer.py authorize-url                     동의 화면 주소 출력
+  python3 hyundai_odometer.py exchange <code|리다이렉트 URL> --token-file F
+                                                                최초 동의 코드 → 토큰 파일 저장
+  python3 hyundai_odometer.py odometer [--token-file F]         {"km":..,"date":..} 한 줄 JSON 출력
+  python3 hyundai_odometer.py cars [--token-file F]             연결된 차량 목록 출력
+
+토큰 파일은 {"refreshToken": ...} 를 담은 JSON이다(다른 키로 감싸져 있어도 찾아 읽는다).
+Refresh Token이 재발급되면 같은 파일에 새 값을 써 두고 refreshTokenRotated=true 를 낸다.
 
 실패하면 종료 코드 1과 함께 {"error": ...} 한 줄을 출력한다. 토큰 값은 출력하지 않는다.
 """
@@ -61,20 +66,75 @@ def http(method, url, headers=None, data=None):
         raise ApiError(f"JSON이 아닌 응답: {raw[:200]}")
 
 
-def access_token():
+TOKEN_FILE = None
+
+
+def find_key(o, k, depth=0):
+    if not isinstance(o, (dict, list)) or depth > 6:
+        return None
+    items = o.values() if isinstance(o, dict) else o
+    if isinstance(o, dict) and isinstance(o.get(k), str) and o[k]:
+        return o[k]
+    for v in items:
+        f = find_key(v, k, depth + 1)
+        if f:
+            return f
+    return None
+
+
+def save_token(refresh):
+    if TOKEN_FILE:
+        with open(TOKEN_FILE, "w", encoding="utf-8") as f:
+            json.dump({"refreshToken": refresh, "issuedAt": datetime.now(KST).isoformat(timespec="seconds")}, f)
+
+
+def stored_refresh():
+    v = env("HYUNDAI_REFRESH_TOKEN", required=False)
+    if v:
+        return v
+    if TOKEN_FILE and os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, encoding="utf-8") as f:
+            v = find_key(json.load(f), "refreshToken")
+        if v:
+            return v
+    raise ApiError("Refresh Token이 없다 (HYUNDAI_REFRESH_TOKEN 또는 --token-file)")
+
+
+def token_request(form):
     cid, secret = env("HYUNDAI_CLIENT_ID"), env("HYUNDAI_CLIENT_SECRET")
-    form = {"grant_type": "refresh_token", "refresh_token": env("HYUNDAI_REFRESH_TOKEN")}
     redirect = env("HYUNDAI_REDIRECT_URI", required=False)
     if redirect:
         form["redirect_uri"] = redirect
     basic = base64.b64encode(f"{cid}:{secret}".encode()).decode()
-    res = http("POST", f"{AUTH_HOST}/api/v1/user/oauth2/token",
-               {"Authorization": f"Basic {basic}", "Content-Type": "application/x-www-form-urlencoded"}, form)
+    return http("POST", f"{AUTH_HOST}/api/v1/user/oauth2/token",
+                {"Authorization": f"Basic {basic}", "Content-Type": "application/x-www-form-urlencoded"}, form)
+
+
+def access_token():
+    old = stored_refresh()
+    res = token_request({"grant_type": "refresh_token", "refresh_token": old})
     tok = res.get("access_token")
     if not tok:
         raise ApiError(f"토큰 응답에 access_token이 없다: {sorted(res)}")
-    rotated = bool(res.get("refresh_token")) and res["refresh_token"] != form["refresh_token"]
+    rotated = bool(res.get("refresh_token")) and res["refresh_token"] != old
+    if rotated:
+        save_token(res["refresh_token"])
     return tok, rotated
+
+
+def cmd_exchange(arg):
+    code = arg
+    if "code=" in arg:
+        code = urllib.parse.parse_qs(urllib.parse.urlsplit(arg).query).get("code", [""])[0]
+    if not code:
+        raise ApiError("code 값이 비어 있다")
+    if not TOKEN_FILE:
+        raise ApiError("--token-file 경로가 필요하다")
+    res = token_request({"grant_type": "authorization_code", "code": code})
+    if not res.get("refresh_token"):
+        raise ApiError(f"토큰 응답에 refresh_token이 없다: {sorted(res)}")
+    save_token(res["refresh_token"])
+    return {"saved": TOKEN_FILE, "accessExpiresIn": res.get("expires_in")}
 
 
 def get(path, tok):
@@ -133,8 +193,16 @@ def cmd_authorize_url():
 
 
 def main(argv):
-    cmd = argv[1] if len(argv) > 1 else "odometer"
-    fn = {"odometer": cmd_odometer, "cars": cmd_cars, "authorize-url": cmd_authorize_url}.get(cmd)
+    global TOKEN_FILE
+    args = list(argv[1:])
+    if "--token-file" in args:
+        i = args.index("--token-file")
+        TOKEN_FILE = args[i + 1] if i + 1 < len(args) else None
+        del args[i:i + 2]
+    cmd = args[0] if args else "odometer"
+    fns = {"odometer": cmd_odometer, "cars": cmd_cars, "authorize-url": cmd_authorize_url,
+           "exchange": lambda: cmd_exchange(args[1] if len(args) > 1 else "")}
+    fn = fns.get(cmd)
     if not fn:
         print(__doc__)
         return 2
