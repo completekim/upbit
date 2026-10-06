@@ -1,0 +1,573 @@
+<title>그붕이 정비 계기판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: 계기판 헤더(누적 주행거리·페이스) → 신호등 요약 → 품목 카드 목록 → 입력·이력·설정 패널 */
+:root{
+  --bg:#eef1f2; --panel:#ffffff; --ink:#18232b; --muted:#5b6a74; --line:#d5dde1;
+  --accent:#1d5d7c; --accent-ink:#ffffff; --accent-soft:#dcebf2;
+  --red:#c2362f; --red-soft:#fbe6e4; --amber:#b86e00; --amber-soft:#fcf0dc;
+  --green:#2f7d4f; --green-soft:#e2f2e8; --cond:#5c6a8a; --cond-soft:#e7eaf3;
+  --track:#e3e8eb;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11171b; --panel:#182127; --ink:#e4ebef; --muted:#97a6af; --line:#2a363d;
+  --accent:#6fb3d4; --accent-ink:#0c1a21; --accent-soft:#1b3442;
+  --red:#ef7a70; --red-soft:#3a1f1d; --amber:#f0b24a; --amber-soft:#3a2c14;
+  --green:#6cc591; --green-soft:#16301f; --cond:#a4b0d2; --cond-soft:#252b3b;
+  --track:#26323a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11171b; --panel:#182127; --ink:#e4ebef; --muted:#97a6af; --line:#2a363d;
+  --accent:#6fb3d4; --accent-ink:#0c1a21; --accent-soft:#1b3442;
+  --red:#ef7a70; --red-soft:#3a1f1d; --amber:#f0b24a; --amber-soft:#3a2c14;
+  --green:#6cc591; --green-soft:#16301f; --cond:#a4b0d2; --cond-soft:#252b3b;
+  --track:#26323a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:20px}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:16px;font-weight:700}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 12px;font-size:13.5px;font-weight:500}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0;width:100%}
+.field{display:grid;gap:4px;min-width:0}
+.field>span{font-size:12.5px;color:var(--muted)}
+
+/* 계기판 헤더 */
+.cluster{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:16px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media (max-width:720px){.cluster{grid-template-columns:1fr}}
+.odo{display:grid;gap:6px}
+.odo-digits{display:flex;gap:3px;flex-wrap:wrap}
+.odo-digits span{font-family:var(--f-num);font-size:clamp(26px,6vw,40px);font-weight:600;background:var(--ink);color:var(--panel);border-radius:5px;padding:2px 7px;line-height:1.2;min-width:1.05em;text-align:center}
+.odo-digits span.unit{background:none;color:var(--muted);font-size:16px;align-self:flex-end;padding:0 0 6px 4px;min-width:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-content:start}
+.stat{display:grid;gap:2px}
+.stat b{font-family:var(--f-num);font-size:19px;font-weight:600}
+.lampbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.lampbar .label{margin-right:2px}
+
+/* 신호등 요약 */
+.lights{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.s-red{color:var(--red);background:var(--red-soft)}
+.s-amber{color:var(--amber);background:var(--amber-soft)}
+.s-green{color:var(--green);background:var(--green-soft)}
+.s-cond{color:var(--cond);background:var(--cond-soft)}
+.visit{margin-left:auto;font-size:13px;background:var(--accent-soft);color:var(--ink);border-radius:8px;padding:6px 10px}
+@media (max-width:600px){.visit{margin-left:0}}
+
+/* 품목 카드 */
+.items{display:grid;gap:10px}
+.item{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px}
+.item.st-red{border-left-color:var(--red)} .item.st-amber{border-left-color:var(--amber)}
+.item.st-green{border-left-color:var(--green)} .item.st-cond{border-left-color:var(--cond)}
+.item-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.item-head h3{font-size:15.5px;font-weight:700;margin-right:auto;min-width:0}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--muted);white-space:nowrap}
+.chip.plan{border-color:var(--accent);color:var(--accent)}
+.chip.cal{border-color:var(--green);color:var(--green)}
+.item-body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.item-body{grid-template-columns:1fr 1fr}}
+.kv{display:grid;gap:1px;min-width:0}
+.kv b{font-weight:600;font-size:14px}
+.kv .num{font-size:14px}
+.bar{height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.note{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.panel{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:12px;display:grid;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.msg{font-size:13px;min-height:1em}
+.msg.err{color:var(--red)} .msg.ok{color:var(--green)}
+
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+details summary{cursor:pointer;font-weight:700}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+td.r,th.r{text-align:right}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:6px}
+code{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;margin:0}
+.chip.warn{border-color:var(--red);color:var(--red);font-weight:600}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s ease}}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:4px">
+    <div class="label">그랜저 IG 3.3 · 2017-10 출고</div>
+    <h1>그붕이 정비 계기판</h1>
+    <div class="small muted">시간 주기와 주행거리 주기 중 먼저 오는 쪽으로 교체 시기를 잡는다. 주행거리는 마지막 기록에 월평균 주행량을 일할로 더해 오늘 값을 추정한다.</div>
+  </header>
+
+  <section class="cluster" aria-label="블루링크 계기판">
+    <div class="odo">
+      <div class="label">오늘 추정 누적 주행거리 · 블루링크 자동 수신</div>
+      <div class="odo-digits" id="odoDigits"><span>–</span></div>
+      <div class="small muted" id="odoSub">기록을 불러오는 중</div>
+      <div class="lampbar" id="lampBar" aria-label="경고등"></div>
+      <div class="msg" id="odoMsg" role="status"></div>
+    </div>
+    <div style="display:grid;gap:14px;align-content:start">
+      <div class="stats">
+        <div class="stat"><span class="label">월 평균</span><b id="paceDay">–</b><span class="small muted">km</span></div>
+        <div class="stat"><span class="label">주행 가능</span><b id="dteVal">–</b><span class="small muted">km</span></div>
+        <div class="stat"><span class="label">마지막 수신</span><b id="lastAge">–</b><span class="small muted" id="lastSrc">일 전</span></div>
+      </div>
+      <div class="small muted" id="syncNote">매주 토요일 07:52 블루링크에서 자동으로 받아 온다. 입력할 필요 없다.</div>
+    </div>
+  </section>
+
+  <div class="lights" id="lights" aria-live="polite"></div>
+
+  <section aria-label="소모품" class="items" id="items">
+    <div class="empty">품목을 불러오는 중이다. 데이터가 없으면 아래 「품목 추가」로 첫 품목을 등록한다.</div>
+  </section>
+
+  <section class="card">
+    <details id="addWrap">
+      <summary>품목 추가</summary>
+      <form id="addForm" class="panel" style="margin-top:10px" autocomplete="off">
+        <div class="grid2">
+          <label class="field"><span>품목명</span><input id="addName" required></label>
+          <label class="field"><span>마지막 교체일</span><input id="addDate" type="date"></label>
+          <label class="field"><span>그때 주행거리 (km)</span><input id="addKm" type="number" min="0"></label>
+          <label class="field"><span>시간 주기 (개월)</span><input id="addMonths" type="number" min="0"></label>
+          <label class="field"><span>거리 주기 (km)</span><input id="addIntKm" type="number" min="0"></label>
+        </div>
+        <div class="actions"><button class="primary" type="submit">추가</button></div>
+      </form>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>교체 이력</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>날짜</th><th class="r">주행거리</th><th>품목</th><th>업체·방식</th><th class="r">비용(원)</th></tr></thead>
+      <tbody id="histBody"><tr><td colspan="5" class="muted">교체를 기록하면 여기에 쌓인다.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>주행거리 기록</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>측정일</th><th class="r">주행거리</th><th class="r">직전 대비</th><th>출처</th></tr></thead>
+      <tbody id="odoBody"><tr><td colspan="4" class="muted">기록이 없다.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>주행거리 자동 수집 · 알림 구조</summary>
+      <div style="display:grid;gap:12px;margin-top:10px">
+        <p class="small" style="margin:0">매주 월요일 08:52(KST) 점검 루틴이 현대 디벨로퍼스 데이터 API로 블루링크 누적 주행거리를 읽어 「주행거리 기록」에 출처 <code>bluelink</code>로 넣고, 판정 결과를 푸시·메일로 보낸다. 화면은 그 기록으로 오늘 값을 추정한다.</p>
+        <ol class="steps small">
+          <li><b>수집.</b> 루틴이 Refresh Token으로 Access Token을 받고(<code>/api/v1/user/oauth2/token</code>), 차량 목록에서 그붕이의 carId를 찾아 누적 운행거리(<code>/api/v1/car/status/{carId}/odometer</code>)와 주행가능거리·경고등 7종을 함께 읽는다. 엔진오일·브레이크 오일·타이어 공기압·스마트키·워셔액 경고등이 켜지면 연결된 품목이 바로 🔴이 된다. 비밀값은 클라우드 환경 변수에만 둔다.</li>
+          <li><b>판정.</b> 화면과 같은 규칙(시간·거리 중 이른 쪽, 선행일·선행 km)으로 🔴·🟡을 가른다. 블루링크 값이 21일 넘게 들어오지 않으면 경고한다.</li>
+          <li><b>알림.</b> 품목 카드의 「캘린더 알림」은 교체 예정일에서 선행일수만큼 앞선 날 09:00에 Google Calendar 일정을 만든다. 거리 기준 예정일은 현재 페이스로 환산한 날짜를 쓴다.</li>
+          <li><b>입력 불필요.</b> 주행거리는 블루링크에서만 받는다. 정비할 때 「교체 기록」에 그날 주행거리가 추정값으로 미리 채워진다.</li>
+        </ol>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <h2 style="margin-right:auto">Vault 반영</h2>
+      <button type="button" id="copyMd">기록표 마크다운 복사</button>
+    </div>
+    <p class="small muted" style="margin:0">정본은 Vault의 「01. 소모품 교체 기록표」다. 교체를 기록한 뒤 이 버튼으로 현재 신호등 표를 복사해 붙인다.</p>
+    <textarea id="mdOut" rows="6" hidden readonly></textarea>
+    <div class="msg" id="mdMsg" role="status"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+const TZ = "Asia/Seoul";
+const DEFAULT_PACE = 18.3;
+const MONTH = 365.25 / 12;  // 월평균 표시용 일수
+const state = { items: [], odo: [], hist: [], vehicle: null, db: null, user: null, canWrite: null, mcp: null, openPanel: null };
+const WARN_LABEL = { engineOil: "엔진오일", breakOil: "브레이크 오일", tirePressure: "타이어 공기압", smartKeyBattery: "스마트키 배터리", washerFluid: "워셔액", lampWire: "램프 단선", lowFuel: "주유" };
+
+/* ---------- 날짜 (KST, 'YYYY-MM-DD' 문자열을 UTC 자정으로 다룬다) ---------- */
+const todayStr = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+const toMs = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+const fromMs = ms => new Date(ms).toISOString().slice(0, 10);
+const DAY = 86400000;
+const daysBetween = (a, b) => Math.round((toMs(b) - toMs(a)) / DAY);
+const addDays = (s, n) => fromMs(toMs(s) + Math.round(n) * DAY);
+const addMonths = (s, n) => {
+  const [y, m, d] = s.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1 + n, 1));
+  const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate();
+  t.setUTCDate(Math.min(d, last));
+  return fromMs(t.getTime());
+};
+const fmtKm = n => n == null || !isFinite(n) ? "–" : Math.round(n).toLocaleString("ko-KR");
+const fmtDate = s => s ? s.replace(/^20(\d\d)-(\d\d)-(\d\d)$/, "$1.$2.$3") : "–";
+const dLabel = n => n === 0 ? "D-day" : n > 0 ? `D-${n}` : `${-n}일 지남`;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = id => document.getElementById(id);
+
+/* ---------- 주행 페이스: 최근 400일 기록의 최소제곱 기울기 ---------- */
+function paceInfo() {
+  const odo = [...state.odo].filter(r => isFinite(r.km) && r.date).sort((a, b) => a.date < b.date ? -1 : 1);
+  if (!odo.length) return { pace: DEFAULT_PACE, last: null, cur: null, basis: "기본값" };
+  const last = odo[odo.length - 1];
+  const t = todayStr();
+  let pts = odo.filter(r => daysBetween(r.date, last.date) <= 400);
+  if (pts.length < 2 || daysBetween(pts[0].date, last.date) < 60) pts = odo.slice(-6);
+  let pace = DEFAULT_PACE, basis = "기본값";
+  if (pts.length >= 2 && daysBetween(pts[0].date, last.date) >= 30) {
+    const xs = pts.map(p => toMs(p.date) / DAY), ys = pts.map(p => p.km);
+    const mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+    let num = 0, den = 0;
+    xs.forEach((x, i) => { num += (x - mx) * (ys[i] - my); den += (x - mx) ** 2; });
+    if (den > 0 && num / den > 0) { pace = num / den; basis = `${pts.length}개 기록, ${daysBetween(pts[0].date, last.date)}일 구간`; }
+  }
+  const gap = Math.max(0, daysBetween(last.date, t));
+  return { pace, last, cur: last.km + pace * gap, gap, basis };
+}
+
+/* ---------- 품목 상태 ---------- */
+function compute(it, P) {
+  const t = todayStr();
+  const out = { tDue: null, tDays: null, kDue: null, kRemain: null, kDate: null, kDays: null, used: null, dueDate: null, dueDays: null, axis: null, status: "green" };
+  const lead = Number(it.leadDays ?? 30), leadKm = Number(it.leadKm ?? 1000);
+  if (it.intMonths && it.lastDate) {
+    out.tDue = addMonths(it.lastDate, Number(it.intMonths));
+    out.tDays = daysBetween(t, out.tDue);
+    const span = daysBetween(it.lastDate, out.tDue);
+    out.used = Math.max(out.used ?? 0, daysBetween(it.lastDate, t) / span);
+  }
+  if (it.intKm && it.lastKm != null && P.cur != null) {
+    out.kDue = Number(it.lastKm) + Number(it.intKm);
+    out.kRemain = out.kDue - P.cur;
+    out.kDays = Math.round(out.kRemain / P.pace);
+    out.kDate = addDays(t, out.kDays);
+    out.used = Math.max(out.used ?? 0, (P.cur - it.lastKm) / it.intKm);
+  }
+  const cands = [];
+  if (out.tDays != null) cands.push({ d: out.tDays, date: out.tDue, axis: "시간" });
+  if (out.kDays != null) cands.push({ d: out.kDays, date: out.kDate, axis: "거리" });
+  cands.sort((a, b) => a.d - b.d);
+  if (cands.length) { out.dueDays = cands[0].d; out.dueDate = cands[0].date; out.axis = cands[0].axis; }
+  if (!cands.length) out.status = "cond";
+  else if (out.dueDays <= 0 || (out.kRemain != null && out.kRemain <= 0)) out.status = "red";
+  else if (out.dueDays <= lead || (out.kRemain != null && out.kRemain <= leadKm)) out.status = "amber";
+  out.warn = !!(it.warnKey && state.vehicle?.warnings?.[it.warnKey] === true);
+  if (it.override === "due" || out.warn) out.status = "red";
+  else if (it.override === "watch" && out.status !== "red") out.status = "amber";
+  return out;
+}
+const RANK = { red: 0, amber: 1, cond: 2, green: 3 };
+const SLABEL = { red: "지금", amber: "확인", green: "여유", cond: "상태 기준" };
+
+/* ---------- 렌더 ---------- */
+function render() {
+  const P = paceInfo();
+  // 계기판
+  const digits = $("odoDigits");
+  if (P.cur != null) {
+    const s = Math.round(P.cur).toLocaleString("ko-KR");
+    digits.innerHTML = [...s].map(c => c === "," ? "" : `<span>${c}</span>`).join("") + `<span class="unit">km</span>`;
+    const src = P.last.source === "bluelink" ? "블루링크" : (P.last.source || "기록");
+    $("odoSub").textContent = `${src} ${fmtDate(P.last.date)} · ${fmtKm(P.last.km)} km${P.gap ? ` + ${P.gap}일치 추정(월 ${fmtKm(P.pace * MONTH)} km 기준)` : ""}`;
+    $("lastAge").textContent = P.gap;
+    $("lastSrc").textContent = "일 전";
+    $("lastAge").style.color = P.gap > 21 ? "var(--red)" : "";
+  } else {
+    digits.innerHTML = `<span>–</span>`;
+    $("odoSub").textContent = "주행거리 기록이 없다. 다음 토요일 자동 수신을 기다린다.";
+  }
+  $("paceDay").textContent = fmtKm(P.pace * MONTH);
+  $("paceDay").title = `기준: ${P.basis}`;
+
+  // 품목
+  const rows = state.items.map(it => ({ it, c: compute(it, P) }))
+    .sort((a, b) => (RANK[a.c.status] - RANK[b.c.status]) || ((a.c.dueDays ?? 99999) - (b.c.dueDays ?? 99999)) || ((a.it.order ?? 99) - (b.it.order ?? 99)));
+  const box = $("items");
+  if (state.openPanel && document.querySelector(".item .slot form")) { /* 입력 중인 패널은 다시 그리지 않는다 */ }
+  else if (!rows.length) {
+    box.innerHTML = `<div class="empty">아직 등록된 품목이 없다. 아래 「품목 추가」로 첫 품목을 등록한다.</div>`;
+  } else {
+    box.innerHTML = rows.map(({ it, c }) => itemHtml(it, c)).join("");
+  }
+  // 신호등 요약
+  const cnt = { red: 0, amber: 0, green: 0, cond: 0 };
+  rows.forEach(r => cnt[r.c.status]++);
+  const t = todayStr();
+  const plans = [...new Set(state.items.filter(i => i.plannedDate && i.plannedDate >= t).map(i => i.plannedDate))].sort();
+  let visit = "";
+  if (plans.length) {
+    const p = plans[0];
+    const names = state.items.filter(i => i.plannedDate === p).map(i => i.name);
+    const shop = state.items.find(i => i.plannedDate === p && i.plannedShop)?.plannedShop || "정비 예약";
+    visit = `<span class="visit"><b>${fmtDate(p)}</b> ${dLabel(daysBetween(t, p))} · ${esc(shop)} — ${names.map(esc).join(", ")}</span>`;
+  }
+  $("lights").innerHTML = `
+    <span class="pill s-red">지금 ${cnt.red}</span>
+    <span class="pill s-amber">확인 ${cnt.amber}</span>
+    <span class="pill s-green">여유 ${cnt.green}</span>
+    ${cnt.cond ? `<span class="pill s-cond">상태 기준 ${cnt.cond}</span>` : ""}
+    ${visit}`;
+  renderHist(); renderOdo(); renderVehicle(); applyWriteGate();
+  if (state.openPanel) restorePanel();
+}
+
+function itemHtml(it, c) {
+  const pct = c.used == null ? 0 : Math.min(100, Math.max(2, c.used * 100));
+  const barColor = { red: "var(--red)", amber: "var(--amber)", green: "var(--green)", cond: "var(--cond)" }[c.status];
+  const t = todayStr();
+  const nextTxt = c.dueDate
+    ? `<span class="num">${fmtDate(c.dueDate)}</span> <span class="muted">${dLabel(c.dueDays)} · ${c.axis} 기준</span>`
+    : `<span class="muted">${esc(it.condition || "잔량·상태를 보고 판단")}</span>`;
+  const cycle = [it.intMonths ? `${it.intMonths}개월` : null, it.intKm ? `${fmtKm(it.intKm)} km` : null].filter(Boolean).join(" · ") || "주기 없음";
+  const kmTxt = c.kDue != null ? `<span class="num">${fmtKm(c.kDue)}</span> <span class="muted">잔여 ${fmtKm(c.kRemain)} km</span>` : `<span class="muted">거리 주기 없음</span>`;
+  const chips = [
+    it.plannedDate && it.plannedDate >= t ? `<span class="chip plan">예약 ${fmtDate(it.plannedDate)}</span>` : "",
+    it.calDate ? `<span class="chip cal">알림 ${fmtDate(it.calDate)}</span>` : "",
+    it.selfService ? `<span class="chip">자가교체</span>` : "",
+    c.warn ? `<span class="chip warn">경고등 점등</span>` : ""
+  ].join("");
+  return `<article class="item st-${c.status}" data-id="${esc(it.id)}">
+    <div class="item-head"><h3>${esc(it.name)}</h3>${chips}<span class="pill s-${c.status}">${SLABEL[c.status]}</span></div>
+    <div class="bar" aria-hidden="true"><i style="width:${pct}%;background:${barColor}"></i></div>
+    <div class="item-body">
+      <div class="kv"><span class="label">마지막 교체</span><b class="num">${it.lastDate ? fmtDate(it.lastDate) : "기록 없음"}</b><span class="small muted num">${it.lastKm != null ? fmtKm(it.lastKm) + " km" : ""}</span></div>
+      <div class="kv"><span class="label">주기</span><b>${cycle}</b><span class="small muted">${c.used != null ? `경과 ${Math.round(c.used * 100)}%` : ""}</span></div>
+      <div class="kv"><span class="label">다음 교체</span><b>${nextTxt}</b><span class="small">${c.kDue != null && c.tDue ? kmTxt : ""}</span></div>
+    </div>
+    ${it.note ? `<div class="note">${esc(it.note)}</div>` : ""}
+    <div class="actions w-only">
+      <button type="button" data-act="done">교체 기록</button>
+      <button type="button" data-act="cal" ${c.dueDate ? "" : "disabled"}>${it.calEventId ? "캘린더 알림 갱신" : "캘린더 알림"}</button>
+      <button type="button" data-act="edit">편집</button>
+    </div>
+    <div class="slot"></div>
+  </article>`;
+}
+
+function renderHist() {
+  const tb = $("histBody");
+  const h = [...state.hist].sort((a, b) => a.date < b.date ? 1 : -1);
+  if (!h.length) { tb.innerHTML = `<tr><td colspan="5" class="muted">교체를 기록하면 여기에 쌓인다.</td></tr>`; return; }
+  tb.innerHTML = h.map(r => `<tr><td class="num">${fmtDate(r.date)}</td><td class="r num">${fmtKm(r.km)}</td><td>${esc((r.items || []).join(", "))}${r.memo ? `<div class="small muted">${esc(r.memo)}</div>` : ""}</td><td>${esc(r.shop || "")}</td><td class="r num">${r.cost ? Number(r.cost).toLocaleString("ko-KR") : ""}</td></tr>`).join("");
+}
+function renderOdo() {
+  const tb = $("odoBody");
+  const o = [...state.odo].sort((a, b) => a.date < b.date ? -1 : 1);
+  if (!o.length) { tb.innerHTML = `<tr><td colspan="4" class="muted">기록이 없다.</td></tr>`; return; }
+  const rows = o.map((r, i) => {
+    const prev = o[i - 1];
+    const diff = prev ? `${fmtKm(r.km - prev.km)} km / ${daysBetween(prev.date, r.date)}일` : "";
+    return `<tr><td class="num">${fmtDate(r.date)}</td><td class="r num">${fmtKm(r.km)}</td><td class="r small muted num">${diff}</td><td class="small">${esc(r.source === "bluelink" ? "블루링크" : (r.source || ""))}${r.note ? ` · ${esc(r.note)}` : ""}</td></tr>`;
+  }).reverse();
+  tb.innerHTML = rows.join("");
+}
+
+/* ---------- 쓰기 권한 ---------- */
+function applyWriteGate() {
+  const ro = state.canWrite === false || !state.db;
+  document.querySelectorAll(".w-only").forEach(el => el.hidden = ro);
+  $("addWrap").hidden = ro;
+}
+
+/* ---------- 카드 안 패널 ---------- */
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const card = btn.closest(".item"); const id = card.dataset.id;
+  const it = state.items.find(i => i.id === id);
+  if (btn.dataset.act === "done") { state.openPanel = { id, kind: "done" }; restorePanel(); }
+  if (btn.dataset.act === "edit") { state.openPanel = { id, kind: "edit" }; restorePanel(); }
+  if (btn.dataset.act === "close") { state.openPanel = null; render(); }
+  if (btn.dataset.act === "cal") await setCalendar(it, card);
+});
+
+function restorePanel() {
+  const { id, kind } = state.openPanel;
+  const card = document.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+  const it = state.items.find(i => i.id === id);
+  if (!card || !it) return;
+  const slot = card.querySelector(".slot");
+  if (slot.firstChild) return;
+  const P = paceInfo();
+  if (kind === "done") {
+    slot.innerHTML = `<form class="panel" data-form="done">
+      <div class="grid2">
+        <label class="field"><span>교체일</span><input name="date" type="date" value="${todayStr()}" required></label>
+        <label class="field"><span>주행거리 (km)</span><input name="km" type="number" min="0" value="${P.cur != null ? Math.round(P.cur) : ""}" required></label>
+        <label class="field"><span>업체·방식</span><input name="shop" placeholder="예: 공임나라 성내점 / 자가"></label>
+        <label class="field"><span>비용 (원)</span><input name="cost" type="number" min="0"></label>
+      </div>
+      <label class="field"><span>메모</span><input name="memo" placeholder="예: 폐유 색 짙음, 패드 앞 15%"></label>
+      <div class="actions"><button class="primary" type="submit">저장</button><button type="button" data-act="close">취소</button></div>
+      <div class="msg"></div></form>`;
+  } else {
+    slot.innerHTML = `<form class="panel" data-form="edit">
+      <div class="grid2">
+        <label class="field"><span>품목명</span><input name="name" value="${esc(it.name)}" required></label>
+        <label class="field"><span>마지막 교체일</span><input name="lastDate" type="date" value="${esc(it.lastDate || "")}"></label>
+        <label class="field"><span>그때 주행거리</span><input name="lastKm" type="number" value="${it.lastKm ?? ""}"></label>
+        <label class="field"><span>시간 주기 (개월)</span><input name="intMonths" type="number" value="${it.intMonths ?? ""}"></label>
+        <label class="field"><span>거리 주기 (km)</span><input name="intKm" type="number" value="${it.intKm ?? ""}"></label>
+        <label class="field"><span>알림 선행 (일)</span><input name="leadDays" type="number" value="${it.leadDays ?? 30}"></label>
+        <label class="field"><span>알림 선행 (km)</span><input name="leadKm" type="number" value="${it.leadKm ?? 1000}"></label>
+        <label class="field"><span>예약일</span><input name="plannedDate" type="date" value="${esc(it.plannedDate || "")}"></label>
+        <label class="field"><span>수동 판정</span><select name="override">
+          <option value="" ${!it.override ? "selected" : ""}>자동</option>
+          <option value="watch" ${it.override === "watch" ? "selected" : ""}>확인 (🟡 고정)</option>
+          <option value="due" ${it.override === "due" ? "selected" : ""}>지금 (🔴 고정)</option></select></label>
+      </div>
+      <label class="field"><span>메모</span><textarea name="note" rows="2">${esc(it.note || "")}</textarea></label>
+      <div class="actions"><button class="primary" type="submit">저장</button><button type="button" data-act="close">취소</button></div>
+      <div class="msg"></div></form>`;
+  }
+}
+
+document.addEventListener("submit", async e => {
+  const f = e.target.closest("form[data-form]");
+  if (!f) return;
+  e.preventDefault();
+  const id = f.closest(".item").dataset.id;
+  const it = state.items.find(i => i.id === id);
+  const fd = Object.fromEntries(new FormData(f).entries());
+  const msg = f.querySelector(".msg");
+  const numOrNull = v => v === "" || v == null ? null : Number(v);
+  try {
+    f.querySelector("button[type=submit]").disabled = true;
+    if (f.dataset.form === "done") {
+      const km = Number(fd.km);
+      await state.db.doc(`items/${id}`).update({ lastDate: fd.date, lastKm: km, override: null, plannedDate: (it.plannedDate && it.plannedDate <= fd.date) ? null : (it.plannedDate || null), updatedAt: new Date().toISOString() });
+      await state.db.collection("history").add({ date: fd.date, km, items: [it.name], itemIds: [id], shop: fd.shop || "", cost: numOrNull(fd.cost), memo: fd.memo || "" });
+      await upsertOdo(fd.date, km, "교체 기록", it.name);
+    } else {
+      await state.db.doc(`items/${id}`).update({
+        name: fd.name, lastDate: fd.lastDate || null, lastKm: numOrNull(fd.lastKm), intMonths: numOrNull(fd.intMonths), intKm: numOrNull(fd.intKm),
+        leadDays: numOrNull(fd.leadDays) ?? 30, leadKm: numOrNull(fd.leadKm) ?? 1000, plannedDate: fd.plannedDate || null, override: fd.override || null, note: fd.note || "",
+        updatedAt: new Date().toISOString() });
+    }
+    state.openPanel = null; render();
+  } catch (err) {
+    msg.className = "msg err"; msg.textContent = `저장하지 못했다 (${err.code || err.message}). 편집 권한이 있는 계정인지 확인한다.`;
+    f.querySelector("button[type=submit]").disabled = false;
+  }
+});
+
+async function upsertOdo(date, km, source, note) {
+  const ref = state.db.doc(`odo/${date}`);
+  const cur = await ref.get();
+  if (cur.exists && Number(cur.data().km) >= km) return;
+  await ref.set({ date, km, source, note: note || "", at: new Date().toISOString() });
+}
+
+
+/* ---------- 품목 추가 ---------- */
+$("addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const n = v => v === "" ? null : Number(v);
+  const name = $("addName").value.trim(); if (!name) return;
+  const id = "i" + Date.now().toString(36);
+  try {
+    await state.db.doc(`items/${id}`).set({ name, lastDate: $("addDate").value || null, lastKm: n($("addKm").value), intMonths: n($("addMonths").value), intKm: n($("addIntKm").value), leadDays: 30, leadKm: 1000, order: 50, note: "" });
+    e.target.reset(); $("addWrap").open = false;
+  } catch (err) { /* 권한 없음 */ }
+});
+
+/* ---------- Google Calendar 알림 ---------- */
+async function setCalendar(it, card) {
+  const slot = card.querySelector(".slot");
+  const say = (t, cls) => { slot.innerHTML = `<div class="msg ${cls || ""}">${esc(t)}</div>`; };
+  if (!state.mcp) { say("이 화면에서는 캘린더 연결을 쓸 수 없다. claude.ai에서 열어야 한다.", "err"); return; }
+  const P = paceInfo(); const c = compute(it, P);
+  if (!c.dueDate) return;
+  const t = todayStr();
+  let alertDate = addDays(c.dueDate, -Number(it.leadDays ?? 30));
+  if (alertDate <= t) alertDate = addDays(t, 1);
+  const desc = [`그붕이 ${it.name} 교체 시기 알림`, `교체 예정: ${c.dueDate} (${c.axis} 기준)`,
+    c.kDue != null ? `거리 기준: ${fmtKm(c.kDue)} km (현재 추정 ${fmtKm(P.cur)} km, 월 ${fmtKm(P.pace * MONTH)} km)` : "",
+    c.tDue ? `시간 기준: ${c.tDue}` : "", it.note ? `메모: ${it.note}` : ""].filter(Boolean).join("\n");
+  say("캘린더에 등록하는 중…");
+  try {
+    if (it.calEventId) { try { await state.mcp.callTool("Google Calendar", "delete_event", { eventId: it.calEventId, notificationLevel: "NONE" }); } catch (_) {} }
+    const r = await state.mcp.callTool("Google Calendar", "create_event", {
+      summary: `[그붕이] ${it.name} 교체 예정 ${fmtDate(c.dueDate)}`,
+      startTime: `${alertDate}T09:00:00+09:00`, endTime: `${alertDate}T09:30:00+09:00`, timeZone: TZ,
+      description: desc, overrideReminders: [{ method: "popup", minutes: 0 }, { method: "popup", minutes: 1440 }],
+      availability: "AVAILABILITY_FREE"
+    });
+    const evId = findKey(r.payload, "id") || findKey(r.structuredContent, "id") || null;
+    await state.db.doc(`items/${it.id}`).update({ calEventId: evId, calDate: alertDate });
+    say(`${fmtDate(alertDate)} 09:00 알림을 등록했다.`, "ok");
+  } catch (err) {
+    const m = { needs_reauth: "Google Calendar 연결이 만료됐다. claude.ai 설정 → 커넥터에서 다시 연결한다.",
+      server_not_connected: "Google Calendar 커넥터가 없다. claude.ai 설정 → 커넥터에서 추가한다.",
+      not_in_manifest: "이 페이지에 캘린더 사용을 허용하지 않았다. 아티팩트 권한 메뉴에서 켠다.",
+      tool_error: `캘린더가 거절했다: ${err.message}` }[err.code] || `등록하지 못했다 (${err.code}). 잠시 뒤 다시 누른다.`;
+    say(m, "err");
+  }
+}
+function findKey(o, k, depth = 0) {
+  if (!o || typeof o !== "object" || depth > 5) return null;
+  if (typeof o[k] === "string" || typeof o[k] === "number") return o[k];
+  for (const v of Object.values(o)) { const f = findKey(v, k, depth + 1); if (f != null) return f; }
+  return null;
+}
+
+/* ---------- 블루링크 차량 상태(계기판에 통합) ---------- */
+function renderVehicle() {
+  const v = state.vehicle;
+  $("dteVal").textContent = v && v.dte != null ? fmtKm(v.dte) : "–";
+  const chips = Object.keys(WARN_LABEL).map(k => {
+    const on = v?.warnings?.[k];
+    const cls = on === true ? "s-red" : on === false ? "s-green" : "s-cond";
+    return `<span class="pill ${cls}" title="${on === true ? "점등" : on === false ? "정상" : "미수신"}">${WARN_LABEL[k]}</span>`;
+  }).join("");
+  const anyKnown = v && Object.values(v.warnings || {}).some(x => typeof x === "boolean");
+  $("lampBar").innerHTML = `<span class="label">경고등</span>${chips}${anyKnown ? "" : `<span class="muted">현대 서버 미제공</span>`}`;
+}
+
+/* ---------- 기타 버튼 ---------- */
+$("copyMd").addEventListener("click", async () => {
+  const P = paceInfo(); const t = todayStr();
+  const icon = { red: "🔴", amber: "🟡", green: "🟢", cond: "⚪" };
+  const rows = state.items.map(it => ({ it, c: compute(it, P) })).sort((a, b) => (RANK[a.c.status] - RANK[b.c.status]) || ((a.it.order ?? 99) - (b.it.order ?? 99)));
+  const lines = [`> ${t} 기준 추정 ${fmtKm(P.cur)} km (마지막 기록 ${P.last ? P.last.date + " · " + fmtKm(P.last.km) + " km" : "없음"}, 월 ${fmtKm(P.pace * MONTH)} km) — 그붕이 정비 계기판에서 생성`, "",
+    "| 상태 | 품목 | 마지막 교체 | 주기 | 다음 예정 |", "|:--:|---|---|---|---|",
+    ...rows.map(({ it, c }) => `| ${icon[c.status]} | ${it.name} | ${it.lastDate ? it.lastDate.slice(2).replace("-", ".") : "없음"}${it.lastKm != null ? " · " + fmtKm(it.lastKm) : ""} | ${[it.intMonths ? it.intMonths + "개월" : "", it.intKm ? fmtKm(it.intKm) + "km" : ""].filter(Boolean).join(" · ") || "상태 기준"} | ${c.dueDate ? c.dueDate.slice(2).replace("-", ".") + " (" + dLabel(c.dueDays) + ", " + c.axis + ")" : "—"} |`)];
+  const md = lines.join("\n"); const ta = $("mdOut"); ta.value = md; ta.hidden = false;
+  try { await navigator.clipboard.writeText(md); $("mdMsg").className = "msg ok"; $("mdMsg").textContent = "복사했다."; }
+  catch (_) { ta.select(); $("mdMsg").textContent = "아래 상자를 선택해 복사한다."; }
+});
+
+/* ---------- 부팅 ---------- */
+render();
+(async () => {
+  const [db, user, mcp] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("mcp")]);
+  state.db = db; state.user = user; state.mcp = mcp;
+  if (user) { try { const w = await user.can("data.write"); state.canWrite = w; } catch (_) {} }
+  if (!db) { $("items").innerHTML = `<div class="empty">데이터 저장소에 연결하지 못했다. claude.ai에 로그인한 상태로 연다.</div>`; applyWriteGate(); return; }
+  const onErr = e => { $("odoMsg").className = "msg err"; $("odoMsg").textContent = `불러오기가 끊겼다 (${e.code}). 새로고침한다.`; };
+  db.collection("items").onSnapshot(s => { state.items = s.docs.map(d => ({ id: d.id, ...d.data() })); render(); }, onErr);
+  db.collection("odo").onSnapshot(s => { state.odo = s.docs.map(d => ({ ...d.data(), date: d.data().date || d.id, km: Number(d.data().km) })); render(); }, onErr);
+  db.doc("vehicle/latest").onSnapshot(d => { state.vehicle = d.exists ? d.data() : null; render(); }, onErr);
+  db.collection("history").onSnapshot(s => { state.hist = s.docs.map(d => ({ id: d.id, ...d.data() })); renderHist(); }, onErr);
+})();
+})();
+</script>
