@@ -86,5 +86,5 @@ python3 -I hyundai_odometer.py odometer --token-file T   # {"km": ..., "date": .
 | 경고등 7종 | ❌ 서버가 `status` 없이 `msgId`만 반환 — 현대 디벨로퍼스 문의 대상 |
 | 토큰 | 환경 변수 `HYUNDAI_REFRESH_TOKEN` (1년 유효, 회전 없음 확인) |
 | 수집기 설치 | 환경 「대화」 설정 스크립트에 `env-setup-block.sh` 블록 — `/root/gbung/hyundai_odometer.py` 설치 + 그 명령만 실행 허용 |
-| 매일 루틴 | `trig_01PuXXiZ59TJiLySfjhM3d2K` 매일 07:52 KST — 무인 수집 검증 완료(권한 거부 0건) |
+| 매일 루틴 | `trig_01PuXXiZ59TJiLySfjhM3d2K` 매주 토요일 07:52 KST — 무인 수집 검증 완료(권한 거부 0건) |
 | 최초 연결 절차 | 「묻기」 모드 세션에서 `authorize-url` → `exchange` (자동 모드에서는 토큰 처리가 차단된다) |
