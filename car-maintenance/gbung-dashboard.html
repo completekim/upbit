@@ -133,9 +133,8 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
         <div class="stat"><span class="label">마지막 기록</span><b id="lastAge">–</b><span class="small muted" id="lastSrc">일 전</span></div>
       </div>
       <div class="inbox" id="inbox">
-        <span class="label">자동 수집함</span>
-        <span id="inboxState" class="muted">MacroDroid가 보낸 값이 Make 수신함에 쌓인다</span>
-        <button type="button" id="inboxImport" hidden>가져오기</button>
+        <span class="label">블루링크 자동 수신</span>
+        <span id="inboxState" class="muted">아직 수신 기록이 없다</span>
       </div>
     </div>
   </section>
@@ -182,16 +181,12 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
     <details>
       <summary>주행거리 자동 수집 · 알림 구조</summary>
       <div style="display:grid;gap:12px;margin-top:10px">
-        <p class="small" style="margin:0">MacroDroid가 주 1회 주행거리를 Make 웹훅으로 보내고, 이 화면의 「가져오기」 또는 매주 도는 점검 루틴이 그 값을 기록에 옮긴다. 시간 기준 알림은 품목별 「캘린더 알림」으로 Google Calendar에 건다.</p>
-        <div class="field"><span>웹훅 주소 (MacroDroid HTTP 요청 대상)</span>
-          <div style="display:flex;gap:6px;flex-wrap:wrap"><code id="hookUrl" style="padding:6px 8px">불러오는 중</code><button type="button" id="copyHook">복사</button></div>
-        </div>
-        <div class="field"><span>보낼 본문 (JSON, Content-Type: application/json)</span>
-<pre>{"km": "{lv=odo}", "date": "{year}-{month_digit}-{dayofmonth}", "source": "macrodroid"}</pre></div>
+        <p class="small" style="margin:0">매주 월요일 08:52(KST) 점검 루틴이 현대 디벨로퍼스 데이터 API로 블루링크 누적 주행거리를 읽어 「주행거리 기록」에 출처 <code>bluelink</code>로 넣고, 판정 결과를 푸시·메일로 보낸다. 화면은 그 기록으로 오늘 값을 추정한다.</p>
         <ol class="steps small">
-          <li><b>방식 A — 확인 대화상자 (기본).</b> 트리거: 요일/시각(일 20:00). 동작: 「대화상자 - 텍스트 입력」으로 계기판 주행거리를 받아 지역 변수 <code>odo</code>에 저장 → 「HTTP 요청」 POST로 위 주소에 전송 → 「알림 표시」로 결과 확인. 마이현대 화면 구조와 무관하게 동작한다.</li>
-          <li><b>방식 B — 마이현대 화면 읽기.</b> 마이현대 홈에 「총 주행거리」가 뜰 때만 쓸 수 있다. 이 값은 블루링크(커넥티드 카) 가입이 살아 있어야 갱신된다 — 2017-10 등록 차는 무료 5년이 2022-10에 끝났다. 「애플리케이션 실행: 마이현대」 → 「대기 8초」 → 「화면 내용 읽기」(사전 변수에 저장) → 「텍스트 조작: 정규식 추출」 <code>([0-9]{1,3},?[0-9]{3})\s*km</code> → 쉼표 제거 → HTTP 요청. 접근성 서비스가 켜져 있고 잠금이 풀린 상태에서만 동작하며, 앱 업데이트로 화면 구조가 바뀌면 깨진다.</li>
-          <li><b>알림.</b> 품목 카드의 「캘린더 알림」은 교체 예정일에서 품목별 선행일수만큼 앞선 날 09:00에 Google Calendar 일정을 만든다. 주행거리 기준 예정일은 현재 페이스로 환산한 날짜를 쓴다. 매주 월요일 점검 루틴은 수집함을 비우고 🔴·🟡 품목이 있으면 휴대폰 푸시와 메일을 보낸다.</li>
+          <li><b>수집.</b> 루틴이 Refresh Token으로 Access Token을 받고(<code>/api/v1/user/oauth2/token</code>), 차량 목록에서 그붕이의 carId를 찾아 누적 운행거리(<code>/api/v1/car/status/{carId}/odometer</code>)를 읽는다. 비밀값은 클라우드 환경 변수에만 둔다.</li>
+          <li><b>판정.</b> 화면과 같은 규칙(시간·거리 중 이른 쪽, 선행일·선행 km)으로 🔴·🟡을 가른다. 블루링크 값이 21일 넘게 들어오지 않으면 경고한다.</li>
+          <li><b>알림.</b> 품목 카드의 「캘린더 알림」은 교체 예정일에서 선행일수만큼 앞선 날 09:00에 Google Calendar 일정을 만든다. 거리 기준 예정일은 현재 페이스로 환산한 날짜를 쓴다.</li>
+          <li><b>수기 입력.</b> 블루링크 값이 늦거나 비면 계기판 값을 위 입력란에 직접 넣는다. 같은 날짜 기록은 입력한 값으로 바뀐다.</li>
         </ol>
       </div>
     </details>
@@ -210,10 +205,9 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
 
 <script>
 (() => {
-const HOOK_ID = 2898031;
 const TZ = "Asia/Seoul";
 const DEFAULT_PACE = 18.3;
-const state = { items: [], odo: [], hist: [], db: null, user: null, canWrite: null, mcp: null, inbox: [] , openPanel: null };
+const state = { items: [], odo: [], hist: [], db: null, user: null, canWrite: null, mcp: null, openPanel: null };
 
 /* ---------- 날짜 (KST, 'YYYY-MM-DD' 문자열을 UTC 자정으로 다룬다) ---------- */
 const todayStr = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
@@ -335,7 +329,7 @@ function render() {
     <span class="pill s-green">여유 ${cnt.green}</span>
     ${cnt.cond ? `<span class="pill s-cond">상태 기준 ${cnt.cond}</span>` : ""}
     ${visit}`;
-  renderHist(); renderOdo(); applyWriteGate();
+  renderHist(); renderOdo(); renderInbox(); applyWriteGate();
   if (state.openPanel) restorePanel();
 }
 
@@ -554,54 +548,17 @@ function findKey(o, k, depth = 0) {
   return null;
 }
 
-/* ---------- Make 수신함 ---------- */
-function extractReading(o) {
-  const kmRaw = findKey(o, "km");
-  if (kmRaw == null) return null;
-  const km = Number(String(kmRaw).replace(/[^0-9.]/g, ""));
-  if (!(km > 1000)) return null;
-  let date = findKey(o, "date");
-  const m = date && String(date).match(/(\d{4})\D?(\d{1,2})\D?(\d{1,2})/);
-  date = m ? `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}` : todayStr();
-  return { km, date, source: String(findKey(o, "source") || "macrodroid") };
+/* ---------- 블루링크 수신 상태 ---------- */
+function renderInbox() {
+  const b = [...state.odo].filter(r => r.source === "bluelink").sort((x, y) => x.date < y.date ? -1 : 1).pop();
+  const el = $("inboxState");
+  if (!b) { el.textContent = "아직 수신 기록이 없다"; el.className = "muted"; return; }
+  const age = daysBetween(b.date, todayStr());
+  el.textContent = `${fmtDate(b.date)} · ${fmtKm(b.km)} km (${age}일 전)`;
+  el.className = age > 21 ? "msg err" : "";
 }
-function listArray(p) {
-  if (Array.isArray(p)) return p;
-  if (p && typeof p === "object") for (const v of Object.values(p)) if (Array.isArray(v)) return v;
-  return [];
-}
-async function checkInbox() {
-  if (!state.mcp) { $("inboxState").textContent = "claude.ai 안에서 열면 Make 수신함을 확인한다"; return; }
-  try {
-    const r = await state.mcp.callTool("Make", "hook-incomings_list", { hookId: HOOK_ID, pg: { limit: 50, sortBy: "created", sortDir: "asc" } }, { cache: false });
-    state.inbox = listArray(r.payload).filter(x => x && x.id);
-    $("inboxState").textContent = state.inbox.length ? `새 수신 ${state.inbox.length}건` : "새 수신 없음";
-    $("inboxImport").hidden = !state.inbox.length || state.canWrite === false;
-  } catch (err) {
-    $("inboxState").textContent = { needs_reauth: "Make 연결 만료 — 설정 → 커넥터에서 다시 연결", server_not_connected: "Make 커넥터가 없다 — 설정 → 커넥터에서 추가", not_in_manifest: "이 페이지에 Make 사용이 꺼져 있다" }[err.code] || `수신함 확인 실패 (${err.code})`;
-  }
-}
-$("inboxImport").addEventListener("click", async () => {
-  const b = $("inboxImport"); b.disabled = true;
-  let ok = 0; const done = [];
-  for (const q of state.inbox) {
-    try {
-      let rd = extractReading(q);
-      if (!rd) { const g = await state.mcp.callTool("Make", "hook-incomings_get", { hookId: HOOK_ID, incomingId: q.id }, { cache: false }); rd = extractReading(g.payload); }
-      if (rd) { await upsertOdo(rd.date, rd.km, rd.source, "Make 수신"); ok++; }
-      done.push(q.id);
-    } catch (_) { /* 다음 항목 */ }
-  }
-  if (done.length) { try { await state.mcp.callTool("Make", "hook-incomings_delete", { hookId: HOOK_ID, ids: done }); } catch (_) {} }
-  $("inboxState").textContent = `${ok}건 가져왔다`;
-  b.disabled = false; b.hidden = true; state.inbox = [];
-});
 
 /* ---------- 기타 버튼 ---------- */
-$("copyHook").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText($("hookUrl").textContent); $("copyHook").textContent = "복사됨"; }
-  catch (_) { const r = document.createRange(); r.selectNodeContents($("hookUrl")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
-});
 $("copyMd").addEventListener("click", async () => {
   const P = paceInfo(); const t = todayStr();
   const icon = { red: "🔴", amber: "🟡", green: "🟢", cond: "⚪" };
@@ -624,9 +581,7 @@ render();
   const onErr = e => { $("odoMsg").className = "msg err"; $("odoMsg").textContent = `불러오기가 끊겼다 (${e.code}). 새로고침한다.`; };
   db.collection("items").onSnapshot(s => { state.items = s.docs.map(d => ({ id: d.id, ...d.data() })); render(); }, onErr);
   db.collection("odo").onSnapshot(s => { state.odo = s.docs.map(d => ({ ...d.data(), date: d.data().date || d.id, km: Number(d.data().km) })); render(); }, onErr);
-  db.doc("settings/main").get().then(d => { if (d.exists && d.data().hookUrl) $("hookUrl").textContent = d.data().hookUrl; else $("hookUrl").textContent = "설정 문서(settings/main.hookUrl)가 없다"; }).catch(() => {});
   db.collection("history").onSnapshot(s => { state.hist = s.docs.map(d => ({ id: d.id, ...d.data() })); renderHist(); }, onErr);
-  checkInbox();
 })();
 })();
 </script>
