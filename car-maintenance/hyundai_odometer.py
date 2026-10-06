@@ -16,6 +16,7 @@
   python3 hyundai_odometer.py exchange <code|리다이렉트 URL> --token-file F
                                                                 최초 동의 코드 → 토큰 파일 저장
   python3 hyundai_odometer.py odometer [--token-file F]         {"km":..,"date":..} 한 줄 JSON 출력
+  python3 hyundai_odometer.py status [--token-file F]           주행거리·주행가능거리·경고등 7종 한 번에
   python3 hyundai_odometer.py cars [--token-file F]             연결된 차량 목록 출력
 
 토큰 파일은 {"refreshToken": ...} 를 담은 JSON이다(다른 키로 감싸져 있어도 찾아 읽는다).
@@ -168,16 +169,71 @@ def parse_odometer(res):
     return {"km": round(km), "date": date, "unit": unit, "timestamp": stamp(r)}
 
 
+# 경로의 {car} 자리에 carId가 들어간다. 콘솔 규격서와 다르면 이 표만 고친다.
+STATUS_PATHS = {
+    "dte": "/api/v1/car/status/{car}/dte",
+    "lowFuel": "/api/v1/car/status/warning/{car}/lowFuel",
+    "tirePressure": "/api/v1/car/status/warning/{car}/tirePressure",
+    "lampWire": "/api/v1/car/status/warning/{car}/lampWire",
+    "smartKeyBattery": "/api/v1/car/status/warning/{car}/smartKeyBattery",
+    "washerFluid": "/api/v1/car/status/warning/{car}/washerFluid",
+    "breakOil": "/api/v1/car/status/warning/{car}/breakOil",
+    "engineOil": "/api/v1/car/status/warning/{car}/engineOil",
+}
+WARNINGS = ["lowFuel", "tirePressure", "lampWire", "smartKeyBattery", "washerFluid", "breakOil", "engineOil"]
+
+
+def resolve_car(tok):
+    car_id = env("HYUNDAI_CAR_ID", required=False)
+    if car_id:
+        return car_id
+    cars = car_list(tok)
+    if not cars:
+        raise ApiError("동의된 차량이 없다. 디벨로퍼스 동의 화면에서 차량을 선택했는지 확인한다")
+    return cars[0].get("carId")
+
+
+def warning_on(res):
+    """경고등 응답에서 점등 여부를 꺼낸다. true/false, "Y"/"N", 1/0 을 모두 받는다."""
+    for k in ("status", "value", "warning", "isOn"):
+        v = res.get(k) if isinstance(res, dict) else None
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return v != 0
+        if isinstance(v, str) and v.strip():
+            return v.strip().lower() in ("y", "true", "on", "1")
+    raise ApiError(f"경고등 값이 응답에 없다: {str(res)[:120]}")
+
+
 def cmd_odometer():
     tok, rotated = access_token()
-    car_id = env("HYUNDAI_CAR_ID", required=False)
-    if not car_id:
-        cars = car_list(tok)
-        if not cars:
-            raise ApiError("동의된 차량이 없다. 디벨로퍼스 동의 화면에서 차량을 선택했는지 확인한다")
-        car_id = cars[0].get("carId")
-    out = parse_odometer(get(f"/api/v1/car/status/{urllib.parse.quote(str(car_id))}/odometer", tok))
+    car = urllib.parse.quote(str(resolve_car(tok)))
+    out = parse_odometer(get(f"/api/v1/car/status/{car}/odometer", tok))
     out.update({"source": "bluelink", "refreshTokenRotated": rotated})
+    return out
+
+
+def cmd_status():
+    """누적 운행거리 + 주행가능거리 + 경고등 7종을 한 번에 읽는다. 항목별 실패는 errors에 모은다."""
+    tok, rotated = access_token()
+    car = urllib.parse.quote(str(resolve_car(tok)))
+    out = {"source": "bluelink", "refreshTokenRotated": rotated,
+           "at": datetime.now(KST).isoformat(timespec="seconds"), "warnings": {}, "errors": {}}
+    try:
+        out["odometer"] = parse_odometer(get(f"/api/v1/car/status/{car}/odometer", tok))
+    except ApiError as e:
+        out["errors"]["odometer"] = str(e)
+    try:
+        d = get(STATUS_PATHS["dte"].format(car=car), tok)
+        out["dte"] = parse_odometer(d)["km"]
+    except (ApiError, KeyError, ValueError) as e:
+        out["errors"]["dte"] = str(e)
+    for w in WARNINGS:
+        try:
+            out["warnings"][w] = warning_on(get(STATUS_PATHS[w].format(car=car), tok))
+        except ApiError as e:
+            out["errors"][w] = str(e)
     return out
 
 
@@ -200,7 +256,7 @@ def main(argv):
         TOKEN_FILE = args[i + 1] if i + 1 < len(args) else None
         del args[i:i + 2]
     cmd = args[0] if args else "odometer"
-    fns = {"odometer": cmd_odometer, "cars": cmd_cars, "authorize-url": cmd_authorize_url,
+    fns = {"odometer": cmd_odometer, "status": cmd_status, "cars": cmd_cars, "authorize-url": cmd_authorize_url,
            "exchange": lambda: cmd_exchange(args[1] if len(args) > 1 else "")}
     fn = fns.get(cmd)
     if not fn:
