@@ -114,7 +114,7 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
   <header style="display:grid;gap:4px">
     <div class="label">그랜저 IG 3.3 · 2017-10 출고</div>
     <h1>그붕이 정비 계기판</h1>
-    <div class="small muted">시간 주기와 주행거리 주기 중 먼저 오는 쪽으로 교체 시기를 잡는다. 주행거리는 마지막 기록에 하루 평균 주행량을 더해 오늘 값을 추정한다.</div>
+    <div class="small muted">시간 주기와 주행거리 주기 중 먼저 오는 쪽으로 교체 시기를 잡는다. 주행거리는 마지막 기록에 월평균 주행량을 일할로 더해 오늘 값을 추정한다.</div>
   </header>
 
   <section class="cluster" aria-label="주행거리">
@@ -131,7 +131,7 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
     </div>
     <div style="display:grid;gap:14px;align-content:start">
       <div class="stats">
-        <div class="stat"><span class="label">하루 평균</span><b id="paceDay">–</b><span class="small muted">km</span></div>
+        <div class="stat"><span class="label">월 평균</span><b id="paceDay">–</b><span class="small muted">km</span></div>
         <div class="stat"><span class="label">연간 환산</span><b id="paceYear">–</b><span class="small muted">km</span></div>
         <div class="stat"><span class="label">마지막 기록</span><b id="lastAge">–</b><span class="small muted" id="lastSrc">일 전</span></div>
       </div>
@@ -218,6 +218,7 @@ pre{font-family:var(--f-num);font-size:12.5px;background:var(--bg);border:1px so
 (() => {
 const TZ = "Asia/Seoul";
 const DEFAULT_PACE = 18.3;
+const MONTH = 365.25 / 12;  // 월평균 표시용 일수
 const state = { items: [], odo: [], hist: [], vehicle: null, db: null, user: null, canWrite: null, mcp: null, openPanel: null };
 const WARN_LABEL = { engineOil: "엔진오일", breakOil: "브레이크 오일", tirePressure: "타이어 공기압", smartKeyBattery: "스마트키 배터리", washerFluid: "워셔액", lampWire: "램프 단선", lowFuel: "주유" };
 
@@ -303,14 +304,14 @@ function render() {
   if (P.cur != null) {
     const s = Math.round(P.cur).toLocaleString("ko-KR");
     digits.innerHTML = [...s].map(c => c === "," ? "" : `<span>${c}</span>`).join("") + `<span class="unit">km</span>`;
-    $("odoSub").textContent = `마지막 기록 ${fmtDate(P.last.date)} · ${fmtKm(P.last.km)} km (${P.last.source || "수기"})${P.gap ? ` + ${P.gap}일 × ${P.pace.toFixed(1)} km 추정` : ""}`;
+    $("odoSub").textContent = `마지막 기록 ${fmtDate(P.last.date)} · ${fmtKm(P.last.km)} km (${P.last.source || "수기"})${P.gap ? ` + ${P.gap}일치 추정(월 ${fmtKm(P.pace * MONTH)} km 기준)` : ""}`;
     $("lastAge").textContent = P.gap;
     $("lastSrc").textContent = "일 전";
   } else {
     digits.innerHTML = `<span>–</span>`;
     $("odoSub").textContent = "주행거리 기록이 없다. 아래에 계기판 값을 입력한다.";
   }
-  $("paceDay").textContent = P.pace.toFixed(1);
+  $("paceDay").textContent = fmtKm(P.pace * MONTH);
   $("paceYear").textContent = fmtKm(P.pace * 365);
   $("paceDay").title = `기준: ${P.basis}`;
 
@@ -533,7 +534,7 @@ async function setCalendar(it, card) {
   let alertDate = addDays(c.dueDate, -Number(it.leadDays ?? 30));
   if (alertDate <= t) alertDate = addDays(t, 1);
   const desc = [`그붕이 ${it.name} 교체 시기 알림`, `교체 예정: ${c.dueDate} (${c.axis} 기준)`,
-    c.kDue != null ? `거리 기준: ${fmtKm(c.kDue)} km (현재 추정 ${fmtKm(P.cur)} km, 하루 ${P.pace.toFixed(1)} km)` : "",
+    c.kDue != null ? `거리 기준: ${fmtKm(c.kDue)} km (현재 추정 ${fmtKm(P.cur)} km, 월 ${fmtKm(P.pace * MONTH)} km)` : "",
     c.tDue ? `시간 기준: ${c.tDue}` : "", it.note ? `메모: ${it.note}` : ""].filter(Boolean).join("\n");
   say("캘린더에 등록하는 중…");
   try {
@@ -590,7 +591,7 @@ $("copyMd").addEventListener("click", async () => {
   const P = paceInfo(); const t = todayStr();
   const icon = { red: "🔴", amber: "🟡", green: "🟢", cond: "⚪" };
   const rows = state.items.map(it => ({ it, c: compute(it, P) })).sort((a, b) => (RANK[a.c.status] - RANK[b.c.status]) || ((a.it.order ?? 99) - (b.it.order ?? 99)));
-  const lines = [`> ${t} 기준 추정 ${fmtKm(P.cur)} km (마지막 기록 ${P.last ? P.last.date + " · " + fmtKm(P.last.km) + " km" : "없음"}, 하루 ${P.pace.toFixed(1)} km) — 그붕이 정비 계기판에서 생성`, "",
+  const lines = [`> ${t} 기준 추정 ${fmtKm(P.cur)} km (마지막 기록 ${P.last ? P.last.date + " · " + fmtKm(P.last.km) + " km" : "없음"}, 월 ${fmtKm(P.pace * MONTH)} km) — 그붕이 정비 계기판에서 생성`, "",
     "| 상태 | 품목 | 마지막 교체 | 주기 | 다음 예정 |", "|:--:|---|---|---|---|",
     ...rows.map(({ it, c }) => `| ${icon[c.status]} | ${it.name} | ${it.lastDate ? it.lastDate.slice(2).replace("-", ".") : "없음"}${it.lastKm != null ? " · " + fmtKm(it.lastKm) : ""} | ${[it.intMonths ? it.intMonths + "개월" : "", it.intKm ? fmtKm(it.intKm) + "km" : ""].filter(Boolean).join(" · ") || "상태 기준"} | ${c.dueDate ? c.dueDate.slice(2).replace("-", ".") + " (" + dLabel(c.dueDays) + ", " + c.axis + ")" : "—"} |`)];
   const md = lines.join("\n"); const ta = $("mdOut"); ta.value = md; ta.hidden = false;
