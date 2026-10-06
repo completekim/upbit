@@ -16,7 +16,6 @@
   python3 hyundai_odometer.py exchange <code|리다이렉트 URL> --token-file F
                                                                 최초 동의 코드 → 토큰 파일 저장
   python3 hyundai_odometer.py odometer [--token-file F]         {"km":..,"date":..} 한 줄 JSON 출력
-  python3 hyundai_odometer.py consent-html <출력.html> --token-file F   차량 데이터 제공 동의 페이지 생성
   python3 hyundai_odometer.py status [--token-file F]           주행거리·주행가능거리·경고등 7종 한 번에
   python3 hyundai_odometer.py cars [--token-file F]             연결된 차량 목록 출력
 
@@ -238,32 +237,6 @@ def cmd_status():
     return out
 
 
-def cmd_consent_html(out_path):
-    """차량 데이터 제3자 제공 동의 화면으로 자동 제출되는 HTML을 만든다.
-
-    규격: POST {API_HOST}/api/v1/car-service/terms/agreement, form(token="Bearer …", state).
-    사용자가 자기 브라우저에서 열어 동의해야 하므로 Access Token(24시간 유효)이 페이지에 들어간다.
-    """
-    if not out_path:
-        raise ApiError("출력 파일 경로가 필요하다")
-    import html as _html
-    tok, _ = access_token()
-    page = (
-        '<!doctype html><html lang="ko"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width,initial-scale=1"><title>그붕이 블루링크 동의</title></head>'
-        '<body style="font-family:system-ui,sans-serif;padding:24px">'
-        "<p>현대 디벨로퍼스 차량 데이터 제공 동의 화면으로 이동합니다. 넘어가지 않으면 버튼을 누르세요.</p>"
-        f'<form id="f" method="post" action="{API_HOST}/api/v1/car-service/terms/agreement">'
-        f'<input type="hidden" name="token" value="Bearer {_html.escape(tok)}">'
-        '<input type="hidden" name="state" value="gbung">'
-        '<button type="submit" style="font-size:18px;padding:12px 20px">동의 화면 열기</button></form>'
-        '<script>document.getElementById("f").submit();</script></body></html>'
-    )
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(page)
-    return {"saved": out_path, "validHours": 24}
-
-
 def cmd_cars():
     tok, _ = access_token()
     return {"cars": [{k: c.get(k) for k in ("carId", "carNickname", "carSellname", "carName", "carType")} for c in car_list(tok)]}
@@ -284,8 +257,7 @@ def main(argv):
         del args[i:i + 2]
     cmd = args[0] if args else "odometer"
     fns = {"odometer": cmd_odometer, "status": cmd_status, "cars": cmd_cars, "authorize-url": cmd_authorize_url,
-           "exchange": lambda: cmd_exchange(args[1] if len(args) > 1 else ""),
-           "consent-html": lambda: cmd_consent_html(args[1] if len(args) > 1 else "")}
+           "exchange": lambda: cmd_exchange(args[1] if len(args) > 1 else "")}
     fn = fns.get(cmd)
     if not fn:
         print(__doc__)
