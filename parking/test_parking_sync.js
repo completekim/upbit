@@ -110,4 +110,57 @@ check('판정: 24시간 넘은 외부 주차, 로그 끊김', function () {
   assert.strictEqual(S.alerts(ev, [], T('2026-10-15', '09:00'))[0].kind, 'silent');
 });
 
+check('두 폰이 같이 탐: 1~2분 차이 꺼짐·켜짐 → 1건', function () {
+  var ev = S.parseFiles([
+    { name: 'parking_log_wansu.csv', text: '2026-10-11,10:00,OFF,37.2001,127.1001\n2026-10-11,12:00,ON,,' },
+    { name: 'parking_log_suna.csv',  text: '2026-10-11,10:01,OFF,,\n2026-10-11,12:02,ON,,' }]);
+  var r = S.reconcile(ev, [], places, null, T('2026-10-11', '13:00'));
+  var ids = Object.keys(r.changed);
+  assert.strictEqual(ids.length, 1);
+  assert.strictEqual(r.changed[ids[0]].endMs, T('2026-10-11', '12:00'));
+  assert.ok(!r.changed[ids[0]].autoClosed);
+  assert.strictEqual(r.state.lastBySrc.suna, T('2026-10-11', '12:02'));
+});
+
+check('두 폰 같이 탐 + 짧은 끊김 → 무시', function () {
+  var ev = S.parseFiles([
+    { name: 'parking_log_wansu.csv', text: '2026-10-11,10:00,OFF,,\n2026-10-11,10:02,ON,,' },
+    { name: 'parking_log_suna.csv',  text: '2026-10-11,10:01,OFF,,\n2026-10-11,10:02,ON,,' }]);
+  var r = S.reconcile(ev, [], places, null, T('2026-10-11', '11:00'));
+  assert.strictEqual(Object.keys(r.changed).length, 0);
+});
+
+check('선아 로그가 늦게 올라옴: 앞 시각 운행도 반영, 완수 기록은 그대로', function () {
+  var w = S.parseFiles([{ name: 'parking_log_wansu.csv', text: '2026-10-11,15:00,OFF,37.5,127.0' }]);
+  var r1 = S.reconcile(w, [], places, null, T('2026-10-11', '15:30'));
+  var docs = Object.keys(r1.changed).map(function (k) { return r1.changed[k]; });
+  var both = S.parseFiles([
+    { name: 'parking_log_wansu.csv', text: '2026-10-11,15:00,OFF,37.5,127.0' },
+    { name: 'parking_log_suna.csv',  text: '2026-10-11,09:00,OFF,37.2001,127.1001\n2026-10-11,10:00,ON,,' }]);
+  var r2 = S.reconcile(both, docs, places, r1.state, T('2026-10-11', '16:00'));
+  var s9 = r2.changed['p' + T('2026-10-11', '09:00')];
+  assert.strictEqual(s9.endMs, T('2026-10-11', '10:00'));
+  assert.strictEqual(s9.by, 'suna');
+  assert.ok(!r2.changed['p' + T('2026-10-11', '15:00')]);       // 완수의 15:00 주차는 건드리지 않는다
+});
+
+check('무료 장소: 표시만 하고 미출차 판정에서 뺀다', function () {
+  var pl = [{ id: 'plW', name: 'DSR타워', lat: 37.2, lng: 127.1, radius: 400, free: true }];
+  var r = S.reconcile(S.parseLog('2026-10-10,08:00,OFF,37.2001,127.1001'), [], pl, null, T('2026-10-11', '09:00'));
+  var d = r.changed['p' + T('2026-10-10', '08:00')];
+  assert.strictEqual(d.free, true);
+  assert.strictEqual(S.alerts(S.parseLog('2026-10-10,08:00,OFF,,'), [d], T('2026-10-11', '09:00')).filter(function (a) { return a.kind === 'long'; }).length, 0);
+});
+
+check('늦게 올라온 꺼짐만 있고 켜짐 없음 → 뒤 주차 시작에서 추정 종료', function () {
+  var w = S.parseFiles([{ name: 'parking_log_wansu.csv', text: '2026-10-11,15:00,OFF,,' }]);
+  var r1 = S.reconcile(w, [], places, null, T('2026-10-11', '15:30'));
+  var docs = Object.keys(r1.changed).map(function (k) { return r1.changed[k]; });
+  var both = S.parseFiles([{ name: 'parking_log_wansu.csv', text: '2026-10-11,15:00,OFF,,' }, { name: 'parking_log_suna.csv', text: '2026-10-11,09:00,OFF,,' }]);
+  var r2 = S.reconcile(both, docs, places, r1.state, T('2026-10-11', '16:00'));
+  var a = r2.changed['p' + T('2026-10-11', '09:00')];
+  assert.strictEqual(a.endMs, T('2026-10-11', '15:00'));
+  assert.strictEqual(a.autoClosed, true);
+});
+
 console.log('전부 통과 ' + n);

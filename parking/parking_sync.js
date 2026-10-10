@@ -9,6 +9,7 @@
   var PLACE_R = 200;
   var LONG_MS = 24 * 3600 * 1000;
   var SILENT_MS = 96 * 3600 * 1000;  // 이만큼 BT 이벤트가 없으면 로그 끊김으로 본다
+  var DUP_MS = 5 * 60 * 1000;        // 둘이 같이 타면 두 폰이 몇 분 차이로 같은 꺼짐을 남긴다 — 이 안이면 같은 사건
 
   function num(v) { var n = Number(String(v == null ? '' : v).trim()); return String(v == null ? '' : v).trim() !== '' && isFinite(n) ? n : null; }
 
@@ -21,8 +22,10 @@
     return isFinite(ms) ? ms : null;
   }
 
-  function parseLog(text) {
+  // src: 어느 폰의 로그인지(파일명 parking_log_<src>.csv). 출처마다 따로 어디까지 처리했는지 기억한다.
+  function parseLog(text, src) {
     var out = [], seen = {};
+    src = src || 'default';
     String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).forEach(function (line) {
       var c = line.split(',');
       if (c.length < 3) return;
@@ -34,12 +37,20 @@
       if (lat == null || lng == null || Math.abs(lat) > 90 || Math.abs(lng) > 180 || (lat === 0 && lng === 0)) { lat = null; lng = null; }
       var k = ms + ev;
       if (seen[k]) { if (lat != null && seen[k].lat == null) { seen[k].lat = lat; seen[k].lng = lng; } return; }
-      seen[k] = { ms: ms, ev: ev, lat: lat, lng: lng };
+      seen[k] = { ms: ms, ev: ev, lat: lat, lng: lng, src: src };
       out.push(seen[k]);
     });
     // 같은 분에 켜짐·꺼짐이 같이 찍히면 켜짐을 먼저 둔다(지난 주차를 닫고 새 주차를 연다)
-    out.sort(function (a, b) { return a.ms - b.ms || (a.ev === 'ON' ? -1 : 1) - (b.ev === 'ON' ? -1 : 1); });
+    out.sort(byTime);
     return out;
+  }
+  function byTime(a, b) { return a.ms - b.ms || (a.ev === 'ON' ? -1 : 1) - (b.ev === 'ON' ? -1 : 1); }
+  function srcOf(name) { var m = String(name || '').match(/parking_log_([A-Za-z0-9-]+)/); return m ? m[1] : 'default'; }
+  // 여러 폰의 로그를 합친다: files = [{name, text}]
+  function parseFiles(files) {
+    var all = [];
+    (files || []).forEach(function (f) { all = all.concat(parseLog(f.text, srcOf(f.name))); });
+    return all.sort(byTime);
   }
 
   function distM(aLat, aLng, bLat, bLng) {
@@ -68,13 +79,18 @@
   function reconcile(events, docs, places, state, now) {
     var work = {}, changed = {}, report = [];
     (docs || []).forEach(function (d) { work[d.id] = clone(d); });
-    var last = (state && state.lastEventMs) || 0;
-    var evs = events.filter(function (e) { return e.ms > last; });
+    var base = (state && state.lastEventMs) || 0, seenBy = Object.assign({}, (state && state.lastBySrc) || {});
+    // 출처별 기록이 생긴 뒤로는 출처마다 따로 본다(처음 올라온 폰의 로그는 처음부터 읽는다). 그 전 상태는 공통 시각 하나.
+    var perSrc = !!(state && state.lastBySrc);
+    var lastOf = function (src) { return perSrc ? (seenBy[src] || 0) : base; };
+    var evs = events.filter(function (e) { return e.ms > lastOf(e.src || 'default'); });
+    var mark = function (e) { var k = e.src || 'default'; if (!(seenBy[k] >= e.ms)) seenBy[k] = e.ms; };
 
     function put(d) { work[d.id] = d; changed[d.id] = d; }
-    function openDoc() {
+    // ms 이전에 시작해 아직 열린 기록 중 가장 늦은 것 (다른 폰 로그가 늦게 올라와도 맞는 주차를 닫도록)
+    function openDoc(ms) {
       var a = null;
-      Object.keys(work).forEach(function (k) { var d = work[k]; if (d.endMs == null && (!a || d.startMs > a.startMs)) a = d; });
+      Object.keys(work).forEach(function (k) { var d = work[k]; if (d.endMs == null && d.startMs < ms && (!a || d.startMs > a.startMs)) a = d; });
       return a;
     }
     // 같은 주차로 볼 기록: 시작이 ±20분 안이고, 아직 다른 BT 꺼짐에 묶이지 않았고, 이 시각에 끝나 있지 않은 것
@@ -83,7 +99,7 @@
       Object.keys(work).forEach(function (k) {
         var d = work[k], g = Math.abs(d.startMs - ms);
         if (g > MERGE_MS) return;
-        if (d.btStartMs != null && d.btStartMs !== ms) return;
+        if (d.btStartMs != null && Math.abs(d.btStartMs - ms) > DUP_MS) return;
         if (d.endMs != null && d.endMs <= ms) return;
         if (!best || g < best.g) best = { d: d, g: g };
       });
@@ -93,7 +109,7 @@
       if (d.placeId) return;
       var hit = matchPlace(places, lat, lng);
       if (!hit) return;
-      d.placeId = hit.p.id; d.place = hit.p.name; d.longOk = !!hit.p.home; d.placeDist = Math.round(hit.d);
+      d.placeId = hit.p.id; d.place = hit.p.name; d.longOk = !!hit.p.home; d.free = !!(hit.p.free || hit.p.home); d.placeDist = Math.round(hit.d);
       if (!d.spot && hit.p.spot) d.spot = hit.p.spot;
       if (d.rate10 == null && hit.p.rate10) d.rate10 = hit.p.rate10;
     }
@@ -105,34 +121,51 @@
     }
 
     for (var i = 0; i < evs.length; i++) {
-      var e = evs[i], nxt = evs[i + 1];
+      var e = evs[i];
+      // 같은 꺼짐을 다른 폰이 몇 분 뒤 남긴 것은 건너뛰고 다음 사건을 본다
+      var j = i + 1;
+      if (e.ev === 'OFF') while (j < evs.length && evs[j].ev === 'OFF' && evs[j].ms - e.ms <= DUP_MS) j++;
+      var nxt = evs[j];
       if (e.ev === 'OFF') {
-        if (nxt && nxt.ev === 'ON' && nxt.ms - e.ms < DEBOUNCE_MS) { report.push('짧은 끊김 무시 ' + fmt(e.ms)); last = nxt.ms; i++; continue; }
+        if (nxt && nxt.ev === 'ON' && nxt.ms - e.ms < DEBOUNCE_MS) {
+          report.push('짧은 끊김 무시 ' + fmt(e.ms));
+          for (var q = i; q <= j; q++) mark(evs[q]);
+          while (j + 1 < evs.length && evs[j + 1].ev === 'ON' && evs[j + 1].ms - nxt.ms <= DUP_MS) mark(evs[++j]);
+          i = j; continue;
+        }
         if (!nxt && now - e.ms < DEBOUNCE_MS) { report.push('대기(3분 미만) ' + fmt(e.ms)); break; }
         var same = nearStart(e.ms);
         if (same) {
           // 이미 있는 기록(수동 입력 등)과 같은 주차 — 좌표·BT 시각만 채운다
           if (same.lat == null && e.lat != null) { same.lat = e.lat; same.lng = e.lng; }
-          same.btStartMs = e.ms;
+          if (same.btStartMs == null) same.btStartMs = e.ms;
           applyPlace(same, e.lat, e.lng);
           put(same);
           report.push('기존 기록과 합침 ' + fmt(e.ms) + ' → ' + same.id);
         } else {
-          var a = openDoc();
-          if (a && a.startMs < e.ms) { close(a, e.ms, false); report.push('열린 기록 추정 종료 ' + a.id); }
+          var a = openDoc(e.ms);
+          if (a) { close(a, e.ms, false); report.push('열린 기록 추정 종료 ' + a.id); }
           var d = { id: 'p' + e.ms, startMs: e.ms, endMs: null, lat: e.lat, lng: e.lng, spot: null, note: '', rate10: null, fee: null, photoId: null,
-                    source: 'bt-log', btStartMs: e.ms, createdAt: now, placeId: null, place: null, longOk: false };
+                    source: 'bt-log', by: e.src || 'default', btStartMs: e.ms, createdAt: now, placeId: null, place: null, longOk: false, free: false };
           applyPlace(d, e.lat, e.lng);
           put(d);
           report.push('주차 시작 ' + fmt(e.ms) + (d.place ? ' · ' + d.place : ''));
         }
       } else {
-        var o = openDoc();
-        if (o && o.startMs < e.ms) { close(o, e.ms, true); report.push('출차 ' + fmt(e.ms) + ' ← ' + o.id); }
+        var o = openDoc(e.ms);
+        // 같이 탄 다른 폰의 켜짐이 몇 분 늦게 오면 이미 닫힌 기록이다 — 무시
+        if (o) { close(o, e.ms, true); report.push('출차 ' + fmt(e.ms) + ' ← ' + o.id); }
       }
-      last = e.ms;
+      mark(e);
     }
-    return { changed: changed, state: { lastEventMs: last, syncedAt: now }, report: report };
+    // 차는 한 대다: 열린 기록 뒤에 시작한 기록이 있으면 앞 기록은 그 시작 시각에 끝난 것이다(늦게 올라온 로그 정리)
+    var all = Object.keys(work).map(function (k) { return work[k]; }).sort(function (a, b) { return a.startMs - b.startMs; });
+    for (var x = 0; x < all.length - 1; x++) {
+      // 이번 반영에서 바뀐 기록이 낀 경우만 손댄다
+      if (all[x].endMs == null && (changed[all[x].id] || changed[all[x + 1].id])) { close(all[x], all[x + 1].startMs, false); report.push('뒤 기록에 맞춰 추정 종료 ' + all[x].id); }
+    }
+    var maxAll = Object.keys(seenBy).reduce(function (m, k) { return Math.max(m, seenBy[k]); }, base);
+    return { changed: changed, state: { lastEventMs: maxAll, lastBySrc: seenBy, syncedAt: now }, report: report };
   }
 
   function fmt(ms) {
@@ -145,13 +178,13 @@
   function alerts(events, docs, now) {
     var out = [], lastEv = events.length ? events[events.length - 1].ms : null;
     (docs || []).forEach(function (d) {
-      if (d.endMs == null && !d.longOk && now - d.startMs > LONG_MS) out.push({ kind: 'long', doc: d, hours: Math.floor((now - d.startMs) / 3600000) });
+      if (d.endMs == null && !d.longOk && !d.free && now - d.startMs > LONG_MS) out.push({ kind: 'long', doc: d, hours: Math.floor((now - d.startMs) / 3600000) });
     });
     if (lastEv == null || now - lastEv > SILENT_MS) out.push({ kind: 'silent', lastEventMs: lastEv });
     return out;
   }
 
-  var api = { parseLog: parseLog, reconcile: reconcile, alerts: alerts, kstMs: kstMs, fmt: fmt, DEBOUNCE_MS: DEBOUNCE_MS, MERGE_MS: MERGE_MS };
+  var api = { parseLog: parseLog, parseFiles: parseFiles, srcOf: srcOf, reconcile: reconcile, alerts: alerts, kstMs: kstMs, fmt: fmt, DEBOUNCE_MS: DEBOUNCE_MS, MERGE_MS: MERGE_MS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.ParkingSync = api;
 
@@ -175,8 +208,7 @@
     };
     var versions = opt.versions && fs.existsSync(opt.versions) ? JSON.parse(fs.readFileSync(opt.versions, 'utf8')) : {};
     var now = opt.now ? Number(opt.now) : Date.now();
-    var text = opt.log.filter(function (p) { return fs.existsSync(p); }).map(function (p) { return fs.readFileSync(p, 'utf8'); }).join('\n');
-    var events = parseLog(text);
+    var events = parseFiles(opt.log.filter(function (p) { return fs.existsSync(p); }).map(function (p) { return { name: pathm.basename(p), text: fs.readFileSync(p, 'utf8') }; }));
     var parkings = rows('parkings'), places = rows('places');
     var stateRow = rows('sync').filter(function (r) { return r.id === 'state'; })[0] || null;
     var exists = {}; parkings.forEach(function (d) { exists['parkings/' + d.id] = true; });
@@ -193,7 +225,7 @@
       plan.push(w);
     }
     Object.keys(r.changed).forEach(function (id) { emit('parkings', id, r.changed[id]); });
-    if (Object.keys(r.changed).length || !stateRow || stateRow.lastEventMs !== r.state.lastEventMs) emit('sync', 'state', r.state);
+    if (Object.keys(r.changed).length || !stateRow || JSON.stringify(stateRow.lastBySrc || {}) !== JSON.stringify(r.state.lastBySrc)) emit('sync', 'state', r.state);
     fs.writeFileSync(pathm.join(out, 'plan.json'), JSON.stringify(plan, null, 1));
     var after = parkings.map(function (d) { return r.changed[d.id] || d; });
     Object.keys(r.changed).forEach(function (id) { if (!after.some(function (d) { return d.id === id; })) after.push(r.changed[id]); });
