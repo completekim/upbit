@@ -1,0 +1,76 @@
+{
+ "macroExportVersion": 1,
+ "macro": {
+  "m_name": "주차 BT 기록",
+  "m_description": "차량(무선 안드로이드 오토 어댑터) 블루투스가 끊기면 OFF와 위치를, 연결되면 ON을 Documents/parking/parking_log.csv에 한 줄로 추가한다. 두 트리거의 기기를 차량 기기로 지정해야 한다.",
+  "m_enabled": true,
+  "m_completed": true,
+  "m_GUID": 0,
+  "m_category": "주차",
+  "localVariables": [],
+  "m_triggerList": [
+   {
+    "m_classType": "BluetoothTrigger",
+    "m_SIGUID": 223344556677881,
+    "m_btState": 3,
+    "m_anyDevice": false,
+    "m_deviceName": "차량 기기 선택"
+   },
+   {
+    "m_classType": "BluetoothTrigger",
+    "m_SIGUID": 223344556677882,
+    "m_btState": 2,
+    "m_anyDevice": false,
+    "m_deviceName": "차량 기기 선택"
+   }
+  ],
+  "m_actionList": [
+   {
+    "m_classType": "IfConditionAction",
+    "m_SIGUID": 0,
+    "m_constraintList": [
+     {
+      "m_classType": "TriggerThatInvokedConstraint",
+      "m_SIGUID": 0,
+      "m_siGuidThatInvoked": 223344556677881,
+      "m_triggerName": "블루투스 끊김",
+      "m_not": false
+     }
+    ]
+   },
+   {
+    "m_classType": "ForceLocationUpdateAction",
+    "m_SIGUID": 0
+   },
+   {
+    "m_classType": "WriteToFileAction",
+    "m_SIGUID": 0,
+    "m_logText": "{year}-{month_digit}-{dayofmonth},{hour}:{minute},OFF,{last_loc_lat},{last_loc_long}\n",
+    "m_filename": "parking_log.csv",
+    "m_append": true,
+    "useAllFilesAccess": true,
+    "allFilesPath": "/storage/emulated/0/Documents/parking"
+   },
+   {
+    "m_classType": "ElseAction",
+    "m_SIGUID": 0
+   },
+   {
+    "m_classType": "WriteToFileAction",
+    "m_SIGUID": 0,
+    "m_logText": "{year}-{month_digit}-{dayofmonth},{hour}:{minute},ON,,\n",
+    "m_filename": "parking_log.csv",
+    "m_append": true,
+    "useAllFilesAccess": true,
+    "allFilesPath": "/storage/emulated/0/Documents/parking"
+   },
+   {
+    "m_classType": "EndIfAction",
+    "m_SIGUID": 0
+   }
+  ],
+  "m_constraintList": []
+ },
+ "globalVariables": [],
+ "userIcons": null
+}
