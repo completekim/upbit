@@ -47,7 +47,6 @@ def run(outdir, truth_path, today):
     m = re.search(r"평균 절대 오차 (\d+)분 \(비교 (\d+)개", out)
     tuned = next((l.split(": ", 1)[1] for l in lines if l.startswith("# 자동 튜닝 적용")), None)
     nt = re.search(r"정답 (\d+)/10", body)
-    last = max((r for r in log.splitlines() if re.match(r"\d{4}-\d{2}-\d{2},", r) and ",TRUTH," not in r), default="")
     lr = [r for r in log.splitlines() if re.match(r"\d{4}-\d{2}-\d{2},\d", r) and ",TRUTH," not in r]
     lastev = lr[-1].split(",")[:2] if lr else None
     summary = {"updated_at": (datetime.now(timezone.utc) + timedelta(hours=9)).strftime("%m/%d %H:%M"),
@@ -55,10 +54,15 @@ def run(outdir, truth_path, today):
                "ntruth": int(nt.group(1)) if nt else 10, "min_truth": 10,
                "mae": int(m.group(1)) if m else None, "mae_n": int(m.group(2)) if m else 0, "tuned": tuned,
                "alert": f"{title} — {body}" if any(k in title for k in ("끊김", "없음", "오류")) else None}
-    json.dump({"nights": nights, "summary": summary, "ntfy_title": title, "ntfy_body": body, "truth_rows_added": added},
+    # 기록 알림 판정: 보정 기간 + 오늘 밤 오차 없음 + 오늘 일지 기록(건너뛰기 포함) 없음
+    tn = next((n for n in nights if n["night"] == today), None)
+    has_doc = any(d["id"] == today for d in truth)
+    remind = bool(nt) and not has_doc and not (tn and (tn["err_start"] is not None or tn["err_wake"] is not None))
+    json.dump({"nights": nights, "summary": summary, "ntfy_title": title, "ntfy_body": body, "truth_rows_added": added,
+               "remind": remind},
               open(os.path.join(outdir, "result.json"), "w"), ensure_ascii=False, indent=1)
     print(out.strip().splitlines()[-6:] and "\n".join(out.strip().splitlines()[-6:]))
-    print(f"직접 기록 합침 {added}건 · 밤 {len(nights)}개 · 요약 {json.dumps(summary, ensure_ascii=False)}")
+    print(f"직접 기록 합침 {added}건 · 밤 {len(nights)}개 · 기록 알림 {'보냄' if remind else '안 보냄'} · 요약 {json.dumps(summary, ensure_ascii=False)}")
 
 if __name__ == "__main__":
     {"extract": lambda: extract(sys.argv[2], sys.argv[3]), "run": lambda: run(sys.argv[2], sys.argv[3], sys.argv[4])}[sys.argv[1]]()
