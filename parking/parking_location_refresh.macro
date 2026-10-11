@@ -1,0 +1,41 @@
+{
+ "macroExportVersion": 1,
+ "macro": {
+  "m_name": "주차 위치 갱신",
+  "m_description": "차량 블루투스에 연결된 동안 2분마다 위치를 갱신해, 시동을 끌 때 「주차 BT 기록」이 마지막 좌표를 쓰게 한다. 제약의 기기를 차량 기기로 지정해야 한다.",
+  "m_enabled": true,
+  "m_completed": true,
+  "m_GUID": 0,
+  "m_category": "주차",
+  "localVariables": [],
+  "m_triggerList": [
+   {
+    "m_classType": "RegularIntervalTrigger",
+    "m_SIGUID": 334455667788991,
+    "m_ignoreReferenceStartTime": true,
+    "m_minutes": 0,
+    "m_seconds": 120,
+    "m_startHour": 0,
+    "m_startMinute": 0,
+    "m_useAlarm": false
+   }
+  ],
+  "m_actionList": [
+   {
+    "m_classType": "ForceLocationUpdateAction",
+    "m_SIGUID": 0
+   }
+  ],
+  "m_constraintList": [
+   {
+    "m_classType": "BluetoothConstraint",
+    "m_SIGUID": 334455667788992,
+    "m_anyDevice": false,
+    "m_btState": 2,
+    "m_deviceName": "차량 기기 선택"
+   }
+  ]
+ },
+ "globalVariables": [],
+ "userIcons": null
+}

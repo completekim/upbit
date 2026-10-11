@@ -23,6 +23,8 @@
 
 같은 반영 코드(`parking/parking_sync.js`)를 페이지와 루틴이 함께 쓴다.
 
+좌표: 시동을 끈 순간의 위치 요청은 화면 꺼짐·실내에서 30초 시간 초과로 실패한다(2026-10-11 로그 `Forced Location Update: Timeout`). 그래서 「주차 위치 갱신」(`parking/parking_location_refresh.macro`)이 차량 BT에 연결된 동안 2분마다 위치를 갱신하고, OFF 줄은 마지막으로 받은 좌표를 쓴다. MacroDroid 위치 권한은 「항상 허용」이어야 한다.
+
 ## 로그 형식
 
 `YYYY-MM-DD,H:MM,OFF|ON[,위도,경도]` (KST, MacroDroid 매직 텍스트)
