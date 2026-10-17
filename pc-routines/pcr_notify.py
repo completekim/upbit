@@ -15,6 +15,13 @@ import sys
 import urllib.parse
 import urllib.request
 
+# `python -I` 는 PYTHONIOENCODING 을 무시해 cp949 콘솔에서 「—」 같은 글자를 print 하면 종료 코드 1 이 난다(PC 실측 2026-10-17)
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 STATE_DIR = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "pc-routines")
 KEYS_PATH = os.path.join(STATE_DIR, "keys.json")
 LOG_PATH = os.path.join(STATE_DIR, "pcr-notify.log")

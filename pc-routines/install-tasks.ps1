@@ -1,4 +1,4 @@
-# pc-routines 작업 스케줄러 등록 — 현재 사용자로 등록(관리자 권한 불필요).
+﻿# pc-routines 작업 스케줄러 등록 — 현재 사용자로 등록(관리자 권한 불필요).
 # 사용: powershell -ExecutionPolicy Bypass -File install-tasks.ps1 [-DryRun] [-Uninstall]
 # 기존 ParkingWatch·Umbrella 와 같이 `pythonw -I <스크립트>` 로 돈다(창 없음).
 param([switch]$DryRun, [switch]$Uninstall)
