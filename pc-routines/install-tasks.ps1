@@ -14,15 +14,20 @@ $tasks = @(
   @{ Name = "CultureClubEve";      Day = "WED"; Time = "19:28"; Arg = "`"$dir\cultureclub-alert.py`"" },
   @{ Name = "CultureClubDay";      Day = "THU"; Time = "09:28"; Arg = "`"$dir\cultureclub-alert.py`"" },
   @{ Name = "PushoverCanarySend";  Day = "SUN"; Time = "09:13"; Arg = "`"$dir\pushover-canary.py`" send" },
-  @{ Name = "PushoverCanaryCheck"; Day = "SUN"; Time = "12:20"; Arg = "`"$dir\pushover-canary.py`" check" }
+  @{ Name = "PushoverCanaryCheck"; Day = "SUN"; Time = "12:20"; Arg = "`"$dir\pushover-canary.py`" check" },
+  @{ Name = "EventWatch";          Day = "";    Time = "09:05"; Arg = "`"$dir\event-watch.py`" watch" },
+  @{ Name = "EventWatchAlarm1340"; Day = "";    Time = "13:40"; Arg = "`"$dir\event-watch.py`" alarm" },
+  @{ Name = "EventWatchAlarm1940"; Day = "";    Time = "19:40"; Arg = "`"$dir\event-watch.py`" alarm" }
 )
+# Day 가 비면 매일(DAILY), 있으면 그 요일(WEEKLY)
 
 foreach ($t in $tasks) {
   if ($Uninstall) {
     $cmd = "schtasks /Delete /F /TN `"$($t.Name)`""
   } else {
     $tr = "`"$py`" -I $($t.Arg)"
-    $cmd = "schtasks /Create /F /TN `"$($t.Name)`" /SC WEEKLY /D $($t.Day) /ST $($t.Time) /TR '$tr'"
+    $sc = if ($t.Day) { "/SC WEEKLY /D $($t.Day)" } else { "/SC DAILY" }
+    $cmd = "schtasks /Create /F /TN `"$($t.Name)`" $sc /ST $($t.Time) /TR '$tr'"
   }
   Write-Host $cmd
   if (-not $DryRun) { Invoke-Expression $cmd }
