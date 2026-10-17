@@ -119,7 +119,10 @@ def ask_claude(target, lines, year):
         + "\n".join(lines[:40])
     )
     try:
-        r = subprocess.run([exe, "-p", prompt], capture_output=True, text=True, timeout=240, encoding="utf-8", errors="replace")
+        # 웹페이지 문장이 그대로 프롬프트에 들어가므로 도구를 전부 끄고, 표준 입력은 비운다(RSS 스크립트와 같은 멈춤 방지). PC 실측 2026-10-17 12초
+        r = subprocess.run([exe, "-p", prompt, "--tools", "", "--strict-mcp-config", "--max-turns", "2"],
+                           stdin=subprocess.DEVNULL, cwd=pcr_notify.STATE_DIR,
+                           capture_output=True, text=True, timeout=240, encoding="utf-8", errors="replace")
         m = re.search(r"\{.*\}", r.stdout, re.S)
         return json.loads(m.group(0)) if m else None
     except Exception as e:  # noqa: BLE001

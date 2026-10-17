@@ -4,8 +4,9 @@
     {
       "id": "hwadam",
       "name": "화담숲",
-      "urls": ["https://www.hwadamsup.com/"],
-      "keywords": ["예약", "사전", "오픈", "개원", "단풍축제", "입장권", "모노레일"],
+      "urls": ["https://www.hwadamsup.com/index", "https://www.hwadamsup.com/getOpenJson"],
+      "keywords": ["예약", "사전", "오픈", "개원", "단풍축제", "입장권", "모노레일", "\"flag\":\"Y\""],
+      "_확인": "2026-10-17 PC 실측 — 루트 / 는 서버 HTML 본문 0줄(JS가 /getOpenJson 의 {date, flag} 를 보고 /html/reservation.html 또는 /index 로 보냄). /index 58줄(이달의 이용안내 공지), /getOpenJson 은 flag 가 Y 로 바뀌면 예약 열림",
       "window": [["02-15", "03-25"], ["08-15", "10-05"]],
       "claude": true,
       "_근거": "봄 오픈 이력 3/10~12 13:00, 가을 9/14~24 13:00. 예매처 NOL. 2025·2026 연속 놓침 — 애매하면 알린다"
@@ -22,11 +23,11 @@
     {
       "id": "seoul",
       "name": "여의도 불꽃",
-      "urls": [],
+      "urls": ["https://www.hanwhafireworks.com/"],
       "keywords": ["골든티켓", "응모", "예매", "유료석", "개최", "일정", "티켓"],
       "window": [["07-20", "10-15"]],
       "claude": true,
-      "_근거": "한화 주최. 골든티켓 응모(LIFEPLUS TRIBES 앱) 8월 초~, 유료석은 티켓링크 선착순 20:00. PC 세션이 공식 사이트 URL 을 확인해 urls 에 넣는다(2026-10-17 클라우드에서는 확인 불가)"
+      "_근거": "한화 주최. 골든티켓 응모(LIFEPLUS TRIBES 앱) 8월 초~, 유료석은 티켓링크 선착순 20:00. 공식 사이트는 2026-10-17 PC 실측 — Copyright Hanwha group·2026 행사 내용, 본문 62줄"
     }
   ],
   "events_seed": {
